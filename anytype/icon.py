@@ -1,21 +1,23 @@
 class Icon:
-    def __init__(self):
+    def __init__(self, icon: str = "📄"):
         self.color: str = "red"
-        self._emoji: str = "📄"
+        self._emoji: str = icon
         self._file: str = ""
         self._format = "emoji"
         self._name = "document"
 
     def _update_with_json(self, json: dict) -> None:
         if json["format"] == "emoji":
-            self.emoji = json["format"]
+            self.emoji = json["emoji"]
             self.format = "emoji"
         elif json["format"] == "icon":
-            self.icon = json["icon"]
+            self.icon = json["name"]
             self.format = "icon"
         elif json["format"] == "file":
             self.file = json["file"]
             self.format = "file"
+        elif json["format"] == "":
+            self.icon = None
         else:
             raise ValueError("Invalid format")
 
@@ -77,7 +79,12 @@ class Icon:
             raise ValueError("Emoji can only be set if format is set to emoji")
         self._emoji = value
 
+    @emoji.getter
+    def emoji(self):
+        return self._emoji
+
     def __repr__(self) -> str:
+        print(self.emoji)
         if self.format == "emoji":
             return f"<Icon={self.emoji}>"
         elif self.format == "icon":

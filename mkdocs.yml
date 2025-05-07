@@ -5,8 +5,8 @@ theme:
   palette:
     scheme: slate
     primary: teal
-  logo: assets/any.jpg
-  favicon: assets/any.jpg
+  logo: assets/any.png
+  favicon: assets/any.png
 nav:
   - Home: index.md
   - Getting Started: getting-started.md

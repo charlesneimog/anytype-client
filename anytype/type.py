@@ -1,6 +1,8 @@
 from .template import Template
 from .api import apiEndpoints, APIWrapper
 from .utils import requires_auth
+from .property import Property
+from .icon import Icon
 
 
 class Type(APIWrapper):
@@ -15,11 +17,49 @@ class Type(APIWrapper):
         self.space_id = ""
         self.id = ""
         self.name = ""
-        self.icon = {}
+        self._icon: Icon | dict = {}
+        self._properties : list[Property] = []
         self.key = ""
         self.template_id = ""
         if name != "":
             self.set_template(name)
+
+    @property
+    def properties(self):
+        return self._properties
+
+    @properties.setter
+    def properties(self, value):
+        self._properties = []
+        for prop in value:
+            id = (prop["id"])
+            response = self._apiEndpoints.getProperty(self.space_id, id)
+            data = response.get("property", {})
+            prop = Property._from_api(self._apiEndpoints, data | {"space_id": self.id})
+            self._properties.append(prop)
+
+    @properties.getter
+    def properties(self):
+        return self._properties
+
+    @property
+    def icon(self):
+        return self._icon
+
+    @icon.setter
+    def icon(self, value):
+        if isinstance(value, dict):
+            icon = Icon()
+            icon._update_with_json(value)
+            self._icon = icon
+        elif isinstance(value, Icon):
+            self._icon = value
+        else:
+            raise Exception("Invalid icon")
+
+    @icon.getter
+    def icon(self):
+        return self._icon
 
     @requires_auth
     def get_templates(self, offset: int = 0, limit: int = 100) -> list[Template]:
@@ -38,12 +78,10 @@ class Type(APIWrapper):
         """
         response = self._apiEndpoints.getTemplates(self.space_id, self.id, offset, limit)
         self._all_templates = [
-            Template._from_api(self._apiEndpoints, data)
-            for data in response.get("data", [])
+            Template._from_api(self._apiEndpoints, data) for data in response.get("data", [])
         ]
 
         return self._all_templates
-
 
     def set_template(self, template_name: str) -> None:
         """
@@ -74,19 +112,6 @@ class Type(APIWrapper):
 
     @requires_auth
     def get_template(self, id: str) -> Template:
-        response = self._apiEndpoints.getTemplate(self.space_id, self.id, id)
-
-        # TODO: This API response is unlike the rest, it returns a list for
-        # "data" even though we're asking for info on a single template.
-        # Bug in anytype-heart, or am I misunderstanding?
-        datas = response.get("data", [])
-        if len(datas) > 1:
-            print(f"getTemplate response data has more than one entry: {response}")
-
-        return Template._from_api(self._apiEndpoints, datas[0])
-
-    @requires_auth
-    def get_template(self, id: str) -> Template:
         response_data = self._apiEndpoints.getTemplate(self.space_id, self.id, id)
 
         template = Template()
@@ -98,7 +123,9 @@ class Type(APIWrapper):
         return template
 
     def __repr__(self):
-        if "emoji" in self.icon:
-            return f"<Type(name={self.name}, icon={self.icon['emoji']})>"
-        else:
-            return f"<Type(name={self.name}, icon={self.icon['name']})>"
+        if self.icon:
+            if self.icon.format == "emoji":
+                return f"<Type(name={self.name}, icon={self.icon.emoji})>"
+            else:
+                return f"<Type(name={self.name}, icon={self.icon})>"
+        return f"<Type(name={self.name})>"

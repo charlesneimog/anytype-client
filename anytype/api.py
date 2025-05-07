@@ -1,5 +1,4 @@
 import requests
-from urllib.parse import urlencode
 from datetime import datetime
 from typing import TypeVar, Type
 
@@ -17,7 +16,7 @@ class ResponseHasError(Exception):
     def __init__(self, response):
         self.status_code = response.status_code
         if self.status_code != 200:
-            raise ValueError(response.json()["error"]["message"])
+            raise ValueError(response.json()["message"])
 
 
 class apiEndpoints:
@@ -28,9 +27,7 @@ class apiEndpoints:
 
     def _request(self, method, path, params=None, data=None):
         url = f"{self.api_url}{path}"
-        if params:
-            url += "?" + urlencode(params)
-        response = requests.request(method, url, headers=self.headers, json=data)
+        response = requests.request(method, url, headers=self.headers, json=data, params=params)
 
         version_str = response.headers.get("Anytype-Version")
         if version_str:
@@ -57,7 +54,9 @@ class apiEndpoints:
 
     # --- export ---
     def getExport(self, spaceId: str, objectId: str, format: str):
-        return self._request("GET", f"/spaces/{spaceId}/objects/{objectId}/{format}")
+        result = self._request("GET", f"/spaces/{spaceId}/objects/{objectId}/{format}")
+        print(result)
+        return result
 
     # --- lists ---
     def getListViews(self, spaceId: str, listId: str, offset: int, limit: int):
@@ -103,6 +102,10 @@ class apiEndpoints:
         payload = {"query": query}
         return self._request("POST", f"/spaces/{spaceId}/search", params=options, data=payload)
 
+    # TODO: PATCH("/spaces/:space_id")
+    def updateSpace(self, spaceId: str, data: dict):
+        return self._request("PATCH", f"/spaces/{spaceId}", data=data)
+
     # --- spaces ---
     def createSpace(self, name):
         data = {"name": name}
@@ -123,12 +126,6 @@ class apiEndpoints:
         options = {"offset": offset, "limit": limit}
         return self._request("GET", f"/spaces/{spaceId}/members", params=options)
 
-    # def updateMember(self, spaceId: str, objectId: str, data: dict):
-    #     return self._request(
-    #         "PATCH", f"/spaces/{spaceId}/members/{objectId}", data=data
-    #     )
-    #     # NOTE: Not yet: https://github.com/anyproto/anytype-raycast/blob/ff6277ff34d1599e272d0fac443d3eb0b47304fa/src/components/ObjectActions.tsx#L203
-
     # --- types ---
     def getType(self, spaceId: str, typeId: str):
         return self._request("GET", f"/spaces/{spaceId}/types/{typeId}")
@@ -136,6 +133,15 @@ class apiEndpoints:
     def getTypes(self, spaceId: str, offset: int, limit: int):
         options = {"offset": offset, "limit": limit}
         return self._request("GET", f"/spaces/{spaceId}/types", params=options)
+
+    def createType(self, spaceId: str, data: dict):
+        return self._request("POST", f"/spaces/{spaceId}/types", data=data)
+
+    def updateType(self, spaceId: str, typeId: str, data: dict):
+        return self._request("PATCH", f"/spaces/{spaceId}/types/{typeId}", data=data)
+
+    def deleteType(self, spaceId: str, typeId: str):
+        return self._request("DELETE", f"/spaces/{spaceId}/types/{typeId}")
 
     # --- templates ---
     def getTemplate(self, spaceId: str, typeId: str, templateId: str):
@@ -145,20 +151,61 @@ class apiEndpoints:
         options = {"offset": offset, "limit": limit}
         return self._request("GET", f"/spaces/{spaceId}/types/{typeId}/templates", params=options)
 
+    # --- Property ---
+    def getProperties(self, spaceId: str, offset: int = 0, limit: int = 10):
+        options = {"offset": offset, "limit": limit}
+        return self._request("GET", f"/spaces/{spaceId}/properties", params=options)
+
+    def getProperty(self, spaceId: str, propertyId: str):
+        return self._request("GET", f"/spaces/{spaceId}/properties/{propertyId}")
+
+    def createProperty(self, spaceId: str, data: dict):
+        return self._request("POST", f"/spaces/{spaceId}/properties", data=data)
+
+    def updateProperty(self, spaceId: str, propertyId: str, data: dict):
+        return self._request("PATCH", f"/spaces/{spaceId}/properties/{propertyId}", data=data)
+
+    def deleteProperty(self, spaceId: str, propertyId: str):
+        return self._request("DELETE", f"/spaces/{spaceId}/properties/{propertyId}")
+
+    # --- tag ---
+    def getTags(self, spaceId: str, propertyId: str, offset: int = 0, limit: int = 10):
+        options = {"offset": offset, "limit": limit}
+        return self._request(
+            "GET", f"/spaces/{spaceId}/properties/{propertyId}/tags", params=options
+        )
+
+    def getTag(self, spaceId: str, propertyId: str, tagId: str):
+        return self._request("GET", f"/spaces/{spaceId}/properties/{propertyId}/tags/{tagId}")
+
+    def createTag(self, spaceId: str, propertyId: str, data: dict):
+        return self._request("POST", f"/spaces/{spaceId}/properties/{propertyId}/tags", data=data)
+
+    def updateTag(self, spaceId: str, propertyId: str, tagId: str, data: dict):
+        return self._request(
+            "PATCH", f"/spaces/{spaceId}/properties/{propertyId}/tags/{tagId}", data=data
+        )
+
+    def deleteTag(self, spaceId: str, propertyId: str, tagId: str):
+        return self._request("DELETE", f"/spaces/{spaceId}/properties/{propertyId}/tags/{tagId}")
+
 
 T = TypeVar("T", bound="APIWrapper")
 
 
 class APIWrapper:
+    __slots__ = ()
     _apiEndpoints: apiEndpoints | None = None
+    _json: dict | None = None
 
     @classmethod
     def _from_api(cls: Type[T], api: apiEndpoints, data: dict) -> T:
         instance = cls()
         instance._apiEndpoints = api
+        instance._json = data
         instance._add_attrs_from_dict(data)
         return instance
 
     def _add_attrs_from_dict(self, data: dict) -> None:
         for key, value in data.items():
-            self.__dict__[key] = value
+            setattr(self, key, value)

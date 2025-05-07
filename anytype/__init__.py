@@ -2,13 +2,13 @@ from .anytype import Anytype
 from .space import Space
 
 from .object import Object
-from .block import Block
 
 from .listview import ListView
 from .member import Member
 from .type import Type
 from .template import Template
-from .relation import Relation
+from .property import Property
+from .tag import Tag 
 from .icon import Icon
 
 from .api import apiEndpoints

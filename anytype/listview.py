@@ -3,7 +3,7 @@ from .object import Object
 from .utils import requires_auth
 
 
-class ListView:
+class ListView(APIWrapper):
     def __init__(self):
         self._apiEndpoints: apiEndpoints | None = None
         self.space_id = ""
@@ -17,10 +17,7 @@ class ListView:
             self.space_id, self.list_id, self.id, offset, limit
         )
 
-        return [
-            Object._from_api(self._apiEndpoints, data)
-            for data in response.get("data", [])
-        ]
+        return [Object._from_api(self._apiEndpoints, data) for data in response.get("data", [])]
 
     @requires_auth
     def add_objectsinlistview(self, objs: list[Object]) -> None:

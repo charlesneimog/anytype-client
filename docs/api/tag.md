@@ -1,0 +1,3 @@
+# `anytype.Tag`
+
+::: anytype.Tag
