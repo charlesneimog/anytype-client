@@ -1,0 +1,2650 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+        <link rel="canonical" href="https://charlesneimog.github.io/anytype-client/api/space/">
+      
+      
+      
+      
+      <link rel="icon" href="../../assets/any.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.6.13">
+    
+    
+      
+        <title>anytype.Space - Anytype Client</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.342714a4.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.06af60db.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/_mkdocstrings.css">
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#anytypespace" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="Anytype Client" class="md-header__button md-logo" aria-label="Anytype Client" data-md-component="logo">
+      
+  <img src="../../assets/any.png" alt="logo">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Anytype Client
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              anytype.Space
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme)" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m14.3 16-.7-2h-3.2l-.7 2H7.8L11 7h2l3.2 9zM20 8.69V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12zm-9.15 3.96h2.3L12 9z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="white" data-md-color-accent="light-blue"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_2" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 2a7 7 0 0 0-7 7c0 2.38 1.19 4.47 3 5.74V17a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1v-2.26c1.81-1.27 3-3.36 3-5.74a7 7 0 0 0-7-7M9 21a1 1 0 0 0 1 1h4a1 1 0 0 0 1-1v-1H9z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="black" data-md-color-accent="light-blue"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_2">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 2a7 7 0 0 1 7 7c0 2.38-1.19 4.47-3 5.74V17a1 1 0 0 1-1 1H9a1 1 0 0 1-1-1v-2.26C6.19 13.47 5 11.38 5 9a7 7 0 0 1 7-7M9 21v-1h6v1a1 1 0 0 1-1 1h-4a1 1 0 0 1-1-1m3-17a5 5 0 0 0-5 5c0 2.05 1.23 3.81 3 4.58V16h4v-2.42c1.77-.77 3-2.53 3-4.58a5 5 0 0 0-5-5"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="Anytype Client" class="md-nav__button md-logo" aria-label="Anytype Client" data-md-component="logo">
+      
+  <img src="../../assets/any.png" alt="logo">
+
+    </a>
+    Anytype Client
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Home
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../getting-started/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Getting Started
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    API Reference
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../contributing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Contributing
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#anytype.Space" class="md-nav__link">
+    <span class="md-ellipsis">
+      Space
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#anytype.Space.create_object" class="md-nav__link">
+    <span class="md-ellipsis">
+      create_object
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#anytype.Space.delete_object" class="md-nav__link">
+    <span class="md-ellipsis">
+      delete_object
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#anytype.Space.get_members" class="md-nav__link">
+    <span class="md-ellipsis">
+      get_members
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#anytype.Space.get_object" class="md-nav__link">
+    <span class="md-ellipsis">
+      get_object
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#anytype.Space.get_objects" class="md-nav__link">
+    <span class="md-ellipsis">
+      get_objects
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#anytype.Space.get_properties" class="md-nav__link">
+    <span class="md-ellipsis">
+      get_properties
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#anytype.Space.get_type" class="md-nav__link">
+    <span class="md-ellipsis">
+      get_type
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#anytype.Space.get_types" class="md-nav__link">
+    <span class="md-ellipsis">
+      get_types
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#anytype.Space.search" class="md-nav__link">
+    <span class="md-ellipsis">
+      search
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#anytype.Space.update_object" class="md-nav__link">
+    <span class="md-ellipsis">
+      update_object
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+
+<h1 id="anytypespace"><code>anytype.Space</code></h1>
+
+
+<div class="doc doc-object doc-class">
+
+
+
+<a id="anytype.Space"></a>
+    <div class="doc doc-contents first">
+            <p class="doc doc-class-bases">
+              Bases: <code><span title="anytype.api.APIWrapper">APIWrapper</span></code></p>
+
+
+        <p>Used to interact with and manage objects, types, and other elements within a specific Space. It provides methods to retrieve objects, types, and perform search operations within the space. Additionally, it allows creating new objects associated with specific types.</p>
+
+
+
+
+
+
+
+              <details class="quote">
+                <summary>Source code in <code>anytype/space.py</code></summary>
+                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 13</span>
+<span class="normal"> 14</span>
+<span class="normal"> 15</span>
+<span class="normal"> 16</span>
+<span class="normal"> 17</span>
+<span class="normal"> 18</span>
+<span class="normal"> 19</span>
+<span class="normal"> 20</span>
+<span class="normal"> 21</span>
+<span class="normal"> 22</span>
+<span class="normal"> 23</span>
+<span class="normal"> 24</span>
+<span class="normal"> 25</span>
+<span class="normal"> 26</span>
+<span class="normal"> 27</span>
+<span class="normal"> 28</span>
+<span class="normal"> 29</span>
+<span class="normal"> 30</span>
+<span class="normal"> 31</span>
+<span class="normal"> 32</span>
+<span class="normal"> 33</span>
+<span class="normal"> 34</span>
+<span class="normal"> 35</span>
+<span class="normal"> 36</span>
+<span class="normal"> 37</span>
+<span class="normal"> 38</span>
+<span class="normal"> 39</span>
+<span class="normal"> 40</span>
+<span class="normal"> 41</span>
+<span class="normal"> 42</span>
+<span class="normal"> 43</span>
+<span class="normal"> 44</span>
+<span class="normal"> 45</span>
+<span class="normal"> 46</span>
+<span class="normal"> 47</span>
+<span class="normal"> 48</span>
+<span class="normal"> 49</span>
+<span class="normal"> 50</span>
+<span class="normal"> 51</span>
+<span class="normal"> 52</span>
+<span class="normal"> 53</span>
+<span class="normal"> 54</span>
+<span class="normal"> 55</span>
+<span class="normal"> 56</span>
+<span class="normal"> 57</span>
+<span class="normal"> 58</span>
+<span class="normal"> 59</span>
+<span class="normal"> 60</span>
+<span class="normal"> 61</span>
+<span class="normal"> 62</span>
+<span class="normal"> 63</span>
+<span class="normal"> 64</span>
+<span class="normal"> 65</span>
+<span class="normal"> 66</span>
+<span class="normal"> 67</span>
+<span class="normal"> 68</span>
+<span class="normal"> 69</span>
+<span class="normal"> 70</span>
+<span class="normal"> 71</span>
+<span class="normal"> 72</span>
+<span class="normal"> 73</span>
+<span class="normal"> 74</span>
+<span class="normal"> 75</span>
+<span class="normal"> 76</span>
+<span class="normal"> 77</span>
+<span class="normal"> 78</span>
+<span class="normal"> 79</span>
+<span class="normal"> 80</span>
+<span class="normal"> 81</span>
+<span class="normal"> 82</span>
+<span class="normal"> 83</span>
+<span class="normal"> 84</span>
+<span class="normal"> 85</span>
+<span class="normal"> 86</span>
+<span class="normal"> 87</span>
+<span class="normal"> 88</span>
+<span class="normal"> 89</span>
+<span class="normal"> 90</span>
+<span class="normal"> 91</span>
+<span class="normal"> 92</span>
+<span class="normal"> 93</span>
+<span class="normal"> 94</span>
+<span class="normal"> 95</span>
+<span class="normal"> 96</span>
+<span class="normal"> 97</span>
+<span class="normal"> 98</span>
+<span class="normal"> 99</span>
+<span class="normal">100</span>
+<span class="normal">101</span>
+<span class="normal">102</span>
+<span class="normal">103</span>
+<span class="normal">104</span>
+<span class="normal">105</span>
+<span class="normal">106</span>
+<span class="normal">107</span>
+<span class="normal">108</span>
+<span class="normal">109</span>
+<span class="normal">110</span>
+<span class="normal">111</span>
+<span class="normal">112</span>
+<span class="normal">113</span>
+<span class="normal">114</span>
+<span class="normal">115</span>
+<span class="normal">116</span>
+<span class="normal">117</span>
+<span class="normal">118</span>
+<span class="normal">119</span>
+<span class="normal">120</span>
+<span class="normal">121</span>
+<span class="normal">122</span>
+<span class="normal">123</span>
+<span class="normal">124</span>
+<span class="normal">125</span>
+<span class="normal">126</span>
+<span class="normal">127</span>
+<span class="normal">128</span>
+<span class="normal">129</span>
+<span class="normal">130</span>
+<span class="normal">131</span>
+<span class="normal">132</span>
+<span class="normal">133</span>
+<span class="normal">134</span>
+<span class="normal">135</span>
+<span class="normal">136</span>
+<span class="normal">137</span>
+<span class="normal">138</span>
+<span class="normal">139</span>
+<span class="normal">140</span>
+<span class="normal">141</span>
+<span class="normal">142</span>
+<span class="normal">143</span>
+<span class="normal">144</span>
+<span class="normal">145</span>
+<span class="normal">146</span>
+<span class="normal">147</span>
+<span class="normal">148</span>
+<span class="normal">149</span>
+<span class="normal">150</span>
+<span class="normal">151</span>
+<span class="normal">152</span>
+<span class="normal">153</span>
+<span class="normal">154</span>
+<span class="normal">155</span>
+<span class="normal">156</span>
+<span class="normal">157</span>
+<span class="normal">158</span>
+<span class="normal">159</span>
+<span class="normal">160</span>
+<span class="normal">161</span>
+<span class="normal">162</span>
+<span class="normal">163</span>
+<span class="normal">164</span>
+<span class="normal">165</span>
+<span class="normal">166</span>
+<span class="normal">167</span>
+<span class="normal">168</span>
+<span class="normal">169</span>
+<span class="normal">170</span>
+<span class="normal">171</span>
+<span class="normal">172</span>
+<span class="normal">173</span>
+<span class="normal">174</span>
+<span class="normal">175</span>
+<span class="normal">176</span>
+<span class="normal">177</span>
+<span class="normal">178</span>
+<span class="normal">179</span>
+<span class="normal">180</span>
+<span class="normal">181</span>
+<span class="normal">182</span>
+<span class="normal">183</span>
+<span class="normal">184</span>
+<span class="normal">185</span>
+<span class="normal">186</span>
+<span class="normal">187</span>
+<span class="normal">188</span>
+<span class="normal">189</span>
+<span class="normal">190</span>
+<span class="normal">191</span>
+<span class="normal">192</span>
+<span class="normal">193</span>
+<span class="normal">194</span>
+<span class="normal">195</span>
+<span class="normal">196</span>
+<span class="normal">197</span>
+<span class="normal">198</span>
+<span class="normal">199</span>
+<span class="normal">200</span>
+<span class="normal">201</span>
+<span class="normal">202</span>
+<span class="normal">203</span>
+<span class="normal">204</span>
+<span class="normal">205</span>
+<span class="normal">206</span>
+<span class="normal">207</span>
+<span class="normal">208</span>
+<span class="normal">209</span>
+<span class="normal">210</span>
+<span class="normal">211</span>
+<span class="normal">212</span>
+<span class="normal">213</span>
+<span class="normal">214</span>
+<span class="normal">215</span>
+<span class="normal">216</span>
+<span class="normal">217</span>
+<span class="normal">218</span>
+<span class="normal">219</span>
+<span class="normal">220</span>
+<span class="normal">221</span>
+<span class="normal">222</span>
+<span class="normal">223</span>
+<span class="normal">224</span>
+<span class="normal">225</span>
+<span class="normal">226</span>
+<span class="normal">227</span>
+<span class="normal">228</span>
+<span class="normal">229</span>
+<span class="normal">230</span>
+<span class="normal">231</span>
+<span class="normal">232</span>
+<span class="normal">233</span>
+<span class="normal">234</span>
+<span class="normal">235</span>
+<span class="normal">236</span>
+<span class="normal">237</span>
+<span class="normal">238</span>
+<span class="normal">239</span>
+<span class="normal">240</span>
+<span class="normal">241</span>
+<span class="normal">242</span>
+<span class="normal">243</span>
+<span class="normal">244</span>
+<span class="normal">245</span>
+<span class="normal">246</span>
+<span class="normal">247</span>
+<span class="normal">248</span>
+<span class="normal">249</span>
+<span class="normal">250</span>
+<span class="normal">251</span>
+<span class="normal">252</span>
+<span class="normal">253</span>
+<span class="normal">254</span>
+<span class="normal">255</span>
+<span class="normal">256</span>
+<span class="normal">257</span>
+<span class="normal">258</span>
+<span class="normal">259</span>
+<span class="normal">260</span>
+<span class="normal">261</span>
+<span class="normal">262</span>
+<span class="normal">263</span>
+<span class="normal">264</span>
+<span class="normal">265</span>
+<span class="normal">266</span>
+<span class="normal">267</span>
+<span class="normal">268</span>
+<span class="normal">269</span>
+<span class="normal">270</span>
+<span class="normal">271</span>
+<span class="normal">272</span>
+<span class="normal">273</span>
+<span class="normal">274</span>
+<span class="normal">275</span>
+<span class="normal">276</span>
+<span class="normal">277</span>
+<span class="normal">278</span>
+<span class="normal">279</span>
+<span class="normal">280</span>
+<span class="normal">281</span>
+<span class="normal">282</span>
+<span class="normal">283</span>
+<span class="normal">284</span>
+<span class="normal">285</span>
+<span class="normal">286</span>
+<span class="normal">287</span>
+<span class="normal">288</span>
+<span class="normal">289</span>
+<span class="normal">290</span>
+<span class="normal">291</span>
+<span class="normal">292</span>
+<span class="normal">293</span>
+<span class="normal">294</span>
+<span class="normal">295</span>
+<span class="normal">296</span>
+<span class="normal">297</span>
+<span class="normal">298</span>
+<span class="normal">299</span>
+<span class="normal">300</span>
+<span class="normal">301</span>
+<span class="normal">302</span>
+<span class="normal">303</span>
+<span class="normal">304</span>
+<span class="normal">305</span>
+<span class="normal">306</span>
+<span class="normal">307</span>
+<span class="normal">308</span>
+<span class="normal">309</span>
+<span class="normal">310</span>
+<span class="normal">311</span>
+<span class="normal">312</span>
+<span class="normal">313</span>
+<span class="normal">314</span>
+<span class="normal">315</span>
+<span class="normal">316</span>
+<span class="normal">317</span>
+<span class="normal">318</span>
+<span class="normal">319</span>
+<span class="normal">320</span>
+<span class="normal">321</span>
+<span class="normal">322</span>
+<span class="normal">323</span>
+<span class="normal">324</span>
+<span class="normal">325</span>
+<span class="normal">326</span>
+<span class="normal">327</span>
+<span class="normal">328</span>
+<span class="normal">329</span>
+<span class="normal">330</span>
+<span class="normal">331</span>
+<span class="normal">332</span>
+<span class="normal">333</span>
+<span class="normal">334</span>
+<span class="normal">335</span>
+<span class="normal">336</span>
+<span class="normal">337</span>
+<span class="normal">338</span>
+<span class="normal">339</span>
+<span class="normal">340</span>
+<span class="normal">341</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">Space</span><span class="p">(</span><span class="n">APIWrapper</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Used to interact with and manage objects, types, and other elements within a specific Space. It provides methods to retrieve objects, types, and perform search operations within the space. Additionally, it allows creating new objects associated with specific types.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_apiEndpoints</span><span class="p">:</span> <span class="n">apiEndpoints</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">id</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_all_types</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="nd">@requires_auth</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_objects</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">offset</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">limit</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">Object</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Retrieves a list of objects associated with the space.</span>
+
+<span class="sd">        Parameters:</span>
+<span class="sd">            offset (int, optional): The offset for pagination (default: 0).</span>
+<span class="sd">            limit (int, optional): The limit for the number of results (default: 100).</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            A list of Object instances.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            Raises an error if the request to the API fails.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">response_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_apiEndpoints</span><span class="o">.</span><span class="n">getObjects</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="n">offset</span><span class="p">,</span> <span class="n">limit</span><span class="p">)</span>
+        <span class="n">objects</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">Object</span><span class="o">.</span><span class="n">_from_api</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_apiEndpoints</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span> <span class="k">for</span> <span class="n">data</span> <span class="ow">in</span> <span class="n">response_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;data&quot;</span><span class="p">,</span> <span class="p">[])</span>
+        <span class="p">]</span>
+
+        <span class="k">return</span> <span class="n">objects</span>
+
+    <span class="nd">@requires_auth</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_object</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">objectId</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Object</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Retrieves a specific object by its ID.</span>
+
+<span class="sd">        Parameters:</span>
+<span class="sd">            objectId (str): The ID of the object to retrieve.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            An Object instance representing the retrieved object.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            Raises an error if the request to the API fails.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">response</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_apiEndpoints</span><span class="o">.</span><span class="n">getObject</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="n">objectId</span><span class="p">)</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">response</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;object&quot;</span><span class="p">,</span> <span class="p">{})</span>
+        <span class="k">return</span> <span class="n">Object</span><span class="o">.</span><span class="n">_from_api</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_apiEndpoints</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
+
+    <span class="nd">@requires_auth</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">delete_object</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">objectId</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Attempt to delete an object by its unique identifier.</span>
+
+<span class="sd">        Parameters:</span>
+<span class="sd">            objectId (str): The unique identifier of the object to delete.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            None</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            Exception: If the request to delete the object fails.</span>
+
+<span class="sd">        Note:</span>
+<span class="sd">            This method is currently not functioning as expected (BUG).</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_apiEndpoints</span><span class="o">.</span><span class="n">deleteObject</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="n">objectId</span><span class="p">)</span>
+
+    <span class="nd">@requires_auth</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">update_object</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obj</span><span class="p">:</span> <span class="n">Object</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Object</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Updates an existing object within the space.</span>
+
+<span class="sd">        Parameters:</span>
+<span class="sd">            objectId (str): The ID of the object to update.</span>
+<span class="sd">            data (dict): The data to update the object with.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            An Object instance representing the updated object.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            Raises an error if the request to the API fails.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">response</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_apiEndpoints</span><span class="o">.</span><span class="n">updateObject</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="n">obj</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">response</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;object&quot;</span><span class="p">,</span> <span class="p">{})</span>
+        <span class="k">return</span> <span class="n">Object</span><span class="o">.</span><span class="n">_from_api</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_apiEndpoints</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
+
+    <span class="nd">@requires_auth</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">create_object</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obj</span><span class="p">:</span> <span class="n">Object</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="n">Type</span> <span class="o">=</span> <span class="n">Type</span><span class="p">())</span> <span class="o">-&gt;</span> <span class="n">Object</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Creates a new object within the space, associated with a specified type.</span>
+
+<span class="sd">        Parameters:</span>
+<span class="sd">            obj (Object): The Object instance to create.</span>
+<span class="sd">            type (Type): The Type instance to associate the object with.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            A new Object instance representing the created object.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            Raises an error if the request to the API fails.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">obj</span><span class="o">.</span><span class="n">type</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="nb">type</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="nb">type</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">type</span>
+
+        <span class="k">if</span> <span class="nb">type</span><span class="o">.</span><span class="n">key</span> <span class="o">==</span> <span class="s2">&quot;&quot;</span> <span class="ow">and</span> <span class="n">obj</span><span class="o">.</span><span class="n">type_key</span> <span class="o">==</span> <span class="s2">&quot;&quot;</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span>
+                <span class="s2">&quot;You need to set one type for the object, use add_type method from the Object class&quot;</span>
+            <span class="p">)</span>
+
+        <span class="n">type_key</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">type_key</span> <span class="k">if</span> <span class="n">obj</span><span class="o">.</span><span class="n">type_key</span> <span class="o">!=</span> <span class="s2">&quot;&quot;</span> <span class="k">else</span> <span class="nb">type</span><span class="o">.</span><span class="n">key</span>
+        <span class="n">template_id</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">template_id</span> <span class="k">if</span> <span class="n">obj</span><span class="o">.</span><span class="n">template_id</span> <span class="o">!=</span> <span class="s2">&quot;&quot;</span> <span class="k">else</span> <span class="nb">type</span><span class="o">.</span><span class="n">template_id</span>
+
+        <span class="n">icon</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">obj</span><span class="o">.</span><span class="n">icon</span><span class="p">,</span> <span class="n">Icon</span><span class="p">):</span>
+            <span class="n">icon</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">icon</span><span class="o">.</span><span class="n">_get_json</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Invalid icon type&quot;</span><span class="p">)</span>
+
+        <span class="n">properties</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">obj</span><span class="o">.</span><span class="n">properties</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+            <span class="n">properties</span> <span class="o">=</span> <span class="p">[</span><span class="n">prop</span><span class="o">.</span><span class="n">_get_json</span><span class="p">()</span> <span class="k">for</span> <span class="n">prop</span> <span class="ow">in</span> <span class="n">obj</span><span class="o">.</span><span class="n">properties</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Invalid properties type&quot;</span><span class="p">)</span>
+
+        <span class="n">object_data</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;icon&quot;</span><span class="p">:</span> <span class="n">icon</span><span class="p">,</span>
+            <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="n">obj</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+            <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="n">obj</span><span class="o">.</span><span class="n">description</span><span class="p">,</span>
+            <span class="s2">&quot;body&quot;</span><span class="p">:</span> <span class="n">obj</span><span class="o">.</span><span class="n">body</span><span class="p">,</span>
+            <span class="s2">&quot;source&quot;</span><span class="p">:</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;template_id&quot;</span><span class="p">:</span> <span class="n">template_id</span><span class="p">,</span>
+            <span class="s2">&quot;type_key&quot;</span><span class="p">:</span> <span class="n">type_key</span><span class="p">,</span>
+            <span class="s2">&quot;properties&quot;</span><span class="p">:</span> <span class="n">properties</span><span class="p">,</span>
+        <span class="p">}</span>
+
+        <span class="n">obj_clone</span> <span class="o">=</span> <span class="n">deepcopy</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span>
+        <span class="n">obj_clone</span><span class="o">.</span><span class="n">_apiEndpoints</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_apiEndpoints</span>
+        <span class="n">obj_clone</span><span class="o">.</span><span class="n">space_id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">id</span>
+
+        <span class="n">response</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_apiEndpoints</span><span class="o">.</span><span class="n">createObject</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="n">object_data</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">response</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;object&quot;</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">key</span> <span class="o">==</span> <span class="s2">&quot;icon&quot;</span><span class="p">:</span>
+                <span class="n">icon</span> <span class="o">=</span> <span class="n">Icon</span><span class="p">()</span>
+                <span class="n">icon</span><span class="o">.</span><span class="n">_update_with_json</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">obj_clone</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+        <span class="k">return</span> <span class="n">obj_clone</span>
+
+    <span class="nd">@requires_auth</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_type</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">typeId</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Type</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Retrieves a specific type by its ID.</span>
+
+<span class="sd">        Parameters:</span>
+<span class="sd">            type_name (str): The name of the type to retrieve.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            A Type instance representing the type.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            ValueError: If the type with the specified name is not found.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">response</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_apiEndpoints</span><span class="o">.</span><span class="n">getType</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="n">typeId</span><span class="p">)</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">response</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;type&quot;</span><span class="p">,</span> <span class="p">{})</span>
+        <span class="c1"># TODO: Sometimes we need to add more attributes beyond the ones in the</span>
+        <span class="c1"># API response. There might be a cleaner way to do this, but doing</span>
+        <span class="c1"># a dict merge with | works for now.</span>
+        <span class="k">return</span> <span class="n">Type</span><span class="o">.</span><span class="n">_from_api</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_apiEndpoints</span><span class="p">,</span> <span class="n">data</span> <span class="o">|</span> <span class="p">{</span><span class="s2">&quot;space_id&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">id</span><span class="p">})</span>
+
+    <span class="nd">@requires_auth</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_types</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">offset</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">limit</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">Type</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Retrieves a list of types associated with the space.</span>
+
+<span class="sd">        Parameters:</span>
+<span class="sd">            offset (int, optional): The offset for pagination (default: 0).</span>
+<span class="sd">            limit (int, optional): The limit for the number of results (default: 100).</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            A list of Type instances.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            Raises an error if the request to the API fails.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">response</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_apiEndpoints</span><span class="o">.</span><span class="n">getTypes</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="n">offset</span><span class="p">,</span> <span class="n">limit</span><span class="p">)</span>
+        <span class="n">types</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">Type</span><span class="o">.</span><span class="n">_from_api</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_apiEndpoints</span><span class="p">,</span> <span class="n">data</span> <span class="o">|</span> <span class="p">{</span><span class="s2">&quot;space_id&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">id</span><span class="p">})</span>
+            <span class="k">for</span> <span class="n">data</span> <span class="ow">in</span> <span class="n">response</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;data&quot;</span><span class="p">,</span> <span class="p">[])</span>
+        <span class="p">]</span>
+
+        <span class="k">return</span> <span class="n">types</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_type_byname</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Type</span><span class="p">:</span>
+        <span class="n">all_types</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_types</span><span class="p">(</span><span class="n">limit</span><span class="o">=</span><span class="mi">200</span><span class="p">)</span>
+        <span class="k">for</span> <span class="nb">type</span> <span class="ow">in</span> <span class="n">all_types</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">type</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="n">name</span><span class="p">:</span>
+                <span class="k">return</span> <span class="nb">type</span>
+
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Type not found&quot;</span><span class="p">)</span>
+
+    <span class="nd">@requires_auth</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_member</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">memberId</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Member</span><span class="p">:</span>
+        <span class="n">response</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_apiEndpoints</span><span class="o">.</span><span class="n">getMember</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="n">memberId</span><span class="p">)</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">response</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;object&quot;</span><span class="p">,</span> <span class="p">{})</span>
+        <span class="k">return</span> <span class="n">Member</span><span class="o">.</span><span class="n">_from_api</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_apiEndpoints</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
+
+    <span class="nd">@requires_auth</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_members</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">offset</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">limit</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">100</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">Member</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Retrieves a list of members associated with the space.</span>
+
+<span class="sd">        Parameters:</span>
+<span class="sd">            offset (int, optional): The offset for pagination (default: 0).</span>
+<span class="sd">            limit (int, optional): The limit for the number of results (default: 100).</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            A list of Member instances.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            Raises an error if the request to the API fails.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">response</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_apiEndpoints</span><span class="o">.</span><span class="n">getMembers</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="n">offset</span><span class="p">,</span> <span class="n">limit</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">[</span><span class="n">Member</span><span class="o">.</span><span class="n">_from_api</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_apiEndpoints</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span> <span class="k">for</span> <span class="n">data</span> <span class="ow">in</span> <span class="n">response</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;data&quot;</span><span class="p">,</span> <span class="p">[])]</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_listviewfromobject</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">obj</span><span class="p">:</span> <span class="n">Object</span><span class="p">,</span> <span class="n">offset</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">limit</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">100</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">ListView</span><span class="p">]:</span>
+        <span class="k">if</span> <span class="n">obj</span><span class="o">.</span><span class="n">type</span> <span class="o">!=</span> <span class="s2">&quot;Collection&quot;</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Object is not a collection&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_listviews</span><span class="p">(</span><span class="n">obj</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="n">offset</span><span class="p">,</span> <span class="n">limit</span><span class="p">)</span>
+
+    <span class="nd">@requires_auth</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_listviews</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">listId</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Object</span> <span class="o">|</span> <span class="n">Type</span><span class="p">,</span> <span class="n">offset</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">limit</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">100</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">ListView</span><span class="p">]:</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">listId</span><span class="p">,</span> <span class="n">Object</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">listId</span><span class="p">,</span> <span class="n">Type</span><span class="p">):</span>
+            <span class="n">listId</span> <span class="o">=</span> <span class="n">listId</span><span class="o">.</span><span class="n">id</span>
+
+        <span class="n">response</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_apiEndpoints</span><span class="o">.</span><span class="n">getListViews</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="n">listId</span><span class="p">,</span> <span class="n">offset</span><span class="p">,</span> <span class="n">limit</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">[</span>
+            <span class="n">ListView</span><span class="o">.</span><span class="n">_from_api</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_apiEndpoints</span><span class="p">,</span>
+                <span class="n">data</span>
+                <span class="o">|</span> <span class="p">{</span>
+                    <span class="s2">&quot;space_id&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">id</span><span class="p">,</span>
+                    <span class="s2">&quot;list_id&quot;</span><span class="p">:</span> <span class="n">listId</span><span class="p">,</span>
+                <span class="p">},</span>
+            <span class="p">)</span>
+            <span class="k">for</span> <span class="n">data</span> <span class="ow">in</span> <span class="n">response</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;data&quot;</span><span class="p">,</span> <span class="p">[])</span>
+        <span class="p">]</span>
+
+    <span class="nd">@requires_auth</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_properties</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">offset</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">limit</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">Property</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Retrieves a list of property associated with the space.</span>
+
+<span class="sd">        Parameters:</span>
+<span class="sd">            offset (int, optional): The offset for pagination (default: 0).</span>
+<span class="sd">            limit (int, optional): The limit for the number of results (default: 100).</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            A list of Property instances.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            Raises an error if the request to the API fails.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">response</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_apiEndpoints</span><span class="o">.</span><span class="n">getProperties</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="n">offset</span><span class="p">,</span> <span class="n">limit</span><span class="p">)</span>
+        <span class="n">types</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">Property</span><span class="o">.</span><span class="n">_from_api</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_apiEndpoints</span><span class="p">,</span> <span class="n">data</span> <span class="o">|</span> <span class="p">{</span><span class="s2">&quot;space_id&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">id</span><span class="p">})</span>
+            <span class="k">for</span> <span class="n">data</span> <span class="ow">in</span> <span class="n">response</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;data&quot;</span><span class="p">,</span> <span class="p">[])</span>
+        <span class="p">]</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_all_types</span> <span class="o">=</span> <span class="n">types</span>
+        <span class="k">return</span> <span class="n">types</span>
+
+    <span class="nd">@requires_auth</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_property</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">propertyId</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Property</span><span class="p">:</span>
+        <span class="n">response</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_apiEndpoints</span><span class="o">.</span><span class="n">getProperty</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="n">propertyId</span><span class="p">)</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">response</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;property&quot;</span><span class="p">,</span> <span class="p">{})</span>
+        <span class="n">prop</span> <span class="o">=</span> <span class="n">Property</span><span class="o">.</span><span class="n">_from_api</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_apiEndpoints</span><span class="p">,</span> <span class="n">data</span> <span class="o">|</span> <span class="p">{</span><span class="s2">&quot;space_id&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">id</span><span class="p">})</span>
+        <span class="k">return</span> <span class="n">prop</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_property_bykey</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Property</span><span class="p">:</span>
+        <span class="n">all_properties</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_properties</span><span class="p">(</span><span class="n">offset</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">limit</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
+        <span class="n">offset</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">limit</span> <span class="o">=</span> <span class="mi">50</span>
+        <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">prop</span> <span class="ow">in</span> <span class="n">all_properties</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">prop</span><span class="o">.</span><span class="n">key</span> <span class="o">==</span> <span class="n">key</span><span class="p">:</span>
+                    <span class="k">return</span> <span class="n">prop</span>
+
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">all_properties</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">100</span><span class="p">:</span>
+                <span class="k">break</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">all_properties</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_properties</span><span class="p">(</span><span class="n">offset</span><span class="o">=</span><span class="n">offset</span><span class="p">,</span> <span class="n">limit</span><span class="o">=</span><span class="n">limit</span><span class="p">)</span>
+            <span class="n">offset</span> <span class="o">+=</span> <span class="n">limit</span>
+            <span class="n">limit</span> <span class="o">+=</span> <span class="mi">100</span>
+
+        <span class="c1"># If we reach here, the property was not found</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Property not found, create it using create_property method&quot;</span><span class="p">)</span>
+
+    <span class="nd">@requires_auth</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">search</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">query</span><span class="p">,</span> <span class="n">offset</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">limit</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">Object</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Performs a search for objects in the space using a query string.</span>
+
+<span class="sd">        Parameters:</span>
+<span class="sd">            query (str): The search query string.</span>
+<span class="sd">            offset (int, optional): The offset for pagination (default: 0).</span>
+<span class="sd">            limit (int, optional): The limit for the number of results (default: 10).</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            A list of Object instances that match the search query.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            ValueError: If the space ID is not set.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">id</span> <span class="o">==</span> <span class="s2">&quot;&quot;</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Space ID is required&quot;</span><span class="p">)</span>
+
+        <span class="n">response</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_apiEndpoints</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="n">query</span><span class="p">,</span> <span class="n">offset</span><span class="p">,</span> <span class="n">limit</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">[</span><span class="n">Object</span><span class="o">.</span><span class="n">_from_api</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_apiEndpoints</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span> <span class="k">for</span> <span class="n">data</span> <span class="ow">in</span> <span class="n">response</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;data&quot;</span><span class="p">,</span> <span class="p">[])]</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;&lt;Space(name=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">)&gt;&quot;</span>
+</code></pre></div></td></tr></table></div>
+              </details>
+
+
+
+  <div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+<div class="doc doc-object doc-function">
+
+
+<h2 id="anytype.Space.create_object" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">create_object</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="n">Type</span><span class="p">())</span></code>
+
+</h2>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Creates a new object within the space, associated with a specified type.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>obj</code>
+            </td>
+            <td>
+                  <code><a class="autorefs autorefs-internal" title="anytype.object.Object" href="../object/#anytype.Object">Object</a></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The Object instance to create.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>type</code>
+            </td>
+            <td>
+                  <code><a class="autorefs autorefs-internal" title="anytype.type.Type" href="../type/#anytype.Type">Type</a></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The Type instance to associate the object with.</p>
+              </div>
+            </td>
+            <td>
+                  <code><a class="autorefs autorefs-internal" title="anytype.type.Type" href="../type/#anytype.Type">Type</a>()</code>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><a class="autorefs autorefs-internal" title="anytype.object.Object" href="../object/#anytype.Object">Object</a></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>A new Object instance representing the created object.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+            <details class="quote">
+              <summary>Source code in <code>anytype/space.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">102</span>
+<span class="normal">103</span>
+<span class="normal">104</span>
+<span class="normal">105</span>
+<span class="normal">106</span>
+<span class="normal">107</span>
+<span class="normal">108</span>
+<span class="normal">109</span>
+<span class="normal">110</span>
+<span class="normal">111</span>
+<span class="normal">112</span>
+<span class="normal">113</span>
+<span class="normal">114</span>
+<span class="normal">115</span>
+<span class="normal">116</span>
+<span class="normal">117</span>
+<span class="normal">118</span>
+<span class="normal">119</span>
+<span class="normal">120</span>
+<span class="normal">121</span>
+<span class="normal">122</span>
+<span class="normal">123</span>
+<span class="normal">124</span>
+<span class="normal">125</span>
+<span class="normal">126</span>
+<span class="normal">127</span>
+<span class="normal">128</span>
+<span class="normal">129</span>
+<span class="normal">130</span>
+<span class="normal">131</span>
+<span class="normal">132</span>
+<span class="normal">133</span>
+<span class="normal">134</span>
+<span class="normal">135</span>
+<span class="normal">136</span>
+<span class="normal">137</span>
+<span class="normal">138</span>
+<span class="normal">139</span>
+<span class="normal">140</span>
+<span class="normal">141</span>
+<span class="normal">142</span>
+<span class="normal">143</span>
+<span class="normal">144</span>
+<span class="normal">145</span>
+<span class="normal">146</span>
+<span class="normal">147</span>
+<span class="normal">148</span>
+<span class="normal">149</span>
+<span class="normal">150</span>
+<span class="normal">151</span>
+<span class="normal">152</span>
+<span class="normal">153</span>
+<span class="normal">154</span>
+<span class="normal">155</span>
+<span class="normal">156</span>
+<span class="normal">157</span>
+<span class="normal">158</span>
+<span class="normal">159</span>
+<span class="normal">160</span>
+<span class="normal">161</span>
+<span class="normal">162</span>
+<span class="normal">163</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@requires_auth</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">create_object</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obj</span><span class="p">:</span> <span class="n">Object</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="n">Type</span> <span class="o">=</span> <span class="n">Type</span><span class="p">())</span> <span class="o">-&gt;</span> <span class="n">Object</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Creates a new object within the space, associated with a specified type.</span>
+
+<span class="sd">    Parameters:</span>
+<span class="sd">        obj (Object): The Object instance to create.</span>
+<span class="sd">        type (Type): The Type instance to associate the object with.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        A new Object instance representing the created object.</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        Raises an error if the request to the API fails.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">obj</span><span class="o">.</span><span class="n">type</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="nb">type</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="nb">type</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">type</span>
+
+    <span class="k">if</span> <span class="nb">type</span><span class="o">.</span><span class="n">key</span> <span class="o">==</span> <span class="s2">&quot;&quot;</span> <span class="ow">and</span> <span class="n">obj</span><span class="o">.</span><span class="n">type_key</span> <span class="o">==</span> <span class="s2">&quot;&quot;</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span>
+            <span class="s2">&quot;You need to set one type for the object, use add_type method from the Object class&quot;</span>
+        <span class="p">)</span>
+
+    <span class="n">type_key</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">type_key</span> <span class="k">if</span> <span class="n">obj</span><span class="o">.</span><span class="n">type_key</span> <span class="o">!=</span> <span class="s2">&quot;&quot;</span> <span class="k">else</span> <span class="nb">type</span><span class="o">.</span><span class="n">key</span>
+    <span class="n">template_id</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">template_id</span> <span class="k">if</span> <span class="n">obj</span><span class="o">.</span><span class="n">template_id</span> <span class="o">!=</span> <span class="s2">&quot;&quot;</span> <span class="k">else</span> <span class="nb">type</span><span class="o">.</span><span class="n">template_id</span>
+
+    <span class="n">icon</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">obj</span><span class="o">.</span><span class="n">icon</span><span class="p">,</span> <span class="n">Icon</span><span class="p">):</span>
+        <span class="n">icon</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">icon</span><span class="o">.</span><span class="n">_get_json</span><span class="p">()</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Invalid icon type&quot;</span><span class="p">)</span>
+
+    <span class="n">properties</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">obj</span><span class="o">.</span><span class="n">properties</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+        <span class="n">properties</span> <span class="o">=</span> <span class="p">[</span><span class="n">prop</span><span class="o">.</span><span class="n">_get_json</span><span class="p">()</span> <span class="k">for</span> <span class="n">prop</span> <span class="ow">in</span> <span class="n">obj</span><span class="o">.</span><span class="n">properties</span><span class="p">]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Invalid properties type&quot;</span><span class="p">)</span>
+
+    <span class="n">object_data</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;icon&quot;</span><span class="p">:</span> <span class="n">icon</span><span class="p">,</span>
+        <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="n">obj</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+        <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="n">obj</span><span class="o">.</span><span class="n">description</span><span class="p">,</span>
+        <span class="s2">&quot;body&quot;</span><span class="p">:</span> <span class="n">obj</span><span class="o">.</span><span class="n">body</span><span class="p">,</span>
+        <span class="s2">&quot;source&quot;</span><span class="p">:</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;template_id&quot;</span><span class="p">:</span> <span class="n">template_id</span><span class="p">,</span>
+        <span class="s2">&quot;type_key&quot;</span><span class="p">:</span> <span class="n">type_key</span><span class="p">,</span>
+        <span class="s2">&quot;properties&quot;</span><span class="p">:</span> <span class="n">properties</span><span class="p">,</span>
+    <span class="p">}</span>
+
+    <span class="n">obj_clone</span> <span class="o">=</span> <span class="n">deepcopy</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span>
+    <span class="n">obj_clone</span><span class="o">.</span><span class="n">_apiEndpoints</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_apiEndpoints</span>
+    <span class="n">obj_clone</span><span class="o">.</span><span class="n">space_id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">id</span>
+
+    <span class="n">response</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_apiEndpoints</span><span class="o">.</span><span class="n">createObject</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="n">object_data</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">response</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;object&quot;</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="k">if</span> <span class="n">key</span> <span class="o">==</span> <span class="s2">&quot;icon&quot;</span><span class="p">:</span>
+            <span class="n">icon</span> <span class="o">=</span> <span class="n">Icon</span><span class="p">()</span>
+            <span class="n">icon</span><span class="o">.</span><span class="n">_update_with_json</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">obj_clone</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+    <span class="k">return</span> <span class="n">obj_clone</span>
+</code></pre></div></td></tr></table></div>
+            </details>
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h2 id="anytype.Space.delete_object" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">delete_object</span><span class="p">(</span><span class="n">objectId</span><span class="p">)</span></code>
+
+</h2>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Attempt to delete an object by its unique identifier.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>objectId</code>
+            </td>
+            <td>
+                  <code><span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The unique identifier of the object to delete.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code>None</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>None</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<p><span class="doc-section-title">Raises:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="Exception">Exception</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>If the request to delete the object fails.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<details class="note" open>
+  <summary>Note</summary>
+  <p>This method is currently not functioning as expected (BUG).</p>
+</details>
+
+            <details class="quote">
+              <summary>Source code in <code>anytype/space.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">64</span>
+<span class="normal">65</span>
+<span class="normal">66</span>
+<span class="normal">67</span>
+<span class="normal">68</span>
+<span class="normal">69</span>
+<span class="normal">70</span>
+<span class="normal">71</span>
+<span class="normal">72</span>
+<span class="normal">73</span>
+<span class="normal">74</span>
+<span class="normal">75</span>
+<span class="normal">76</span>
+<span class="normal">77</span>
+<span class="normal">78</span>
+<span class="normal">79</span>
+<span class="normal">80</span>
+<span class="normal">81</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@requires_auth</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">delete_object</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">objectId</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Attempt to delete an object by its unique identifier.</span>
+
+<span class="sd">    Parameters:</span>
+<span class="sd">        objectId (str): The unique identifier of the object to delete.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        None</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        Exception: If the request to delete the object fails.</span>
+
+<span class="sd">    Note:</span>
+<span class="sd">        This method is currently not functioning as expected (BUG).</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_apiEndpoints</span><span class="o">.</span><span class="n">deleteObject</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="n">objectId</span><span class="p">)</span>
+</code></pre></div></td></tr></table></div>
+            </details>
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h2 id="anytype.Space.get_members" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">get_members</span><span class="p">(</span><span class="n">offset</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">limit</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span></code>
+
+</h2>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Retrieves a list of members associated with the space.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>offset</code>
+            </td>
+            <td>
+                  <code><span title="int">int</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The offset for pagination (default: 0).</p>
+              </div>
+            </td>
+            <td>
+                  <code>0</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>limit</code>
+            </td>
+            <td>
+                  <code><span title="int">int</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The limit for the number of results (default: 100).</p>
+              </div>
+            </td>
+            <td>
+                  <code>100</code>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="list">list</span>[<span title="anytype.member.Member">Member</span>]</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>A list of Member instances.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+            <details class="quote">
+              <summary>Source code in <code>anytype/space.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">223</span>
+<span class="normal">224</span>
+<span class="normal">225</span>
+<span class="normal">226</span>
+<span class="normal">227</span>
+<span class="normal">228</span>
+<span class="normal">229</span>
+<span class="normal">230</span>
+<span class="normal">231</span>
+<span class="normal">232</span>
+<span class="normal">233</span>
+<span class="normal">234</span>
+<span class="normal">235</span>
+<span class="normal">236</span>
+<span class="normal">237</span>
+<span class="normal">238</span>
+<span class="normal">239</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@requires_auth</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">get_members</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">offset</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">limit</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">100</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">Member</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Retrieves a list of members associated with the space.</span>
+
+<span class="sd">    Parameters:</span>
+<span class="sd">        offset (int, optional): The offset for pagination (default: 0).</span>
+<span class="sd">        limit (int, optional): The limit for the number of results (default: 100).</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        A list of Member instances.</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        Raises an error if the request to the API fails.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">response</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_apiEndpoints</span><span class="o">.</span><span class="n">getMembers</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="n">offset</span><span class="p">,</span> <span class="n">limit</span><span class="p">)</span>
+    <span class="k">return</span> <span class="p">[</span><span class="n">Member</span><span class="o">.</span><span class="n">_from_api</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_apiEndpoints</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span> <span class="k">for</span> <span class="n">data</span> <span class="ow">in</span> <span class="n">response</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;data&quot;</span><span class="p">,</span> <span class="p">[])]</span>
+</code></pre></div></td></tr></table></div>
+            </details>
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h2 id="anytype.Space.get_object" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">get_object</span><span class="p">(</span><span class="n">objectId</span><span class="p">)</span></code>
+
+</h2>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Retrieves a specific object by its ID.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>objectId</code>
+            </td>
+            <td>
+                  <code><span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The ID of the object to retrieve.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><a class="autorefs autorefs-internal" title="anytype.object.Object" href="../object/#anytype.Object">Object</a></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>An Object instance representing the retrieved object.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+            <details class="quote">
+              <summary>Source code in <code>anytype/space.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">46</span>
+<span class="normal">47</span>
+<span class="normal">48</span>
+<span class="normal">49</span>
+<span class="normal">50</span>
+<span class="normal">51</span>
+<span class="normal">52</span>
+<span class="normal">53</span>
+<span class="normal">54</span>
+<span class="normal">55</span>
+<span class="normal">56</span>
+<span class="normal">57</span>
+<span class="normal">58</span>
+<span class="normal">59</span>
+<span class="normal">60</span>
+<span class="normal">61</span>
+<span class="normal">62</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@requires_auth</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">get_object</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">objectId</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Object</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Retrieves a specific object by its ID.</span>
+
+<span class="sd">    Parameters:</span>
+<span class="sd">        objectId (str): The ID of the object to retrieve.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        An Object instance representing the retrieved object.</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        Raises an error if the request to the API fails.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">response</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_apiEndpoints</span><span class="o">.</span><span class="n">getObject</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="n">objectId</span><span class="p">)</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="n">response</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;object&quot;</span><span class="p">,</span> <span class="p">{})</span>
+    <span class="k">return</span> <span class="n">Object</span><span class="o">.</span><span class="n">_from_api</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_apiEndpoints</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
+</code></pre></div></td></tr></table></div>
+            </details>
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h2 id="anytype.Space.get_objects" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">get_objects</span><span class="p">(</span><span class="n">offset</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">limit</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span></code>
+
+</h2>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Retrieves a list of objects associated with the space.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>offset</code>
+            </td>
+            <td>
+                  <code><span title="int">int</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The offset for pagination (default: 0).</p>
+              </div>
+            </td>
+            <td>
+                  <code>0</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>limit</code>
+            </td>
+            <td>
+                  <code><span title="int">int</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The limit for the number of results (default: 100).</p>
+              </div>
+            </td>
+            <td>
+                  <code>100</code>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="list">list</span>[<a class="autorefs autorefs-internal" title="anytype.object.Object" href="../object/#anytype.Object">Object</a>]</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>A list of Object instances.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+            <details class="quote">
+              <summary>Source code in <code>anytype/space.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">24</span>
+<span class="normal">25</span>
+<span class="normal">26</span>
+<span class="normal">27</span>
+<span class="normal">28</span>
+<span class="normal">29</span>
+<span class="normal">30</span>
+<span class="normal">31</span>
+<span class="normal">32</span>
+<span class="normal">33</span>
+<span class="normal">34</span>
+<span class="normal">35</span>
+<span class="normal">36</span>
+<span class="normal">37</span>
+<span class="normal">38</span>
+<span class="normal">39</span>
+<span class="normal">40</span>
+<span class="normal">41</span>
+<span class="normal">42</span>
+<span class="normal">43</span>
+<span class="normal">44</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@requires_auth</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">get_objects</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">offset</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">limit</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">Object</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Retrieves a list of objects associated with the space.</span>
+
+<span class="sd">    Parameters:</span>
+<span class="sd">        offset (int, optional): The offset for pagination (default: 0).</span>
+<span class="sd">        limit (int, optional): The limit for the number of results (default: 100).</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        A list of Object instances.</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        Raises an error if the request to the API fails.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">response_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_apiEndpoints</span><span class="o">.</span><span class="n">getObjects</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="n">offset</span><span class="p">,</span> <span class="n">limit</span><span class="p">)</span>
+    <span class="n">objects</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="n">Object</span><span class="o">.</span><span class="n">_from_api</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_apiEndpoints</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span> <span class="k">for</span> <span class="n">data</span> <span class="ow">in</span> <span class="n">response_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;data&quot;</span><span class="p">,</span> <span class="p">[])</span>
+    <span class="p">]</span>
+
+    <span class="k">return</span> <span class="n">objects</span>
+</code></pre></div></td></tr></table></div>
+            </details>
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h2 id="anytype.Space.get_properties" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">get_properties</span><span class="p">(</span><span class="n">offset</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">limit</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span></code>
+
+</h2>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Retrieves a list of property associated with the space.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>offset</code>
+            </td>
+            <td>
+                  <code><span title="int">int</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The offset for pagination (default: 0).</p>
+              </div>
+            </td>
+            <td>
+                  <code>0</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>limit</code>
+            </td>
+            <td>
+                  <code><span title="int">int</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The limit for the number of results (default: 100).</p>
+              </div>
+            </td>
+            <td>
+                  <code>100</code>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="list">list</span>[<a class="autorefs autorefs-internal" title="anytype.property.Property" href="../property/#anytype.Property">Property</a>]</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>A list of Property instances.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+            <details class="quote">
+              <summary>Source code in <code>anytype/space.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">268</span>
+<span class="normal">269</span>
+<span class="normal">270</span>
+<span class="normal">271</span>
+<span class="normal">272</span>
+<span class="normal">273</span>
+<span class="normal">274</span>
+<span class="normal">275</span>
+<span class="normal">276</span>
+<span class="normal">277</span>
+<span class="normal">278</span>
+<span class="normal">279</span>
+<span class="normal">280</span>
+<span class="normal">281</span>
+<span class="normal">282</span>
+<span class="normal">283</span>
+<span class="normal">284</span>
+<span class="normal">285</span>
+<span class="normal">286</span>
+<span class="normal">287</span>
+<span class="normal">288</span>
+<span class="normal">289</span>
+<span class="normal">290</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@requires_auth</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">get_properties</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">offset</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">limit</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">Property</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Retrieves a list of property associated with the space.</span>
+
+<span class="sd">    Parameters:</span>
+<span class="sd">        offset (int, optional): The offset for pagination (default: 0).</span>
+<span class="sd">        limit (int, optional): The limit for the number of results (default: 100).</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        A list of Property instances.</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        Raises an error if the request to the API fails.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">response</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_apiEndpoints</span><span class="o">.</span><span class="n">getProperties</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="n">offset</span><span class="p">,</span> <span class="n">limit</span><span class="p">)</span>
+    <span class="n">types</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="n">Property</span><span class="o">.</span><span class="n">_from_api</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_apiEndpoints</span><span class="p">,</span> <span class="n">data</span> <span class="o">|</span> <span class="p">{</span><span class="s2">&quot;space_id&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">id</span><span class="p">})</span>
+        <span class="k">for</span> <span class="n">data</span> <span class="ow">in</span> <span class="n">response</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;data&quot;</span><span class="p">,</span> <span class="p">[])</span>
+    <span class="p">]</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">_all_types</span> <span class="o">=</span> <span class="n">types</span>
+    <span class="k">return</span> <span class="n">types</span>
+</code></pre></div></td></tr></table></div>
+            </details>
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h2 id="anytype.Space.get_type" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">get_type</span><span class="p">(</span><span class="n">typeId</span><span class="p">)</span></code>
+
+</h2>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Retrieves a specific type by its ID.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>type_name</code>
+            </td>
+            <td>
+                  <code><span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The name of the type to retrieve.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><a class="autorefs autorefs-internal" title="anytype.type.Type" href="../type/#anytype.Type">Type</a></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>A Type instance representing the type.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<p><span class="doc-section-title">Raises:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="ValueError">ValueError</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>If the type with the specified name is not found.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+            <details class="quote">
+              <summary>Source code in <code>anytype/space.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">165</span>
+<span class="normal">166</span>
+<span class="normal">167</span>
+<span class="normal">168</span>
+<span class="normal">169</span>
+<span class="normal">170</span>
+<span class="normal">171</span>
+<span class="normal">172</span>
+<span class="normal">173</span>
+<span class="normal">174</span>
+<span class="normal">175</span>
+<span class="normal">176</span>
+<span class="normal">177</span>
+<span class="normal">178</span>
+<span class="normal">179</span>
+<span class="normal">180</span>
+<span class="normal">181</span>
+<span class="normal">182</span>
+<span class="normal">183</span>
+<span class="normal">184</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@requires_auth</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">get_type</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">typeId</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Type</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Retrieves a specific type by its ID.</span>
+
+<span class="sd">    Parameters:</span>
+<span class="sd">        type_name (str): The name of the type to retrieve.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        A Type instance representing the type.</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        ValueError: If the type with the specified name is not found.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">response</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_apiEndpoints</span><span class="o">.</span><span class="n">getType</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="n">typeId</span><span class="p">)</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="n">response</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;type&quot;</span><span class="p">,</span> <span class="p">{})</span>
+    <span class="c1"># TODO: Sometimes we need to add more attributes beyond the ones in the</span>
+    <span class="c1"># API response. There might be a cleaner way to do this, but doing</span>
+    <span class="c1"># a dict merge with | works for now.</span>
+    <span class="k">return</span> <span class="n">Type</span><span class="o">.</span><span class="n">_from_api</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_apiEndpoints</span><span class="p">,</span> <span class="n">data</span> <span class="o">|</span> <span class="p">{</span><span class="s2">&quot;space_id&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">id</span><span class="p">})</span>
+</code></pre></div></td></tr></table></div>
+            </details>
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h2 id="anytype.Space.get_types" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">get_types</span><span class="p">(</span><span class="n">offset</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">limit</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span></code>
+
+</h2>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Retrieves a list of types associated with the space.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>offset</code>
+            </td>
+            <td>
+                  <code><span title="int">int</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The offset for pagination (default: 0).</p>
+              </div>
+            </td>
+            <td>
+                  <code>0</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>limit</code>
+            </td>
+            <td>
+                  <code><span title="int">int</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The limit for the number of results (default: 100).</p>
+              </div>
+            </td>
+            <td>
+                  <code>100</code>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="list">list</span>[<a class="autorefs autorefs-internal" title="anytype.type.Type" href="../type/#anytype.Type">Type</a>]</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>A list of Type instances.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+            <details class="quote">
+              <summary>Source code in <code>anytype/space.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">186</span>
+<span class="normal">187</span>
+<span class="normal">188</span>
+<span class="normal">189</span>
+<span class="normal">190</span>
+<span class="normal">191</span>
+<span class="normal">192</span>
+<span class="normal">193</span>
+<span class="normal">194</span>
+<span class="normal">195</span>
+<span class="normal">196</span>
+<span class="normal">197</span>
+<span class="normal">198</span>
+<span class="normal">199</span>
+<span class="normal">200</span>
+<span class="normal">201</span>
+<span class="normal">202</span>
+<span class="normal">203</span>
+<span class="normal">204</span>
+<span class="normal">205</span>
+<span class="normal">206</span>
+<span class="normal">207</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@requires_auth</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">get_types</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">offset</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">limit</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">Type</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Retrieves a list of types associated with the space.</span>
+
+<span class="sd">    Parameters:</span>
+<span class="sd">        offset (int, optional): The offset for pagination (default: 0).</span>
+<span class="sd">        limit (int, optional): The limit for the number of results (default: 100).</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        A list of Type instances.</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        Raises an error if the request to the API fails.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">response</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_apiEndpoints</span><span class="o">.</span><span class="n">getTypes</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="n">offset</span><span class="p">,</span> <span class="n">limit</span><span class="p">)</span>
+    <span class="n">types</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="n">Type</span><span class="o">.</span><span class="n">_from_api</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_apiEndpoints</span><span class="p">,</span> <span class="n">data</span> <span class="o">|</span> <span class="p">{</span><span class="s2">&quot;space_id&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">id</span><span class="p">})</span>
+        <span class="k">for</span> <span class="n">data</span> <span class="ow">in</span> <span class="n">response</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;data&quot;</span><span class="p">,</span> <span class="p">[])</span>
+    <span class="p">]</span>
+
+    <span class="k">return</span> <span class="n">types</span>
+</code></pre></div></td></tr></table></div>
+            </details>
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h2 id="anytype.Space.search" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">search</span><span class="p">(</span><span class="n">query</span><span class="p">,</span> <span class="n">offset</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">limit</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span></code>
+
+</h2>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Performs a search for objects in the space using a query string.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>query</code>
+            </td>
+            <td>
+                  <code><span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The search query string.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>offset</code>
+            </td>
+            <td>
+                  <code><span title="int">int</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The offset for pagination (default: 0).</p>
+              </div>
+            </td>
+            <td>
+                  <code>0</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>limit</code>
+            </td>
+            <td>
+                  <code><span title="int">int</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The limit for the number of results (default: 10).</p>
+              </div>
+            </td>
+            <td>
+                  <code>10</code>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="list">list</span>[<a class="autorefs autorefs-internal" title="anytype.object.Object" href="../object/#anytype.Object">Object</a>]</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>A list of Object instances that match the search query.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<p><span class="doc-section-title">Raises:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="ValueError">ValueError</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>If the space ID is not set.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+            <details class="quote">
+              <summary>Source code in <code>anytype/space.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">318</span>
+<span class="normal">319</span>
+<span class="normal">320</span>
+<span class="normal">321</span>
+<span class="normal">322</span>
+<span class="normal">323</span>
+<span class="normal">324</span>
+<span class="normal">325</span>
+<span class="normal">326</span>
+<span class="normal">327</span>
+<span class="normal">328</span>
+<span class="normal">329</span>
+<span class="normal">330</span>
+<span class="normal">331</span>
+<span class="normal">332</span>
+<span class="normal">333</span>
+<span class="normal">334</span>
+<span class="normal">335</span>
+<span class="normal">336</span>
+<span class="normal">337</span>
+<span class="normal">338</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@requires_auth</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">search</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">query</span><span class="p">,</span> <span class="n">offset</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">limit</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">Object</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Performs a search for objects in the space using a query string.</span>
+
+<span class="sd">    Parameters:</span>
+<span class="sd">        query (str): The search query string.</span>
+<span class="sd">        offset (int, optional): The offset for pagination (default: 0).</span>
+<span class="sd">        limit (int, optional): The limit for the number of results (default: 10).</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        A list of Object instances that match the search query.</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        ValueError: If the space ID is not set.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">id</span> <span class="o">==</span> <span class="s2">&quot;&quot;</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Space ID is required&quot;</span><span class="p">)</span>
+
+    <span class="n">response</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_apiEndpoints</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="n">query</span><span class="p">,</span> <span class="n">offset</span><span class="p">,</span> <span class="n">limit</span><span class="p">)</span>
+    <span class="k">return</span> <span class="p">[</span><span class="n">Object</span><span class="o">.</span><span class="n">_from_api</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_apiEndpoints</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span> <span class="k">for</span> <span class="n">data</span> <span class="ow">in</span> <span class="n">response</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;data&quot;</span><span class="p">,</span> <span class="p">[])]</span>
+</code></pre></div></td></tr></table></div>
+            </details>
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h2 id="anytype.Space.update_object" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">update_object</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span></code>
+
+</h2>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Updates an existing object within the space.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>objectId</code>
+            </td>
+            <td>
+                  <code><span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The ID of the object to update.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>data</code>
+            </td>
+            <td>
+                  <code><span title="dict">dict</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The data to update the object with.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><a class="autorefs autorefs-internal" title="anytype.object.Object" href="../object/#anytype.Object">Object</a></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>An Object instance representing the updated object.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+            <details class="quote">
+              <summary>Source code in <code>anytype/space.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 83</span>
+<span class="normal"> 84</span>
+<span class="normal"> 85</span>
+<span class="normal"> 86</span>
+<span class="normal"> 87</span>
+<span class="normal"> 88</span>
+<span class="normal"> 89</span>
+<span class="normal"> 90</span>
+<span class="normal"> 91</span>
+<span class="normal"> 92</span>
+<span class="normal"> 93</span>
+<span class="normal"> 94</span>
+<span class="normal"> 95</span>
+<span class="normal"> 96</span>
+<span class="normal"> 97</span>
+<span class="normal"> 98</span>
+<span class="normal"> 99</span>
+<span class="normal">100</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@requires_auth</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">update_object</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obj</span><span class="p">:</span> <span class="n">Object</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Object</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Updates an existing object within the space.</span>
+
+<span class="sd">    Parameters:</span>
+<span class="sd">        objectId (str): The ID of the object to update.</span>
+<span class="sd">        data (dict): The data to update the object with.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        An Object instance representing the updated object.</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        Raises an error if the request to the API fails.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">response</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_apiEndpoints</span><span class="o">.</span><span class="n">updateObject</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="n">obj</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="n">response</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;object&quot;</span><span class="p">,</span> <span class="p">{})</span>
+    <span class="k">return</span> <span class="n">Object</span><span class="o">.</span><span class="n">_from_api</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_apiEndpoints</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
+</code></pre></div></td></tr></table></div>
+            </details>
+    </div>
+
+</div>
+
+
+
+  </div>
+
+    </div>
+
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      <script id="__config" type="application/json">{"base": "../..", "features": [], "search": "../../assets/javascripts/workers/search.d50fe291.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.13a4f30d.min.js"></script>
+      
+    
+  </body>
+</html>
