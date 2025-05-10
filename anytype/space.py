@@ -63,7 +63,21 @@ class Space(APIWrapper):
 
     @requires_auth
     def delete_object(self, objectId: str) -> None:
-        # BUG: not working yet
+        """
+        Attempt to delete an object by its unique identifier.
+
+        Parameters:
+            objectId (str): The unique identifier of the object to delete.
+
+        Returns:
+            None
+
+        Raises:
+            Exception: If the request to delete the object fails.
+
+        Note:
+            This method is currently not functioning as expected (BUG).
+        """
         self._apiEndpoints.deleteObject(self.id, objectId)
 
     @requires_auth

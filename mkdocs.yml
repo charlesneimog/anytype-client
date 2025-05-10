@@ -3,8 +3,24 @@ site_url: https://charlesneimog.github.io/anytype-client
 theme:
   name: material
   palette:
-    scheme: slate
-    primary: teal
+    - media: (prefers-color-scheme)
+      toggle:
+        icon: material/brightness-auto
+        name: Switch to light mode
+    - media: '(prefers-color-scheme: light)'
+      scheme: default
+      primary: white
+      accent: light blue
+      toggle:
+        icon: material/lightbulb
+        name: Switch to dark mode
+    - media: '(prefers-color-scheme: dark)'
+      scheme: slate
+      accent: light blue
+      primary: black
+      toggle:
+        icon: material/lightbulb-outline
+        name: Switch to light mode
   logo: assets/any.png
   favicon: assets/any.png
 nav:

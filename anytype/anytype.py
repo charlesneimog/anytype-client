@@ -94,6 +94,18 @@ class Anytype:
 
     @requires_auth
     def get_space(self, spaceId: str) -> Space:
+        """
+        Retrieve a specific space by its unique identifier.
+
+        Parameters:
+            spaceId (str): The unique identifier of the space to retrieve.
+
+        Returns:
+            Space: A `Space` instance representing the requested space.
+
+        Raises:
+            Exception: If the request to the API fails or the space is not found.
+        """
         response = self._apiEndpoints.getSpace(spaceId)
         data = response.get("space", {})
         return Space._from_api(self._apiEndpoints, data)

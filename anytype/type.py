@@ -112,6 +112,18 @@ class Type(APIWrapper):
 
     @requires_auth
     def get_template(self, id: str) -> Template:
+        """
+        Retrieve a specific template by its unique identifier.
+
+        Parameters:
+            id (str): The unique identifier of the template to retrieve.
+
+        Returns:
+            Template: A `Template` instance populated with data retrieved from the API.
+
+        Raises:
+            Exception: If the request to the API fails or the template cannot be retrieved.
+        """
         response_data = self._apiEndpoints.getTemplate(self.space_id, self.id, id)
 
         template = Template()
