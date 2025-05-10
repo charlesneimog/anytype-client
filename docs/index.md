@@ -14,3 +14,27 @@ A Python client for interacting with [Anytype](https://anytype.io/). Automate wo
 - **Space Operations**: Manage spaces, types, and relations programmatically.
 - **Batch Operations**: Export data, automate repetitive tasks, and more.
 - **PDF Import Example**: Bulk import annotated PDFs as structured notes (see [examples](https://github.com/charlesneimog/anytype-client/tree/main/examples)).
+
+## 👥 Contributors
+
+<p style="">
+<div style="">
+    <a href="https://github.com/charlesneimog/anytype-client/graphs/contributors">
+        <img src="https://img.shields.io/github/contributors/charlesneimog/anytype-client" alt="GitHub Contributors" />
+    </a>
+    <a href="https://github.com/charlesneimog/anytype-client/commits/main">
+        <img src="https://img.shields.io/github/last-commit/charlesneimog/anytype-client" alt="Last Commit" />
+    </a>
+    <a href="https://github.com/charlesneimog/anytype-client/releases">
+        <img src="https://img.shields.io/github/v/release/charlesneimog/anytype-client" alt="Release Version" />
+    </a>
+</div>
+
+<div style="">
+    <a href="https://github.com/charlesneimog/anytype-client/graphs/contributors">
+        <img src="https://contrib.rocks/image?repo=charlesneimog/anytype-client" alt="Contributors" style="max-width: 150px;" />
+    </a>
+    </div>
+</p>
+
+
