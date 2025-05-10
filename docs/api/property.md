@@ -1,0 +1,3 @@
+# `anytype.Property`
+
+::: anytype.Property
