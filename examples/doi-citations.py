@@ -1,3 +1,11 @@
+import sys
+import os
+import html
+
+# for my tests
+file = os.path.dirname(__file__) + "/../"
+sys.path.append(file)
+
 import anytype
 import requests
 import time
@@ -5,29 +13,43 @@ import time
 any = anytype.Anytype()
 any.auth()
 
-if len(any.get_spaces()) == 1:
-    any.create_space("My Space")
 
-space = any.get_spaces()[1]
-types = space.get_types()
-project_type = None
-for type in types:
-    if type.name == "Article":
-        project_type = type
+spaces = any.get_spaces()
+
+myspace = None
+for space in spaces:
+    if space.name == "My Space":
+        myspace = space
         break
 
-if project_type is None:
-    raise Exception("Article type not found")
-
-import requests
+if myspace is None:
+    myspace = any.create_space("My Space")
 
 
-def already_added(doi):
-    listview = space.get_listviews(project_type)[0]
-    print(listview)
-    objects = listview.get_objectsinlistview()
-    for obj in objects:
-        print(obj)
+article_type = None
+for type in myspace.get_types(offset=0, limit=100):
+    if type.name == "Artigo":
+        article_type = type
+
+objects = myspace.search("", article_type)
+
+# if type does not exist we create it
+if article_type is None:
+    article_type = anytype.Type("Artigo")
+    article_type.icon = anytype.Icon()  # default icon
+    article_type.layout = "basic"
+    article_type.plural_name = "Artigos"
+
+    article_type.add_property("Doi", anytype.PropertyFormat.TEXT)
+    article_type.add_property("Publication Year", anytype.PropertyFormat.NUMBER)
+    article_type.add_property("Authors", anytype.PropertyFormat.MULTI_SELECT)
+    article_type.add_property("Readed", anytype.PropertyFormat.CHECKBOX)
+    article_type = myspace.create_type(article_type)
+
+assert isinstance(article_type, anytype.Type)
+
+
+time.sleep(2)
 
 
 def add_article(doi, recursive=False):
@@ -41,17 +63,23 @@ def add_article(doi, recursive=False):
         title = data["message"]["title"][0]
         authors = []
         for author in data.get("message", {}).get("author", []):
-            authors.append(f"{author['given']} {author['family']}")
+            if "given" not in author or "family" not in author:
+                authors.append(author["name"])
+            else:
+                authors.append(f"{author['given']} {author['family']}")
 
         # Year and DOI of the article
         article_doi = data["message"]["URL"]
         year = data["message"]["issued"]["date-parts"][0][0]
 
         # Creating the article object
-        obj = anytype.Object(title, project_type)
+        obj = anytype.Object(title, article_type)
         obj.doi = article_doi
-        obj.author = authors
-        obj.year = year
+        authors = [html.unescape(author).title() for author in authors]  # fix encoding
+
+        obj.authors = authors
+        obj.publication_year = year
+        obj.readed = False
 
         # Handle references (citations)
         references = data["message"].get("reference", [])
@@ -60,15 +88,10 @@ def add_article(doi, recursive=False):
             for reference in references:
                 ref_doi = reference.get("DOI", "")
                 if ref_doi != "":
-                    try:
-                        add_article(ref_doi)
-                    except Exception as e:
-                        print(f"Failed to retrieve info about {doi} {e}")
+                    add_article(ref_doi)
 
-        isOnList = False
-
-        space.create_object(obj)
-        time.sleep(0.5)
+        myspace.create_object(obj)
+        time.sleep(1)
 
     else:
         print(f"Error fetching article data: {response.status_code}")
@@ -76,5 +99,4 @@ def add_article(doi, recursive=False):
 
 # Example usage:
 doi = "10.1080/17459737.2025.2465976"
-already_added(doi)
-# add_article(doi, True)
+add_article(doi, True)
