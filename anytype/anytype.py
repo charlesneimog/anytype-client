@@ -20,7 +20,6 @@ class Anytype:
         self._apiEndpoints: apiEndpoints | None = None
         self._headers = {}
 
-
     def auth(self, force=False, callback=None) -> None:
         """
         Authenticates the user by retrieving or creating a session token. If the session token already exists, it validates the token. If not, the user will be prompted to enter a 4-digit code for authentication.
@@ -69,7 +68,6 @@ class Anytype:
         self.app_key = token_response.get("app_key")
         self._validate_token()
 
-
     def _validate_token(self) -> bool:
         self._headers = {
             "Content-Type": "application/json",
@@ -82,7 +80,6 @@ class Anytype:
         except Exception:
             return False
 
-
     def _get_userdata_folder(self) -> str:
         userdata = os.path.join(os.path.expanduser("~"), ".anytype")
         if not os.path.exists(userdata):
@@ -90,7 +87,6 @@ class Anytype:
         if os.name == "nt":
             os.system(f"attrib +h {userdata}")
         return userdata
-
 
     @requires_auth
     def get_space(self, spaceId: str) -> Space:
@@ -110,7 +106,6 @@ class Anytype:
         data = response.get("space", {})
         return Space._from_api(self._apiEndpoints, data)
 
-
     @requires_auth
     def get_spaces(self, offset=0, limit=10) -> list[Space]:
         """
@@ -127,11 +122,7 @@ class Anytype:
             Raises an error if the request to the API fails.
         """
         response = self._apiEndpoints.getSpaces(offset, limit)
-        return [
-            Space._from_api(self._apiEndpoints, data)
-            for data in response.get("data", [])
-        ]
-
+        return [Space._from_api(self._apiEndpoints, data) for data in response.get("data", [])]
 
     @requires_auth
     def create_space(self, name: str) -> Space:
@@ -151,7 +142,6 @@ class Anytype:
         data = response.get("space", {})
         return Space._from_api(self._apiEndpoints, data)
 
-
     @requires_auth
     def global_search(self, query, offset=0, limit=10) -> list[Object]:
         """
@@ -169,7 +159,4 @@ class Anytype:
             Raises an error if the search request fails.
         """
         response = self._apiEndpoints.globalSearch(query, offset, limit)
-        return [
-            Object._from_api(self._apiEndpoints, data)
-            for data in response.get("data", [])
-        ]
+        return [Object._from_api(self._apiEndpoints, data) for data in response.get("data", [])]
