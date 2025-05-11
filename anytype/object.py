@@ -29,7 +29,7 @@ class Object(APIWrapper):
 
     """
 
-    def __init__(self, name: str = "", type: Type = Type()):
+    def __init__(self, name: str = "", type: Type | None = None):
         self._apiEndpoints: apiEndpoints | None = None
         self._icon: Icon = Icon()
         self._values = {}
@@ -43,9 +43,10 @@ class Object(APIWrapper):
         self.layout: str = "basic"
 
         self.properties: list[Property] = []
-        for prop in type.properties:
-            if prop.key not in _ANYTYPE_SYSTEM_RELATIONS:
-                self.properties.append(prop)
+        if type is not None:
+            for prop in type.properties:
+                if prop.key not in _ANYTYPE_SYSTEM_RELATIONS:
+                    self.properties.append(prop)
 
         self.root_id: str = ""
         self.space_id: str = ""
@@ -59,8 +60,8 @@ class Object(APIWrapper):
         self._values = {}
         notoverdrive = ("icon", "type")
 
-        if type:
-            self._type = type
+        if type is not None:
+            self.type = type
             for prop in self.properties:
                 class_prop = prop.name.lower().replace(" ", "_")
                 if class_prop in notoverdrive:
@@ -76,7 +77,6 @@ class Object(APIWrapper):
                 self._custom_getters[class_prop] = {"prop": prop, "func": getter}
 
     def __setattr__(self, name, value):
-        # Trata atributos com propriedades personalizadas primeiro
         if "_custom_setters" in self.__dict__ and name in self._custom_setters:
             for prop in self.properties:
                 class_prop = prop.name.lower().replace(" ", "_")
@@ -84,7 +84,6 @@ class Object(APIWrapper):
                     self._custom_setters[name]["func"](prop, value)
                     return
             raise AttributeError(f"Attribute {name} not found")
-        # Garante que propriedades com setters funcionem
         elif hasattr(type(self), name):
             object.__setattr__(self, name, value)
         else:
@@ -94,6 +93,8 @@ class Object(APIWrapper):
         if "_custom_getters" in self.__dict__ and name in self._custom_getters:
             prop = self._custom_getters[name]["prop"]
             return self._custom_getters[name]["func"](name, prop)
+        elif hasattr(type(self), name):
+            return getattr(self, name)
         else:
             try:
                 return self.__dict__[name]
@@ -151,35 +152,6 @@ class Object(APIWrapper):
     def icon(self):
         return self._icon
 
-    # NOTE: Seems to be removed
-    # @requires_auth
-    # def export(self, folder: str, format: str = "markdown") -> None:
-    #     """
-    #     Exports the object to a specified folder and format (either markdown or protobuf).
-    #
-    #     Parameters:
-    #         folder (str): The path to the output folder where the object will be exported.
-    #         format (str, optional): The export format, either "markdown" or "protobuf". Default is "markdown".
-    #
-    #     Returns:
-    #         None
-    #
-    #     Raises:
-    #         Raises an error if the request to the API fails.
-    #
-    #     Note:
-    #         If using Linux, a note is printed indicating potential issues with Anytype for Flatpak.
-    #     """
-    #
-    #     path = Path(folder)
-    #     if not path.is_absolute():
-    #         path = Path.cwd() / path
-    #
-    #     assert format in ["markdown", "protobuf"]
-    #     self._apiEndpoints.getExport(self.space_id, self.id, format)
-    #     if platform.system() == "Linux":
-    #         print("Note that this will not work on Anytype for flatpak, even without any errors")
-
     def add_type(self, type: Type):
         """
         Adds a type for an Object.
@@ -191,7 +163,6 @@ class Object(APIWrapper):
             None
 
         """
-
         self.template_id = type.template_id
         self.type_key = type.key
 
