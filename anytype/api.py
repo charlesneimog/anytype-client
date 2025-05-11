@@ -3,7 +3,7 @@ from datetime import datetime
 from typing import TypeVar, Type
 
 
-MIN_REQUIRED_VERSION = datetime(2025, 3, 17).date()
+MIN_REQUIRED_VERSION = datetime(2025, 4, 22).date()
 API_CONFIG = {
     "apiUrl": "http://localhost:31009/v1",
     "apiAppName": "PythonClient",
@@ -34,7 +34,7 @@ class apiEndpoints:
             version_date = datetime.strptime(version_str, "%Y-%m-%d").date()
 
             if version_date < MIN_REQUIRED_VERSION:
-                print("❌ Version is too old:", version_date)
+                raise Exception("❌ Version is too old:", version_date)
         else:
             raise ValueError("Anytype-Version header not found, probably anytype is too old")
 
@@ -97,10 +97,9 @@ class apiEndpoints:
         payload = {"query": query}
         return self._request("POST", "/search", params=options, data=payload)
 
-    def search(self, spaceId: str, query: str, offset: int = 0, limit: int = 10):
+    def search(self, spaceId: str, data: dict, offset: int = 0, limit: int = 10):
         options = {"offset": offset, "limit": limit}
-        payload = {"query": query}
-        return self._request("POST", f"/spaces/{spaceId}/search", params=options, data=payload)
+        return self._request("POST", f"/spaces/{spaceId}/search", params=options, data=data)
 
     # TODO: PATCH("/spaces/:space_id")
     def updateSpace(self, spaceId: str, data: dict):
