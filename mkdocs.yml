@@ -1,7 +1,10 @@
+---
 site_name: Anytype Client
 site_url: https://charlesneimog.github.io/anytype-client
+repo_url: https://github.com/charlesneimog/anytype-client
 theme:
   name: material
+  features: [content.code.copy]
   palette:
     - media: (prefers-color-scheme)
       toggle:
@@ -28,6 +31,23 @@ nav:
   - Getting Started: getting-started.md
   - API Reference: api/index.md
   - Contributing: contributing.md
+  - Examples: examples.md
 plugins:
   - search
   - mkdocstrings
+  - git-revision-date-localized:
+      enable_creation_date: true
+  - git-authors
+markdown_extensions:
+  # admonition
+  - admonition
+  - pymdownx.details
+  - pymdownx.superfences
+
+  # code highlight
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.superfences
+
+  # read files
+  - pymdownx.snippets
