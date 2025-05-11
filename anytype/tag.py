@@ -10,7 +10,6 @@ class Tag(APIWrapper):
         self.name: str = ""
         self.id: str = ""
         self.key: str = ""
-        pass
 
     @requires_auth
     def update_tag(self, name: str, color: str = "red"):
