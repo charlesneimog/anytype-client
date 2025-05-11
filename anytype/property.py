@@ -3,6 +3,8 @@ from .tag import Tag
 from .utils import requires_auth, _ANYTYPE_PROPERTIES_COLORS
 import warnings
 import random
+import time
+from enum import Enum
 
 
 class Property(APIWrapper):
@@ -223,6 +225,19 @@ class Property(APIWrapper):
             raise TypeError("Expected a list value for 'objects'.")
         self._objects = value
 
+    def _retry_on_limit_error(self, func, *args, **kwargs):
+        for attempt in range(10):
+            try:
+                return func(*args, **kwargs)
+            except ValueError as e:
+                if "maximum request limit" in str(e).lower():
+                    if attempt < 10 - 1:
+                        time.sleep(2)
+                    else:
+                        raise
+                else:
+                    raise
+
     @requires_auth
     def _get_json(self) -> dict:
         """
@@ -262,9 +277,10 @@ class Property(APIWrapper):
                             break
                     if notfound:
                         random_color = random.choice(_ANYTYPE_PROPERTIES_COLORS)
-                        tag = self.create_tag(tag, random_color)
-                        tag_ids.append(tag.id)
-                        warnings.warn("Tag '{tag}' not exist, creating it")
+                        tag_obj = self._retry_on_limit_error(self.create_tag, tag, random_color)
+                        tag_ids.append(tag_obj.id)
+                        warnings.warn(f"Tag '{tag_obj.name}' not exist, creating it")
+                        time.sleep(0.05)
 
             json_dict["multi_select"] = tag_ids
         elif format == "date":
@@ -280,7 +296,7 @@ class Property(APIWrapper):
         elif format == "objects":
             json_dict["objects"] = self.objects
         else:
-            raise ValueError("Formato não reconhecido")
+            raise ValueError("Format not supported")
         return json_dict
 
     @requires_auth
@@ -294,6 +310,8 @@ class Property(APIWrapper):
         Raises:
             Raises an error if the request to the API fails.
         """
+        print(self.format)
+
         response = self._apiEndpoints.getTags(self.space_id, self.id)
         types = [
             Tag._from_api(
@@ -341,6 +359,7 @@ class Property(APIWrapper):
                 if tag.name == name:
                     warnings.warn(f"Tag '{name}' already exists, returning existing tag")
                     return tag
+
         response = self._apiEndpoints.createTag(self.space_id, self.id, data)
         tag = Tag._from_api(self._apiEndpoints, response.get("tag", []))
         return tag
