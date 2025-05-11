@@ -6,7 +6,7 @@ from .object import Object
 from .member import Member
 from .icon import Icon
 from .api import apiEndpoints, APIWrapper
-from .utils import requires_auth
+from .utils import requires_auth, PropertyFormat
 from .property import Property
 
 
@@ -100,7 +100,7 @@ class Space(APIWrapper):
         return Object._from_api(self._apiEndpoints, data)
 
     @requires_auth
-    def create_object(self, obj: Object, type: Type = Type()) -> Object:
+    def create_object(self, obj: Object, type: Type | None = None) -> Object:
         """
         Creates a new object within the space, associated with a specified type.
 
@@ -114,38 +114,42 @@ class Space(APIWrapper):
         Raises:
             Raises an error if the request to the API fails.
         """
-        if obj.type is None and type is not None:
+        if obj.type is not None and type is None:
             type = obj.type
 
-        if type.key == "" and obj.type_key == "":
+        if type is None:
             raise Exception(
                 "You need to set one type for the object, use add_type method from the Object class"
             )
 
+        if type.key == "":
+            raise Exception(
+                "Type has an invalid key, please retrieve it from the API to get a valid type"
+            )
+
         type_key = obj.type_key if obj.type_key != "" else type.key
         template_id = obj.template_id if obj.template_id != "" else type.template_id
-
-        icon = {}
+        icon_json = {}
         if isinstance(obj.icon, Icon):
-            icon = obj.icon._get_json()
+            icon_json = obj.icon._get_json()
         else:
             raise ValueError("Invalid icon type")
 
-        properties = []
-        if isinstance(obj.properties, list):
-            properties = [prop._get_json() for prop in obj.properties]
+        properties_json: list[dict] = [{}]
+        if isinstance(obj.type.properties, list):
+            properties_json = [prop._get_json() for prop in obj.type.properties]
         else:
             raise ValueError("Invalid properties type")
 
         object_data = {
-            "icon": icon,
+            "icon": icon_json,
             "name": obj.name,
             "description": obj.description,
             "body": obj.body,
             "source": "",
             "template_id": template_id,
             "type_key": type_key,
-            "properties": properties,
+            "properties": properties_json,
         }
 
         obj_clone = deepcopy(obj)
@@ -155,12 +159,49 @@ class Space(APIWrapper):
         response = self._apiEndpoints.createObject(self.id, object_data)
 
         for key, value in response.get("object", {}).items():
-            if key == "icon":
-                icon = Icon()
-                icon._update_with_json(value)
-            else:
-                obj_clone.__dict__[key] = value
+            setattr(obj_clone, key, value)
         return obj_clone
+
+    @requires_auth
+    def create_type(self, type: Type) -> Type:
+        """ """
+        if not type.icon or not type.layout or not type.name or not type.plural_name:
+            raise Exception("Please define icon, layout, name and plural_name")
+
+        # TODO: Need to do something if properties len > 200
+        defined_props = []
+        all_props = self.get_properties(offset=0, limit=200)
+        for prop in type.properties:
+            prop_name = prop.name if isinstance(prop, Property) else prop["name"]
+            prop_format = prop.format if isinstance(prop, Property) else prop["format"]
+            exists = False
+            for any_prop in all_props:
+                if any_prop.name == prop_name:
+                    exists = True
+                    prop = any_prop
+
+            if not exists:
+                prop = self.create_property(prop_name, prop_format)
+                pass
+
+            if isinstance(prop, Property):
+                defined_props.append(prop._json)
+            elif isinstance(prop, dict):
+                defined_props.append(prop)
+            else:
+                raise ValueError("Invalid prop type, this should not happen, please report!")
+
+        icon = type.icon._get_json()
+        data = {
+            "name": type.name,
+            "plural_name": type.plural_name,
+            "icon": icon,
+            "layout": type.layout,
+            "properties": defined_props,
+        }
+        response = self._apiEndpoints.createType(self.id, data)
+        type = Type._from_api(self._apiEndpoints, response.get("type", {}) | {"space_id": self.id})
+        return type
 
     @requires_auth
     def get_type(self, typeId: str) -> Type:
@@ -203,6 +244,9 @@ class Space(APIWrapper):
             Type._from_api(self._apiEndpoints, data | {"space_id": self.id})
             for data in response.get("data", [])
         ]
+        for type in types:
+            for prop in type.properties:
+                prop.space_id = self.id
 
         return types
 
@@ -290,9 +334,24 @@ class Space(APIWrapper):
         return types
 
     @requires_auth
+    def create_property(self, name: str, prop_format: PropertyFormat | str) -> Property:
+        if isinstance(prop_format, PropertyFormat):
+            prop_format = prop_format.value
+
+        object_data = {
+            "name": name,
+            "format": prop_format,
+        }
+
+        response = self._apiEndpoints.createProperty(self.id, object_data)
+        prop = Property._from_api(self._apiEndpoints, response.get("property", {}))
+        return prop
+
+    @requires_auth
     def get_property(self, propertyId: str) -> Property:
         response = self._apiEndpoints.getProperty(self.id, propertyId)
         data = response.get("property", {})
+        print("space", self.id)
         prop = Property._from_api(self._apiEndpoints, data | {"space_id": self.id})
         return prop
 
@@ -316,7 +375,9 @@ class Space(APIWrapper):
         raise ValueError("Property not found, create it using create_property method")
 
     @requires_auth
-    def search(self, query, offset=0, limit=10) -> list[Object]:
+    def search(
+        self, query, type: None | Type = None, offset: int = 0, limit: int = 10
+    ) -> list[Object]:
         """
         Performs a search for objects in the space using a query string.
 
@@ -334,7 +395,15 @@ class Space(APIWrapper):
         if self.id == "":
             raise ValueError("Space ID is required")
 
-        response = self._apiEndpoints.search(self.id, query, offset, limit)
+        types = []
+        if type is not None:
+            types = [type.key]
+        data = {
+            "query": query,
+            "sort": {"direction": "desc", "property_key": "last_modified_date"},
+            "types": types,
+        }
+        response = self._apiEndpoints.search(self.id, data, offset, limit)
         return [Object._from_api(self._apiEndpoints, data) for data in response.get("data", [])]
 
     def __repr__(self):
