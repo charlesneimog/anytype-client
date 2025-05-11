@@ -1,6 +1,6 @@
 from .template import Template
 from .api import apiEndpoints, APIWrapper
-from .utils import requires_auth
+from .utils import requires_auth, _ANYTYPE_SYSTEM_RELATIONS, PropertyFormat
 from .property import Property
 from .icon import Icon
 
@@ -11,17 +11,22 @@ class Type(APIWrapper):
     """
 
     def __init__(self, name: str = ""):
-        self._apiEndpoints: apiEndpoints | None = None
         self._all_templates = []
         self.type = ""
         self.space_id = ""
         self.id = ""
-        self.name = ""
+        self.name = name
+
+        # creation
+        self.layout: str = ""
+        self.plural_name: str = ""
+
         self._icon: Icon | dict = {}
-        self._properties : list[Property] = []
+        self._properties: list[Property | dict] = []
         self.key = ""
         self.template_id = ""
-        if name != "":
+
+        if name != "" and self._apiEndpoints:
             self.set_template(name)
 
     @property
@@ -31,11 +36,15 @@ class Type(APIWrapper):
     @properties.setter
     def properties(self, value):
         self._properties = []
+        if value is None:
+            return
         for prop in value:
-            id = (prop["id"])
+            id = prop["id"]
             response = self._apiEndpoints.getProperty(self.space_id, id)
             data = response.get("property", {})
-            prop = Property._from_api(self._apiEndpoints, data | {"space_id": self.id})
+            prop = Property._from_api(self._apiEndpoints, data | {"space_id": self.space_id})
+            if prop.key in _ANYTYPE_SYSTEM_RELATIONS:
+                continue
             self._properties.append(prop)
 
     @properties.getter
@@ -48,7 +57,9 @@ class Type(APIWrapper):
 
     @icon.setter
     def icon(self, value):
-        if isinstance(value, dict):
+        if value is None:
+            self._icon = Icon()
+        elif isinstance(value, dict):
             icon = Icon()
             icon._update_with_json(value)
             self._icon = icon
@@ -106,9 +117,7 @@ class Type(APIWrapper):
                 self.template_id = template.id
                 return
         if not found:
-            raise ValueError(
-                f"Type '{self.name}' does not have " "a template named '{template_name}'"
-            )
+            raise ValueError(f"Type '{self.name}' does not have a template named '{template_name}'")
 
     @requires_auth
     def get_template(self, id: str) -> Template:
@@ -133,6 +142,13 @@ class Type(APIWrapper):
                 template.__dict__[key] = value
 
         return template
+
+    def add_property(self, name: str, property_format: PropertyFormat) -> None:
+        if self._apiEndpoints is None:
+            prop = {"format": property_format.value, "name": name}  # or: property_format.value
+            self.properties.append(prop)
+        else:
+            raise Exception("Not implemented yet")
 
     def __repr__(self):
         if self.icon:
