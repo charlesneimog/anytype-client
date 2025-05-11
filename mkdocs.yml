@@ -3,6 +3,10 @@ site_name: Anytype Client
 site_url: https://charlesneimog.github.io/anytype-client
 repo_url: https://github.com/charlesneimog/anytype-client
 theme:
+  icon:
+    admonition:
+      code: simple/python
+
   name: material
   features: [content.code.copy]
   palette:
@@ -35,9 +39,6 @@ nav:
 plugins:
   - search
   - mkdocstrings
-  - git-revision-date-localized:
-      enable_creation_date: true
-  - git-authors
 markdown_extensions:
   # admonition
   - admonition
