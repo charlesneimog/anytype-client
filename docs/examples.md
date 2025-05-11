@@ -2,7 +2,7 @@
 
 ## Hello World 
 
-!!! quote "Hello World Example" 
+??? example "Hello World Example" 
     ``` python
     from anytype import Anytype
     from anytype import Object
@@ -42,7 +42,7 @@
     <img src="../assets/doi-article.png"/>
 </p>
 
-!!! quote "Collection with all cited articles" 
+??? example "Collection with all cited articles" 
     ``` python
     import anytype
     import requests
