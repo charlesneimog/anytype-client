@@ -3,7 +3,8 @@
 [![Python Version](https://img.shields.io/badge/python-3.10%2B-blue)](https://www.python.org/)
 [![License](https://img.shields.io/badge/license-GPL3-green)](https://github.com/charlesneimog/anytype-client/blob/main/LICENSE)
 
-A Python client for interacting with [Anytype](https://anytype.io/). Automate workflows and integrate with your apps! ✨
+**Unofficial Python API** for [Anytype](https://anytype.io/). Automate workflows and integrate with your apps! ✨
+
 
 ---
 
@@ -17,7 +18,6 @@ A Python client for interacting with [Anytype](https://anytype.io/). Automate wo
 
 ## 👥 Contributors
 
-<p style="">
 <div style="">
     <a href="https://github.com/charlesneimog/anytype-client/graphs/contributors">
         <img src="https://img.shields.io/github/contributors/charlesneimog/anytype-client" alt="GitHub Contributors" />
@@ -34,7 +34,4 @@ A Python client for interacting with [Anytype](https://anytype.io/). Automate wo
     <a href="https://github.com/charlesneimog/anytype-client/graphs/contributors">
         <img src="https://contrib.rocks/image?repo=charlesneimog/anytype-client" alt="Contributors" style="max-width: 150px;" />
     </a>
-    </div>
-</p>
-
-
+</div>

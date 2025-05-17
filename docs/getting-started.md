@@ -3,7 +3,7 @@
 ## ☑️ Prerequisites
 
 - Python 3.10+
-- Anytype desktop app (v0.44.13-beta or higher) running during authentication
+- Anytype desktop app (v0.46.19-alpha or `higher`) running during authentication
 
 ## 📦 Installation
 
@@ -40,7 +40,7 @@ new_note.description = "Automatically generated via Python API"
 
 # Add rich content
 new_note.add_title1("Welcome to Automated Knowledge Management!")
-new_note.add_text("This section was created programmatically using:")
+new_note.add_text("This section was created programmatically using Python Anytype Client")
 
 # Commit to workspace
 created_object = my_space.create_object(new_note, note_type)

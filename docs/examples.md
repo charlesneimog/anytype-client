@@ -39,7 +39,9 @@
 ## Collection with articles and all articles cited 
 
 <p>
-    <img src="../assets/doi-article.png"/>
+    <a href="../assets/doi-article.png">
+        <img style="border-radius: 8px;" src="../assets/doi-article.png" alt="DOI Article" />
+    </a>
 </p>
 
 ??? example "Collection with all cited articles" 
