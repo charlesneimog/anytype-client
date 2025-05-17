@@ -22,6 +22,46 @@ class Space(APIWrapper):
         self._all_types = []
 
     @requires_auth
+    def _object_to_dict(self, obj:Object)-> dict:
+        type = obj.type
+        if type is None:
+            raise Exception(
+                "You need to set one type for the object, use add_type method from the Object class"
+            )
+
+        if type.key == "":
+            raise Exception(
+                "Type has an invalid key, please retrieve it from the API to get a valid type"
+            )
+
+        type_key = obj.type_key if obj.type_key != "" else type.key
+        template_id = obj.template_id if obj.template_id != "" else type.template_id
+        icon_json = {}
+        if isinstance(obj.icon, Icon):
+            icon_json = obj.icon._get_json()
+        else:
+            raise ValueError("Invalid icon type")
+
+        properties_json: list[dict] = [{}]
+        if isinstance(obj.type.properties, list):
+            properties_json = [prop._get_json() for prop in obj.type.properties]
+        else:
+            raise ValueError("Invalid properties type")
+
+        object_data = {
+            "icon": icon_json,
+            "name": obj.name,
+            "description": obj.description,
+            "body": obj.body,
+            "source": "",
+            "template_id": template_id,
+            "type_key": type_key,
+            "properties": properties_json,
+        }
+        return object_data
+
+
+    @requires_auth
     def get_objects(self, offset=0, limit=100) -> list[Object]:
         """
         Retrieves a list of objects associated with the space.
@@ -62,12 +102,12 @@ class Space(APIWrapper):
         return Object._from_api(self._apiEndpoints, data)
 
     @requires_auth
-    def delete_object(self, objectId: str) -> None:
+    def delete_object(self, obj: str | Object) -> None:
         """
         Attempt to delete an object by its unique identifier.
 
         Parameters:
-            objectId (str): The unique identifier of the object to delete.
+            objectId (Object | str): The Object or object ID string to delete.
 
         Returns:
             None
@@ -75,10 +115,10 @@ class Space(APIWrapper):
         Raises:
             Exception: If the request to delete the object fails.
 
-        Note:
-            This method is currently not functioning as expected (BUG).
         """
-        self._apiEndpoints.deleteObject(self.id, objectId)
+        if isinstance(obj, Object):
+            obj = obj.id
+        self._apiEndpoints.deleteObject(self.id, obj)
 
     @requires_auth
     def update_object(self, obj: Object) -> Object:
@@ -95,6 +135,7 @@ class Space(APIWrapper):
         Raises:
             Raises an error if the request to the API fails.
         """
+        data = self._object_to_dict(obj)
         response = self._apiEndpoints.updateObject(self.id, obj.id, data)
         data = response.get("object", {})
         return Object._from_api(self._apiEndpoints, data)
@@ -114,47 +155,14 @@ class Space(APIWrapper):
         Raises:
             Raises an error if the request to the API fails.
         """
-        if obj.type is not None and type is None:
-            type = obj.type
+        if obj.type is None and type is not None:
+            obj.type = type
 
-        if type is None:
-            raise Exception(
-                "You need to set one type for the object, use add_type method from the Object class"
-            )
-
-        if type.key == "":
-            raise Exception(
-                "Type has an invalid key, please retrieve it from the API to get a valid type"
-            )
-
-        type_key = obj.type_key if obj.type_key != "" else type.key
-        template_id = obj.template_id if obj.template_id != "" else type.template_id
-        icon_json = {}
-        if isinstance(obj.icon, Icon):
-            icon_json = obj.icon._get_json()
-        else:
-            raise ValueError("Invalid icon type")
-
-        properties_json: list[dict] = [{}]
-        if isinstance(obj.type.properties, list):
-            properties_json = [prop._get_json() for prop in obj.type.properties]
-        else:
-            raise ValueError("Invalid properties type")
-
-        object_data = {
-            "icon": icon_json,
-            "name": obj.name,
-            "description": obj.description,
-            "body": obj.body,
-            "source": "",
-            "template_id": template_id,
-            "type_key": type_key,
-            "properties": properties_json,
-        }
 
         obj_clone = deepcopy(obj)
         obj_clone._apiEndpoints = self._apiEndpoints
         obj_clone.space_id = self.id
+        object_data = self._object_to_dict(obj)
 
         response = self._apiEndpoints.createObject(self.id, object_data)
 
@@ -164,7 +172,25 @@ class Space(APIWrapper):
 
     @requires_auth
     def create_type(self, type: Type) -> Type:
-        """ """
+        """
+        Create a new type within the current space.
+
+        This function validates the `Type` instance, ensures all required fields are
+        present (icon, layout, name, plural_name), and resolves all referenced
+        properties—creating them if they don't already exist.
+
+        Parameters:
+            type (Type): The Type instance to be created, including its properties.
+
+        Returns:
+            Type: The created Type instance as returned by the API.
+
+        Raises:
+            Exception: If any of the required fields (icon, layout, name, plural_name)
+                       are missing.
+            ValueError: If a property has an invalid or unrecognized format.
+        """
+
         if not type.icon or not type.layout or not type.name or not type.plural_name:
             raise Exception("Please define icon, layout, name and plural_name")
 
@@ -376,13 +402,14 @@ class Space(APIWrapper):
 
     @requires_auth
     def search(
-        self, query, type: None | Type = None, offset: int = 0, limit: int = 10
+        self, query, type: Type | None = None, offset: int = 0, limit: int = 10
     ) -> list[Object]:
         """
         Performs a search for objects in the space using a query string.
 
         Parameters:
             query (str): The search query string.
+            type (Type, optional): The type to filter by.
             offset (int, optional): The offset for pagination (default: 0).
             limit (int, optional): The limit for the number of results (default: 10).
 

@@ -144,6 +144,24 @@ class Type(APIWrapper):
         return template
 
     def add_property(self, name: str, property_format: PropertyFormat) -> None:
+        """
+        Add a property definition to the type being constructed.
+
+        If the API endpoints are not yet initialized (e.g., during local type definition),
+        the property is added to the internal property list. Otherwise, the method is not implemented.
+
+        Parameters:
+            name (str): The name of the property to add.
+            property_format (PropertyFormat): The format of the property (e.g., text, number, date).
+
+        Returns:
+            None
+
+        Raises:
+            Exception: If the API endpoints are initialized, indicating this functionality
+                       is not yet supported in that context.
+        """
+
         if self._apiEndpoints is None:
             prop = {"format": property_format.value, "name": name}  # or: property_format.value
             self.properties.append(prop)

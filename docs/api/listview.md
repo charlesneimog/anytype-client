@@ -1,0 +1,3 @@
+# `anytype.ListView`
+
+::: anytype.ListView

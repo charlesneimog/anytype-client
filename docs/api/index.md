@@ -4,6 +4,7 @@
 
 - [`anytype.Anytype`](anytype.md)
 - [`anytype.Space`](space.md)
+- [`anytype.ListView`](listview.md)
 - [`anytype.Object`](object.md)
 - [`anytype.Type`](type.md)
 - [`anytype.Property`](property.md)
