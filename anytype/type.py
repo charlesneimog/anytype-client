@@ -23,6 +23,7 @@ class Type(APIWrapper):
 
         self._icon: Icon | dict = {}
         self._properties: list[Property | dict] = []
+        self._properties_value: list = []
         self.key = ""
         self.template_id = ""
 
@@ -36,9 +37,14 @@ class Type(APIWrapper):
     @properties.setter
     def properties(self, value):
         self._properties = []
-        if value is None:
-            return
-        for prop in value:
+        self._properties_value = value
+
+    @properties.getter
+    def properties(self):
+        if len(self._properties) > 0:
+            return self._properties
+
+        for prop in self._properties_value:
             id = prop["id"]
             response = self._apiEndpoints.getProperty(self.space_id, id)
             data = response.get("property", {})
@@ -46,9 +52,6 @@ class Type(APIWrapper):
             if prop.key in _ANYTYPE_SYSTEM_RELATIONS:
                 continue
             self._properties.append(prop)
-
-    @properties.getter
-    def properties(self):
         return self._properties
 
     @property

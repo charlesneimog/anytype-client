@@ -270,17 +270,21 @@ class Space(APIWrapper):
             Type._from_api(self._apiEndpoints, data | {"space_id": self.id})
             for data in response.get("data", [])
         ]
-        for type in types:
-            for prop in type.properties:
-                prop.space_id = self.id
-
         return types
 
     def get_type_byname(self, name: str) -> Type:
-        all_types = self.get_types(limit=200)
-        for type in all_types:
-            if type.name == name:
-                return type
+        offset = 0
+        limit = 5
+        while True:
+            types = self.get_types(offset=offset, limit=limit)
+            type_len = len(types)
+            for type in types:
+                if type.name == name:
+                    return type
+            if type_len < limit:
+                break
+
+            offset += limit
 
         raise ValueError("Type not found")
 
