@@ -27,6 +27,7 @@ class apiEndpoints:
 
     def _request(self, method, path, params=None, data=None):
         url = f"{self.api_url}{path}"
+        print(url)
         response = requests.request(method, url, headers=self.headers, json=data, params=params)
 
         version_str = response.headers.get("Anytype-Version")
@@ -43,12 +44,12 @@ class apiEndpoints:
 
     # --- auth ---
     def displayCode(self):
-        return self._request("POST", "/auth/display_code", params={"app_name": self.app_name})
+        return self._request("POST", "/auth/challenges") 
 
     def getToken(self, challengeId: str, code: str):
         return self._request(
             "POST",
-            "/auth/token",
+            "/auth/api_keys",
             params={"challenge_id": challengeId, "code": code},
         )
 
