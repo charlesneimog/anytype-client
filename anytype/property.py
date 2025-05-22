@@ -230,6 +230,12 @@ class Property(APIWrapper):
             try:
                 return func(*args, **kwargs)
             except ValueError as e:
+                if "maximum request limit" in str(e).lower():
+                    if attempt < 10 - 1:
+                        time.sleep(2)
+                    else:
+                        raise
+                else:
                     raise
 
     @requires_auth
@@ -274,6 +280,7 @@ class Property(APIWrapper):
                         tag_obj = self._retry_on_limit_error(self.create_tag, tag, random_color)
                         tag_ids.append(tag_obj.id)
                         warnings.warn(f"Tag '{tag_obj.name}' not exist, creating it")
+                        time.sleep(0.05)
 
             json_dict["multi_select"] = tag_ids
         elif format == "date":
