@@ -81,6 +81,9 @@ class apiEndpoints:
     def createObject(self, spaceId: str, data: dict):
         return self._request("POST", f"/spaces/{spaceId}/objects", json=data)
 
+    def updateObject(self, spaceId: str, objectId: str, data: dict):
+        return self._request("PATCH", f"/spaces/{spaceId}/objects/{objectId}", json=data)
+
     def deleteObject(self, spaceId: str, objectId: str):
         return self._request("DELETE", f"/spaces/{spaceId}/objects/{objectId}")
 
