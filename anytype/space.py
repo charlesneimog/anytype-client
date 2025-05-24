@@ -22,7 +22,7 @@ class Space(APIWrapper):
         self._all_types = []
 
     @requires_auth
-    def _object_to_dict(self, obj:Object)-> dict:
+    def _object_to_dict(self, obj: Object) -> dict:
         type = obj.type
         if type is None:
             raise Exception(
@@ -60,7 +60,6 @@ class Space(APIWrapper):
         }
         return object_data
 
-
     @requires_auth
     def get_objects(self, offset=0, limit=100) -> list[Object]:
         """
@@ -84,12 +83,12 @@ class Space(APIWrapper):
         return objects
 
     @requires_auth
-    def get_object(self, objectId: str) -> Object:
+    def get_object(self, obj: str | Object) -> Object:
         """
         Retrieves a specific object by its ID.
 
         Parameters:
-            objectId (str): The ID of the object to retrieve.
+            object (Object | str): The object (or its ID) to retrieve.
 
         Returns:
             An Object instance representing the retrieved object.
@@ -97,28 +96,42 @@ class Space(APIWrapper):
         Raises:
             Raises an error if the request to the API fails.
         """
+        if isinstance(obj, Object):
+            objectId = obj.id
+        else:
+            objectId = obj
         response = self._apiEndpoints.getObject(self.id, objectId)
         data = response.get("object", {})
         return Object._from_api(self._apiEndpoints, data)
 
     @requires_auth
-    def delete_object(self, obj: str | Object) -> None:
+    def create_object(self, obj: Object, type: Type | None = None) -> Object:
         """
-        Attempt to delete an object by its unique identifier.
+        Creates a new object within the space, associated with a specified type.
 
         Parameters:
-            objectId (Object | str): The Object or object ID string to delete.
+            obj (Object): The Object instance to create.
+            type (Type): The Type instance to associate the object with.
 
         Returns:
-            None
+            A new Object instance representing the created object.
 
         Raises:
-            Exception: If the request to delete the object fails.
-
+            Raises an error if the request to the API fails.
         """
-        if isinstance(obj, Object):
-            obj = obj.id
-        self._apiEndpoints.deleteObject(self.id, obj)
+        if obj.type is None and type is not None:
+            obj.type = type
+
+        obj_clone = deepcopy(obj)
+        obj_clone._apiEndpoints = self._apiEndpoints
+        obj_clone.space_id = self.id
+        object_data = self._object_to_dict(obj)
+
+        response = self._apiEndpoints.createObject(self.id, object_data)
+
+        for key, value in response.get("object", {}).items():
+            setattr(obj_clone, key, value)
+        return obj_clone
 
     @requires_auth
     def update_object(self, obj: Object) -> Object:
@@ -141,34 +154,23 @@ class Space(APIWrapper):
         return Object._from_api(self._apiEndpoints, data)
 
     @requires_auth
-    def create_object(self, obj: Object, type: Type | None = None) -> Object:
+    def delete_object(self, obj: str | Object) -> None:
         """
-        Creates a new object within the space, associated with a specified type.
+        Attempt to delete an object by its unique identifier.
 
         Parameters:
-            obj (Object): The Object instance to create.
-            type (Type): The Type instance to associate the object with.
+            objectId (Object | str): The Object or object ID string to delete.
 
         Returns:
-            A new Object instance representing the created object.
+            None
 
         Raises:
-            Raises an error if the request to the API fails.
+            Exception: If the request to delete the object fails.
+
         """
-        if obj.type is None and type is not None:
-            obj.type = type
-
-
-        obj_clone = deepcopy(obj)
-        obj_clone._apiEndpoints = self._apiEndpoints
-        obj_clone.space_id = self.id
-        object_data = self._object_to_dict(obj)
-
-        response = self._apiEndpoints.createObject(self.id, object_data)
-
-        for key, value in response.get("object", {}).items():
-            setattr(obj_clone, key, value)
-        return obj_clone
+        if isinstance(obj, Object):
+            obj = obj.id
+        self._apiEndpoints.deleteObject(self.id, obj)
 
     @requires_auth
     def create_type(self, type: Type) -> Type:
