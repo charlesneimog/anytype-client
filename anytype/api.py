@@ -2,7 +2,7 @@ import requests
 from datetime import datetime
 from typing import TypeVar, Type
 
-
+MIN_API_VERSION = "2025-05-20"
 MIN_REQUIRED_VERSION = datetime(2025, 4, 22).date()
 API_CONFIG = {
     "apiUrl": "http://localhost:31009/v1",
@@ -15,7 +15,7 @@ class ResponseHasError(Exception):
 
     def __init__(self, response):
         self.status_code = response.status_code
-        if self.status_code != 200:
+        if self.status_code != 200 and self.status_code != 201:
             raise ValueError(response.json()["message"])
 
 
@@ -23,17 +23,16 @@ class apiEndpoints:
     def __init__(self, headers: dict = {}):
         self.api_url = API_CONFIG["apiUrl"].rstrip("/")
         self.app_name = API_CONFIG["apiAppName"]
+        if "Anytype-Version" not in headers:
+            headers["Anytype-Version"] = MIN_API_VERSION
         self.headers = headers
 
-    def _request(self, method, path, params=None, data=None):
+    def _request(self, method, path, params=None, json=None):
         url = f"{self.api_url}{path}"
-        print(url)
-        response = requests.request(method, url, headers=self.headers, json=data, params=params)
-
+        response = requests.request(method, url, headers=self.headers, json=json, params=params)
         version_str = response.headers.get("Anytype-Version")
         if version_str:
             version_date = datetime.strptime(version_str, "%Y-%m-%d").date()
-
             if version_date < MIN_REQUIRED_VERSION:
                 raise Exception("❌ Version is too old:", version_date)
         else:
@@ -44,13 +43,13 @@ class apiEndpoints:
 
     # --- auth ---
     def displayCode(self):
-        return self._request("POST", "/auth/challenges") 
+        return self._request("POST", "/auth/challenges", json={"app_name": self.app_name})
 
     def getToken(self, challengeId: str, code: str):
         return self._request(
             "POST",
             "/auth/api_keys",
-            params={"challenge_id": challengeId, "code": code},
+            json={"challenge_id": challengeId, "code": code},
         )
 
     # --- export ---
@@ -73,14 +72,14 @@ class apiEndpoints:
         )
 
     def addObjectsToList(self, spaceId: str, listId: str, object_ids: list[str]):
-        return self._request("POST", f"/spaces/{spaceId}/lists/{listId}/objects", data=object_ids)
+        return self._request("POST", f"/spaces/{spaceId}/lists/{listId}/objects", json=object_ids)
 
     def deleteObjectsFromList(self, spaceId: str, listId: str, objectId: str):
         return self._request("DELETE", f"/spaces/{spaceId}/lists/{listId}/objects/{objectId}")
 
     # --- objects ---
     def createObject(self, spaceId: str, data: dict):
-        return self._request("POST", f"/spaces/{spaceId}/objects", data=data)
+        return self._request("POST", f"/spaces/{spaceId}/objects", json=data)
 
     def deleteObject(self, spaceId: str, objectId: str):
         return self._request("DELETE", f"/spaces/{spaceId}/objects/{objectId}")
@@ -96,20 +95,20 @@ class apiEndpoints:
     def globalSearch(self, query: str = "", offset=0, limit=10):
         options = {"offset": offset, "limit": limit}
         payload = {"query": query}
-        return self._request("POST", "/search", params=options, data=payload)
+        return self._request("POST", "/search", params=options, json=payload)
 
     def search(self, spaceId: str, data: dict, offset: int = 0, limit: int = 10):
         options = {"offset": offset, "limit": limit}
-        return self._request("POST", f"/spaces/{spaceId}/search", params=options, data=data)
+        return self._request("POST", f"/spaces/{spaceId}/search", params=options, json=data)
 
     # TODO: PATCH("/spaces/:space_id")
     def updateSpace(self, spaceId: str, data: dict):
-        return self._request("PATCH", f"/spaces/{spaceId}", data=data)
+        return self._request("PATCH", f"/spaces/{spaceId}", json=data)
 
     # --- spaces ---
     def createSpace(self, name):
         data = {"name": name}
-        return self._request("POST", "/spaces", data=data)
+        return self._request("POST", "/spaces", json=data)
 
     def getSpace(self, spaceId: str):
         return self._request("GET", f"/spaces/{spaceId}")
@@ -135,10 +134,10 @@ class apiEndpoints:
         return self._request("GET", f"/spaces/{spaceId}/types", params=options)
 
     def createType(self, spaceId: str, data: dict):
-        return self._request("POST", f"/spaces/{spaceId}/types", data=data)
+        return self._request("POST", f"/spaces/{spaceId}/types", json=data)
 
     def updateType(self, spaceId: str, typeId: str, data: dict):
-        return self._request("PATCH", f"/spaces/{spaceId}/types/{typeId}", data=data)
+        return self._request("PATCH", f"/spaces/{spaceId}/types/{typeId}", json=data)
 
     def deleteType(self, spaceId: str, typeId: str):
         return self._request("DELETE", f"/spaces/{spaceId}/types/{typeId}")
@@ -160,10 +159,10 @@ class apiEndpoints:
         return self._request("GET", f"/spaces/{spaceId}/properties/{propertyId}")
 
     def createProperty(self, spaceId: str, data: dict):
-        return self._request("POST", f"/spaces/{spaceId}/properties", data=data)
+        return self._request("POST", f"/spaces/{spaceId}/properties", json=data)
 
     def updateProperty(self, spaceId: str, propertyId: str, data: dict):
-        return self._request("PATCH", f"/spaces/{spaceId}/properties/{propertyId}", data=data)
+        return self._request("PATCH", f"/spaces/{spaceId}/properties/{propertyId}", json=data)
 
     def deleteProperty(self, spaceId: str, propertyId: str):
         return self._request("DELETE", f"/spaces/{spaceId}/properties/{propertyId}")
@@ -179,11 +178,11 @@ class apiEndpoints:
         return self._request("GET", f"/spaces/{spaceId}/properties/{propertyId}/tags/{tagId}")
 
     def createTag(self, spaceId: str, propertyId: str, data: dict):
-        return self._request("POST", f"/spaces/{spaceId}/properties/{propertyId}/tags", data=data)
+        return self._request("POST", f"/spaces/{spaceId}/properties/{propertyId}/tags", json=data)
 
     def updateTag(self, spaceId: str, propertyId: str, tagId: str, data: dict):
         return self._request(
-            "PATCH", f"/spaces/{spaceId}/properties/{propertyId}/tags/{tagId}", data=data
+            "PATCH", f"/spaces/{spaceId}/properties/{propertyId}/tags/{tagId}", json=data
         )
 
     def deleteTag(self, spaceId: str, propertyId: str, tagId: str):

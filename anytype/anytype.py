@@ -15,7 +15,7 @@ class Anytype:
     def __init__(self) -> None:
         self.app_name = ""
         self.space_id = ""
-        self.token = ""
+        self.api_key = ""
         self.app_key = ""
         self._apiEndpoints: apiEndpoints | None = None
         self._headers = {}
@@ -43,8 +43,7 @@ class Anytype:
         if os.path.exists(anytoken):
             with open(anytoken) as f:
                 auth_json = json.load(f)
-            self.token = auth_json.get("session_token")
-            self.app_key = auth_json.get("app_key")
+            self.api_key = auth_json.get("api_key")
             if self._validate_token():
                 return
 
@@ -64,14 +63,13 @@ class Anytype:
         with open(anytoken, "w") as file:
             json.dump(token_response, file, indent=4)
 
-        self.token = token_response.get("session_token")
-        self.app_key = token_response.get("app_key")
+        self.api_key = token_response.get("api_key")
         self._validate_token()
 
     def _validate_token(self) -> bool:
         self._headers = {
             "Content-Type": "application/json",
-            "Authorization": f"Bearer {self.app_key}",
+            "Authorization": f"Bearer {self.api_key}",
         }
         self._apiEndpoints = apiEndpoints(self._headers)
         try:
