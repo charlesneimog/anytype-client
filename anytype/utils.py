@@ -1,4 +1,24 @@
+import re
+import keyword
 from functools import wraps
+
+
+def sanitize_property_name(name: str) -> str:
+    """
+    Sanitizes a property name to be a valid Python attribute name.
+    - Converts to lowercase
+    - Replaces all non-alphanumeric characters with underscores
+    - Ensures the name doesn't start with a number
+    - Ensures the name isn't a Python keyword
+    """
+    # Convert to lowercase and replace non-alphanumeric chars with underscore
+    sanitized = re.sub(r'[^a-z0-9_]', '_', name.lower())
+    
+    # Remove leading numbers by adding underscore
+    if sanitized and (sanitized[0].isdigit() or keyword.iskeyword(sanitized)):
+        sanitized = '_' + sanitized
+        
+    return sanitized
 
 
 def requires_auth(method):

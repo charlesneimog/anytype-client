@@ -4,7 +4,7 @@ from .type import Type
 from .icon import Icon
 from .property import Property
 from .api import apiEndpoints, APIWrapper
-from .utils import requires_auth, _ANYTYPE_SYSTEM_RELATIONS
+from .utils import requires_auth, _ANYTYPE_SYSTEM_RELATIONS, sanitize_property_name
 
 
 class Object(APIWrapper):
@@ -63,7 +63,7 @@ class Object(APIWrapper):
         if type is not None:
             self.type = type
             for prop in self.properties:
-                class_prop = prop.name.lower().replace(" ", "_")
+                class_prop = sanitize_property_name(prop.name)
                 if class_prop in notoverdrive:
                     continue
 
@@ -79,7 +79,7 @@ class Object(APIWrapper):
     def __setattr__(self, name, value):
         if "_custom_setters" in self.__dict__ and name in self._custom_setters:
             for prop in self.properties:
-                class_prop = prop.name.lower().replace(" ", "_")
+                class_prop = sanitize_property_name(prop.name)
                 if class_prop == name:
                     self._custom_setters[name]["func"](prop, value)
                     return
