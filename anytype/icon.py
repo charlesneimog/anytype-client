@@ -84,7 +84,6 @@ class Icon:
         return self._emoji
 
     def __repr__(self) -> str:
-        print(self.emoji)
         if self.format == "emoji":
             return f"<Icon={self.emoji}>"
         elif self.format == "icon":

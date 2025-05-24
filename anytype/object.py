@@ -130,22 +130,27 @@ class Object(APIWrapper):
             new_icon._update_with_json(value)
             self._icon = new_icon
         elif isinstance(value, str):
+            # This is from chatgpt, please report is you know about emoji encode
             emoji_pattern = re.compile(
-                "[\U0001f600-\U0001f64f"
-                "\U0001f300-\U0001f5ff"
-                "\U0001f680-\U0001f6ff"
-                "\U0001f1e0-\U0001f1ff"
-                "\U00002702-\U000027b0"
-                "\U000024c2-\U0001f251"
+                "[\U0001f600-\U0001f64f"  # Emoticons
+                "\U0001f300-\U0001f5ff"  # Misc Symbols and Pictographs
+                "\U0001f680-\U0001f6ff"  # Transport & Map Symbols
+                "\U0001f1e0-\U0001f1ff"  # Regional Indicator Symbols
+                "\U00002702-\U000027b0"  # Dingbats
+                "\U000024c2-\U0001f251"  # Enclosed characters and others
+                "\U0001f900-\U0001f9ff"  # Supplemental Symbols and Pictographs (includes 🤯)
                 "]+",
                 flags=re.UNICODE,
             )
+
             if bool(emoji_pattern.fullmatch(value)):
                 self._icon.emoji = value
             else:
-                raise Exception("Invalid icon format")
+                raise Exception(f"Invalid icon format {value}")
         elif isinstance(value, Icon):
             self._icon = value
+        elif value is None:
+            self._icon = Icon("")
         else:
             raise Exception("Invalid icon format")
 
