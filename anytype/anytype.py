@@ -87,7 +87,7 @@ class Anytype:
         return userdata
 
     @requires_auth
-    def get_space(self, spaceId: str) -> Space:
+    def get_space(self, space: str | Space) -> Space:
         """
         Retrieve a specific space by its unique identifier.
 
@@ -100,6 +100,14 @@ class Anytype:
         Raises:
             Exception: If the request to the API fails or the space is not found.
         """
+        if isinstance(space, Space):
+            spaceId = space.id
+        elif isinstance(space, str):
+            spaceId = space
+        else:
+            # not reached
+            raise Exception("Invalid space type")
+
         response = self._apiEndpoints.getSpace(spaceId)
         data = response.get("space", {})
         return Space._from_api(self._apiEndpoints, data)
