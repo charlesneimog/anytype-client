@@ -32,7 +32,8 @@ class Object(APIWrapper):
     def __init__(self, name: str = "", type: Type | None = None):
         self._apiEndpoints: apiEndpoints | None = None
         self._icon: Icon = Icon()
-        self._values = {}
+        self._values: dict = {}
+        self._type: None = None
 
         self.id: str = ""
         self.source: str = ""
