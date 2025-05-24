@@ -1,5 +1,6 @@
-name: ci
+name: Documentation
 on:
+  workflow_dispatch:   # manual trigger
   release:
     types: [published]
 permissions:

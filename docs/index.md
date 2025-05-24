@@ -1,5 +1,14 @@
 # Anytype Python Client 
 
+
+!!! danger "Documentation for the develop version"
+    This documentation is for the GitHub version and requires the Anytype Alpha version.
+    Install it with:
+    ```
+    pip install git+https://github.com/charlesneimog/anytype-client
+    ```
+
+
 [![Python Version](https://img.shields.io/badge/python-3.10%2B-blue)](https://www.python.org/)
 [![License](https://img.shields.io/badge/license-GPL3-green)](https://github.com/charlesneimog/anytype-client/blob/main/LICENSE)
 
