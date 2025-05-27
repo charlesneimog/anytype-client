@@ -11,9 +11,8 @@ spaces = any.get_spaces()
 my_space = spaces[0]
 
 # Create Object on the first space
-note_type = my_space.get_type("Page")
-new_object = Object()
-new_object.name = "Hello World!"
+note_type = my_space.get_type_byname("Page")
+new_object = Object("Hello World", note_type)
 new_object.icon = "🐍"
 new_object.description = "This is an object created from Python Api"
 new_object.add_title1("Hello")

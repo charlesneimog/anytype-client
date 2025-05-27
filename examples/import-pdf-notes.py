@@ -1,5 +1,6 @@
 from anytype import Anytype
 from anytype import Object
+from anytype import Type
 
 from pdfannots import process_file
 from pdfminer.layout import LAParams
@@ -55,17 +56,13 @@ if pdf_space is None:
     raise ValueError("Space not found")
 
 # <- Not sure if this exists for you too
-note_type = pdf_space.get_type("Article")
-
-# <- this is valid just for my workspace
-note_type.set_template("Article")
-
-new_object = Object()
-new_object.name = pdf_name
+article_type = Type("Article")
+article_type = pdf_space.create_type(article_type)
+new_object = Object(pdf_name, article_type)
 new_object.icon = "📄"
 new_object.description = "This is an object created from Python Api"
 
 for note in all_notes:
     new_object.body += f"> {note['text']} \n\n"
 
-created_object = pdf_space.create_object(new_object, note_type)
+created_object = pdf_space.create_object(new_object)
