@@ -200,6 +200,10 @@ class Property(APIWrapper):
         else:
             raise ValueError("Format not supported")
 
+    # @value.getter
+    # def value(self):
+    #     raise Exception("Anytype API yet does not return property value")
+
 
 class Text(Property):
     """
@@ -207,14 +211,9 @@ class Text(Property):
     """
 
     def __init__(self, name: str = ""):
-
         super().__init__(name)
         self.format = "text"
         self.text = ""
-
-    @property
-    def value2(self):
-        pass
 
     def __repr__(self):
         return f"<Text({self.name})>"
@@ -271,7 +270,9 @@ class Select(Property):
                     return tag
 
         response = self._apiEndpoints.createTag(self.space_id, self.id, data)
-        tag = Tag._from_api(self._apiEndpoints, response.get("tag", []))
+        tag = Tag._from_api(
+            self._apiEndpoints, response.get("tag", []) | {"space_id": self.space_id}
+        )
         return tag
 
     @requires_auth
@@ -309,7 +310,9 @@ class Select(Property):
             Raises an error if the request to the API fails.
         """
         response = self._apiEndpoints.getTag(self.space_id, self.id, tag_id)
-        tag = Tag._from_api(self._apiEndpoints, response.get("tag", []))
+        tag = Tag._from_api(
+            self._apiEndpoints, response.get("tag", []) | {"space_id": self.space_id}
+        )
         return tag
 
     def __repr__(self):
@@ -353,7 +356,9 @@ class MultiSelect(Property):
                     return tag
 
         response = self._apiEndpoints.createTag(self.space_id, self.id, data)
-        tag = Tag._from_api(self._apiEndpoints, response.get("tag", []))
+        tag = Tag._from_api(
+            self._apiEndpoints, response.get("tag", []) | {"space_id": self.space_id}
+        )
         return tag
 
     @requires_auth
@@ -391,7 +396,9 @@ class MultiSelect(Property):
             Raises an error if the request to the API fails.
         """
         response = self._apiEndpoints.getTag(self.space_id, self.id, tag_id)
-        tag = Tag._from_api(self._apiEndpoints, response.get("tag", []))
+        tag = Tag._from_api(
+            self._apiEndpoints, response.get("tag", []) | {"space_id": self.space_id}
+        )
         return tag
 
     def __repr__(self):

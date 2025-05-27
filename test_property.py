@@ -1,89 +1,83 @@
-import anytype
-import requests
-import time
+from anytype import Anytype, Space, Object, Type, Icon
 
-any = anytype.Anytype()
+from anytype.property import (
+    Text,
+    Number,
+    Checkbox,
+    Select,
+    MultiSelect,
+    Date,
+    Files,
+    Email,
+    Phone,
+    Objects,
+    Url,
+)
+
+
+import random
+import string
+
+any = Anytype()
 any.auth()
 
-if len(any.get_spaces()) == 1:
-    any.create_space("My Space")
 
-space = any.get_spaces()[1]
-types = space.get_types()
-project_type = None
-for type in types:
-    if type.name == "Article":
-        project_type = type
-        break
-
-if not isinstance(project_type, anytype.Type):
-    raise Exception("Article type not found")
-
-import requests
+def get_apispace() -> Space:
+    spaces = any.get_spaces()
+    for space in spaces:
+        if space.name == "API":
+            return space
+    raise Exception("Space not found")
 
 
-def already_added(doi):
-    objects = space.get_objects()
-    id = ""
-    for obj in objects:
-        print(obj.name)
-        if (obj.name) == "Articles":
-            id = obj.id
+def test_testproperties():
+    api_space = get_apispace()
+    prop_test_type = Type("TestProperty")
+    prop_test_type.icon = Icon()
+    prop_test_type.layout = "basic"
+    prop_test_type.plural_name = "TestProperties"
 
-    if id == "":
-        raise Exception("Not Collection Articles")
-    listview = space.get_listviews(id)[0]
-    objects = listview.get_objectsinlistview()
-    print(objects)
-    for obj in objects:
-        print(obj)
+    prop_test_type.add_property(Text("prop_text"))
+    prop_test_type.add_property(Number("prop_number"))
+    prop_test_type.add_property(Select("prop_select"))
+    prop_test_type.add_property(MultiSelect("prop_multi"))
+    prop_test_type.add_property(Date("prop_date"))
+    # article_type.add_property(Files("prop_files"))
+    prop_test_type.add_property(Checkbox("prop_checkbox"))
+    prop_test_type.add_property(Url("prop_url"))
+    prop_test_type.add_property(Email("prop_email"))
+    prop_test_type.add_property(Phone("prop_phone"))
+    prop_test_type.add_property(Objects("prop_objects"))
 
+    prop_test_type = api_space.create_type(prop_test_type)
 
-def add_article(doi, recursive=False):
-    url = f"https://api.crossref.org/works/{doi}"
-    response = requests.get(url)
+    # Test
+    obj = Object("My Property Object", prop_test_type)
+    obj.icon = "🐍"
+    obj.body = "`print('Hello World!')`"
+    obj.description = "This is an object created from Python Api"
 
-    if response.status_code == 200:
-        data = response.json()
+    obj.properties["prop_text"].value = "My Text"
+    obj.properties["prop_number"].value = 12389
+    obj.properties["prop_select"].value = "Test"
+    obj.properties["prop_multi"].value = ["Test1", "Test2"]
+    obj.properties["prop_date"].value = "27/03/2025"
+    obj.properties["prop_checkbox"].value = True
+    obj.properties["prop_url"].value = "https://charlesneimog.github.io"
+    obj.properties["prop_email"].value = "myemail@email.com"
+    obj.properties["prop_phone"].value = "+55112233445566"
 
-        # Article Metadata
-        title = data["message"]["title"][0]
-        authors = []
-        for author in data.get("message", {}).get("author", []):
-            authors.append(f"{author['given']} {author['family']}")
+    created_obj = api_space.create_object(obj)
 
-        # Year and DOI of the article
-        article_doi = data["message"]["URL"]
-        year = data["message"]["issued"]["date-parts"][0][0]
+    id = created_obj.properties["prop_text"].value
+    print(api_space.get_property(id)._json)
 
-        # Creating the article object
-        obj = anytype.Object(title, project_type)
-        obj.doi = article_doi
-        obj.author = authors
-        obj.year = year
-
-        # Handle references (citations)
-        references = data["message"].get("reference", [])
-
-        if recursive:
-            for reference in references:
-                ref_doi = reference.get("DOI", "")
-                if ref_doi != "":
-                    try:
-                        add_article(ref_doi)
-                    except Exception as e:
-                        print(f"Failed to retrieve info about {doi} {e}")
-
-        isOnList = False
-
-        space.create_object(obj)
-        time.sleep(0.5)
-
-    else:
-        print(f"Error fetching article data: {response.status_code}")
+    assert created_obj.properties["prop_text"].value == "My Text2"
+    assert created_obj.properties["prop_number"].value == 12389
+    assert created_obj.properties["prop_select"].value == "Test"
+    assert created_obj.properties["prop_multi"].value == ["Test1", "Test2"]
+    assert created_obj.properties["prop_date"].value == "27/03/2025"
+    assert created_obj.properties["prop_checkbox"].value == True
 
 
-# Example usage:
-doi = "10.1080/17459737.2025.2465976"
-# already_added(doi)
-add_article(doi, True)
+test_testproperties()

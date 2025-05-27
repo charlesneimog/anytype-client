@@ -1,20 +1,7 @@
 from .template import Template
 from .api import apiEndpoints, APIWrapper
-from .utils import requires_auth, _ANYTYPE_SYSTEM_RELATIONS
-from .property import (
-    Property,
-    Checkbox,
-    Text,
-    Number,
-    Select,
-    MultiSelect,
-    Date,
-    Files,
-    Url,
-    Email,
-    Phone,
-    Objects,
-)
+from .utils import requires_auth
+from .property import Property
 from .icon import Icon
 
 
@@ -30,67 +17,17 @@ class Type(APIWrapper):
         self.id = ""
         self.name = name
         self.key = ""
+        self.properties = {}
 
         # creation
         self.layout: str = ""
         self.plural_name: str = ""
 
         self._icon: Icon | dict = {}
-        self._properties: list[Property | dict] = []
-        self._properties_value: list = []
         self.template_id = ""
 
         if name != "" and self._apiEndpoints:
             self.set_template(name)
-
-    @property
-    def properties(self):
-        return self._properties
-
-    @properties.setter
-    def properties(self, value):
-        self._properties = []
-        self._properties_value = value
-
-    @properties.getter
-    def properties(self):
-        if len(self._properties) > 0:
-            return self._properties
-
-        for prop in self._properties_value:
-            id = prop["id"]
-            response = self._apiEndpoints.getProperty(self.space_id, id)
-            data = response.get("property", {})
-            format = data["format"]
-            if format == "checkbox":
-                prop = Checkbox._from_api(self._apiEndpoints, data | {"space_id": self.space_id})
-            elif format == "text":
-                prop = Text._from_api(self._apiEndpoints, data | {"space_id": self.space_id})
-            elif format == "number":
-                prop = Number._from_api(self._apiEndpoints, data | {"space_id": self.space_id})
-            elif format == "select":
-                prop = Select._from_api(self._apiEndpoints, data | {"space_id": self.space_id})
-            elif format == "multi_select":
-                prop = MultiSelect._from_api(self._apiEndpoints, data | {"space_id": self.space_id})
-            elif format == "date":
-                prop = Date._from_api(self._apiEndpoints, data | {"space_id": self.space_id})
-            elif format == "files":
-                prop = Files._from_api(self._apiEndpoints, data | {"space_id": self.space_id})
-            elif format == "url":
-                prop = Url._from_api(self._apiEndpoints, data | {"space_id": self.space_id})
-            elif format == "email":
-                prop = Email._from_api(self._apiEndpoints, data | {"space_id": self.space_id})
-            elif format == "phone":
-                prop = Phone._from_api(self._apiEndpoints, data | {"space_id": self.space_id})
-            elif format == "objects":
-                prop = Objects._from_api(self._apiEndpoints, data | {"space_id": self.space_id})
-            else:
-                raise Exception("Invalid format")
-
-            if prop.key in _ANYTYPE_SYSTEM_RELATIONS:
-                continue
-            self._properties.append(prop)
-        return self._properties
 
     @property
     def icon(self):
@@ -130,7 +67,8 @@ class Type(APIWrapper):
         """
         response = self._apiEndpoints.getTemplates(self.space_id, self.id, offset, limit)
         self._all_templates = [
-            Template._from_api(self._apiEndpoints, data) for data in response.get("data", [])
+            Template._from_api(self._apiEndpoints, data | {"space_id": self.space_id})
+            for data in response.get("data", [])
         ]
 
         return self._all_templates
@@ -176,6 +114,7 @@ class Type(APIWrapper):
         """
         response_data = self._apiEndpoints.getTemplate(self.space_id, self.id, id)
 
+        # TODO: Fix this
         template = Template()
         template._apiEndpoints = self._apiEndpoints
         for data in response_data.get("data", []):
@@ -200,8 +139,7 @@ class Type(APIWrapper):
         """
 
         if self._apiEndpoints is None:
-            prop = {"format": property.format, "name": property.name}  # or: property_format.value
-            self.properties.append(prop)
+            self.properties[property.name] = property
         else:
             raise Exception("Not implemented yet")
 

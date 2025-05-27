@@ -25,7 +25,9 @@ class Tag(APIWrapper):
         """
         data = {"name": name, "color": color}
         response = self._apiEndpoints.updateTag(self.space_id, self._property_id, self.id, data)
-        tag = Tag._from_api(self._apiEndpoints, response.get("tag", []))
+        tag = Tag._from_api(
+            self._apiEndpoints, response.get("tag", []) | {"space_id": self.space_id}
+        )
         return tag
 
     @requires_auth

@@ -30,7 +30,10 @@ class ListView(APIWrapper):
             self.space_id, self.list_id, self.id, offset, limit
         )
 
-        return [Object._from_api(self._apiEndpoints, data) for data in response.get("data", [])]
+        return [
+            Object._from_api(self._apiEndpoints, data | {"space_id": self.space_id})
+            for data in response.get("data", [])
+        ]
 
     def add_objectinlistview(self, obj: Object) -> None:
         """

@@ -46,9 +46,12 @@ class Object(APIWrapper):
 
         self.properties: dict = {}
         if type is not None:
-            for prop in type.properties:
+            if type.id == "":
+                raise Exception("Type has no id, create the type first and pass the created type")
+            for _, prop in type.properties.items():
                 if prop.key not in _ANYTYPE_SYSTEM_RELATIONS:
                     self.properties[prop.name] = prop
+
             self.type = type
 
         self.root_id: str = ""

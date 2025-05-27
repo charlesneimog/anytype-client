@@ -1,6 +1,8 @@
 import requests
 from datetime import datetime
 from typing import TypeVar, Type
+from .utils import _ANYTYPE_SYSTEM_RELATIONS
+
 
 MIN_API_VERSION = "2025-05-20"
 MIN_REQUIRED_VERSION = datetime(2025, 4, 22).date()
@@ -204,4 +206,75 @@ class APIWrapper:
 
     def _add_attrs_from_dict(self, data: dict) -> None:
         for key, value in data.items():
-            setattr(self, key, value)
+            if key == "type":
+                from anytype import type
+
+                setattr(
+                    self,
+                    key,
+                    type.Type()._from_api(self._apiEndpoints, value | {"space_id": self.space_id}),
+                )
+            elif key == "properties":
+                from anytype import property
+
+                properties = {}
+                for prop in value:
+                    id = prop["id"]
+                    response = self._apiEndpoints.getProperty(self.space_id, id)
+                    data = response.get("property", {})
+                    format = data["format"]
+                    if format == "checkbox":
+                        prop = property.Checkbox._from_api(
+                            self._apiEndpoints, data | {"space_id": self.space_id}
+                        )
+                    elif format == "text":
+                        prop = property.Text._from_api(
+                            self._apiEndpoints, data | {"space_id": self.space_id}
+                        )
+                    elif format == "number":
+                        prop = property.Number._from_api(
+                            self._apiEndpoints, data | {"space_id": self.space_id}
+                        )
+                    elif format == "select":
+                        prop = property.Select._from_api(
+                            self._apiEndpoints, data | {"space_id": self.space_id}
+                        )
+                    elif format == "multi_select":
+                        prop = property.MultiSelect._from_api(
+                            self._apiEndpoints, data | {"space_id": self.space_id}
+                        )
+                    elif format == "date":
+                        prop = property.Date._from_api(
+                            self._apiEndpoints, data | {"space_id": self.space_id}
+                        )
+                    elif format == "files":
+                        prop = property.Files._from_api(
+                            self._apiEndpoints, data | {"space_id": self.space_id}
+                        )
+                    elif format == "url":
+                        prop = property.Url._from_api(
+                            self._apiEndpoints, data | {"space_id": self.space_id}
+                        )
+                    elif format == "email":
+                        prop = property.Email._from_api(
+                            self._apiEndpoints, data | {"space_id": self.space_id}
+                        )
+                    elif format == "phone":
+                        prop = property.Phone._from_api(
+                            self._apiEndpoints, data | {"space_id": self.space_id}
+                        )
+                    elif format == "objects":
+                        prop = property.Objects._from_api(
+                            self._apiEndpoints, data | {"space_id": self.space_id}
+                        )
+                    else:
+                        raise Exception("Invalid format")
+
+                    if prop.key in _ANYTYPE_SYSTEM_RELATIONS:
+                        continue
+
+                    properties[prop.name] = prop
+
+                setattr(self, key, properties)
+            else:
+                setattr(self, key, value)

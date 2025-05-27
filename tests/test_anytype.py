@@ -380,4 +380,16 @@ def test_testproperties():
     obj.properties["prop_email"].value = "myemail@email.com"
     obj.properties["prop_phone"].value = "+55112233445566"
 
-    api_space.create_object(obj)
+    created_obj = api_space.create_object(obj)
+
+    obj.properties["prop_text"].value = "My Text2"
+    obj.properties["prop_number"].value = 12389
+    obj.properties["prop_select"].value = "Test"
+    obj.properties["prop_multi"].value = ["Test1", "Test2"]
+    obj.properties["prop_date"].value = "27/03/2025"
+    obj.properties["prop_checkbox"].value = True
+    obj.properties["prop_url"].value = "https://charlesneimog.github.io"
+    obj.properties["prop_email"].value = "myemail@email.com"
+    obj.properties["prop_phone"].value = "+55112233445566"
+
+    updated_obj = api_space.update_object(obj)

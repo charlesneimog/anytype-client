@@ -28,7 +28,7 @@ class Space(APIWrapper):
                 "You need to set one type for the object, use add_type method from the Object class"
             )
         if type(obj.type) is dict:
-            obj.type = Type._from_api(self._apiEndpoints, obj.type)
+            obj.type = Type._from_api(self._apiEndpoints, obj.type | {"space_id": self.id})
 
         if obj.type.key == "":
             raise Exception(
@@ -44,8 +44,11 @@ class Space(APIWrapper):
             raise ValueError("Invalid icon type")
 
         properties_json: list[dict] = [{}]
-        if isinstance(obj.type.properties, list):
-            properties_json = [prop._get_json() for prop in obj.type.properties]
+        if isinstance(obj.properties, dict):
+            properties_json = []
+            for _, prop in obj.properties.items():
+                prop.space_id = self.id
+                properties_json.append(prop._get_json())
         else:
             raise ValueError("Invalid properties type")
 
@@ -78,7 +81,8 @@ class Space(APIWrapper):
         """
         response_data = self._apiEndpoints.getObjects(self.id, offset, limit)
         objects = [
-            Object._from_api(self._apiEndpoints, data) for data in response_data.get("data", [])
+            Object._from_api(self._apiEndpoints, data | {"space_id": self.id})
+            for data in response_data.get("data", [])
         ]
 
         return objects
@@ -103,7 +107,7 @@ class Space(APIWrapper):
             objectId = obj
         response = self._apiEndpoints.getObject(self.id, objectId)
         data = response.get("object", {})
-        return Object._from_api(self._apiEndpoints, data)
+        return Object._from_api(self._apiEndpoints, data | {"space_id": self.id})
 
     @requires_auth
     def create_object(self, obj: Object, type: Type | None = None) -> Object:
@@ -123,16 +127,14 @@ class Space(APIWrapper):
         if obj.type is None and type is not None:
             obj.type = type
 
-        obj_clone = deepcopy(obj)
-        obj_clone._apiEndpoints = self._apiEndpoints
-        obj_clone.space_id = self.id
         object_data = self._object_to_dict(obj)
-
         response = self._apiEndpoints.createObject(self.id, object_data)
-
-        for key, value in response.get("object", {}).items():
-            setattr(obj_clone, key, value)
-        return obj_clone
+        new_obj = Object._from_api(
+            self._apiEndpoints, response.get("object", {}) | {"space_id": self.id}
+        )
+        new_obj._apiEndpoints = self._apiEndpoints
+        new_obj.space_id = self.id
+        return new_obj
 
     @requires_auth
     def update_object(self, obj: Object) -> Object:
@@ -151,7 +153,7 @@ class Space(APIWrapper):
         data = self._object_to_dict(obj)
         response = self._apiEndpoints.updateObject(self.id, obj.id, data)
         data = response.get("object", {})
-        return Object._from_api(self._apiEndpoints, data)
+        return Object._from_api(self._apiEndpoints, data | {"space_id": self.id})
 
     @requires_auth
     def delete_object(self, obj: str | Object) -> None:
@@ -198,7 +200,8 @@ class Space(APIWrapper):
 
         defined_props = []
         all_props = self.get_properties(offset=0, limit=200)
-        for prop in type.properties:
+        for _, prop in type.properties.items():
+            prop.space_id = self.id
             prop_name = prop.name if isinstance(prop, Property) else prop["name"]
             prop_format = prop.format if isinstance(prop, Property) else prop["format"]
             exists = False
@@ -381,7 +384,7 @@ class Space(APIWrapper):
 
         response = self._apiEndpoints.getMember(self.id, memberId)
         data = response.get("object", {})
-        return Member._from_api(self._apiEndpoints, data)
+        return Member._from_api(self._apiEndpoints, data | {"space_id": self.id})
 
     @requires_auth
     def get_members(self, offset: int = 0, limit: int = 100) -> list[Member]:
@@ -399,7 +402,10 @@ class Space(APIWrapper):
             Raises an error if the request to the API fails.
         """
         response = self._apiEndpoints.getMembers(self.id, offset, limit)
-        return [Member._from_api(self._apiEndpoints, data) for data in response.get("data", [])]
+        return [
+            Member._from_api(self._apiEndpoints, data | {"space_id": self.id})
+            for data in response.get("data", [])
+        ]
 
     @requires_auth
     def get_listviews(
@@ -457,7 +463,9 @@ class Space(APIWrapper):
             "format": prop.format,
         }
         response = self._apiEndpoints.createProperty(self.id, object_data)
-        prop = Property._from_api(self._apiEndpoints, response.get("property", {}))
+        prop = Property._from_api(
+            self._apiEndpoints, response.get("property", {}) | {"space_id": self.id}
+        )
         return prop
 
     @requires_auth
@@ -522,7 +530,10 @@ class Space(APIWrapper):
             "types": types,
         }
         response = self._apiEndpoints.search(self.id, data, offset, limit)
-        return [Object._from_api(self._apiEndpoints, data) for data in response.get("data", [])]
+        return [
+            Object._from_api(self._apiEndpoints, data | {"space_id": self.id})
+            for data in response.get("data", [])
+        ]
 
     def __repr__(self):
         return f"<Space(name={self.name})>"

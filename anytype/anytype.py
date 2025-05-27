@@ -111,6 +111,7 @@ class Anytype:
 
         response = self._apiEndpoints.getSpace(spaceId)
         data = response.get("space", {})
+        # TODO: what I do here to save the space id?
         return Space._from_api(self._apiEndpoints, data)
 
     @requires_auth
@@ -129,6 +130,7 @@ class Anytype:
             Raises an error if the request to the API fails.
         """
         response = self._apiEndpoints.getSpaces(offset, limit)
+        # TODO: what I do here to save the space id?
         return [Space._from_api(self._apiEndpoints, data) for data in response.get("data", [])]
 
     @requires_auth
@@ -147,6 +149,7 @@ class Anytype:
         """
         response = self._apiEndpoints.createSpace(name)
         data = response.get("space", {})
+        # TODO: what I do here to save the space id?
         return Space._from_api(self._apiEndpoints, data)
 
     @requires_auth
@@ -166,4 +169,5 @@ class Anytype:
             Raises an error if the search request fails.
         """
         response = self._apiEndpoints.globalSearch(query, offset, limit)
+        # TODO: what I do here to save the space id?
         return [Object._from_api(self._apiEndpoints, data) for data in response.get("data", [])]
