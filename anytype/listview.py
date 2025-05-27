@@ -96,5 +96,5 @@ class ListView(APIWrapper):
         assert objId != ""
         self._apiEndpoints.deleteObjectsFromList(self.space_id, self.list_id, objId)
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"<ListView(name={self.name})>"

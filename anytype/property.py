@@ -204,10 +204,6 @@ class Property(APIWrapper):
 class Text(Property):
     """
     Represents a text property.
-
-    Attributes:
-        format (str): Always set to "text".
-        text (str): The actual string value of the text property.
     """
 
     def __init__(self, name: str = ""):
@@ -227,13 +223,6 @@ class Text(Property):
 class Number(Property):
     """
     Represents a numeric property (integer or float).
-
-    Attributes:
-        format (str): Always set to "number".
-        number (int|float): The numeric value of the property.
-
-    Methods:
-        __repr__(): String representation of the instance.
     """
 
     def __init__(self, name: str = ""):
@@ -249,15 +238,10 @@ class Select(Property):
     """
     Represents a select (single-choice) property using predefined tags.
 
-    Attributes:
-        format (str): Always set to "select".
-        select (str|Tag): The selected tag or its name.
-
     Methods:
         create_tag(name, color, create_if_exists): Creates a tag in the property.
         get_tags(): Fetches all tags associated with the property.
         get_tag(tag_id): Fetches a specific tag by ID.
-        __repr__(): String representation of the instance.
     """
 
     def __init__(self, name: str = ""):
@@ -266,7 +250,7 @@ class Select(Property):
         self.select = None
 
     @requires_auth
-    def create_tag(self, name: str, color: str = "red", create_if_exists: bool = False):
+    def create_tag(self, name: str, color: str = "red", create_if_exists: bool = False) -> Tag:
         """
         Creates a new tag with the specified name for a `anytype.PropertyFormat.SELECT` or `anytype.PropertyFormat.MULTI_SELECT` property.
 
@@ -311,7 +295,7 @@ class Select(Property):
         return types
 
     @requires_auth
-    def get_tag(self, tag_id: str):
+    def get_tag(self, tag_id: str) -> Tag:
         """
         Retrieves a specific tag by its ID.
 
@@ -336,15 +320,10 @@ class MultiSelect(Property):
     """
     Represents a multi-select (multiple-choice) property using predefined tags.
 
-    Attributes:
-        format (str): Always set to "multi_select".
-        multi_select (list[str|Tag]): List of selected tags or tag names.
-
     Methods:
         create_tag(name, color, create_if_exists): Creates a tag in the property.
         get_tags(): Fetches all tags associated with the property.
         get_tag(tag_id): Fetches a specific tag by ID.
-        __repr__(): String representation of the instance.
     """
 
     def __init__(self, name: str = ""):
@@ -353,7 +332,7 @@ class MultiSelect(Property):
         self.multi_select: list = []
 
     @requires_auth
-    def create_tag(self, name: str, color: str = "red", create_if_exists: bool = False):
+    def create_tag(self, name: str, color: str = "red", create_if_exists: bool = False) -> Tag:
         """
         Creates a new tag with the specified name for a `anytype.PropertyFormat.SELECT` or `anytype.PropertyFormat.MULTI_SELECT` property.
 
@@ -398,7 +377,7 @@ class MultiSelect(Property):
         return types
 
     @requires_auth
-    def get_tag(self, tag_id: str):
+    def get_tag(self, tag_id: str) -> Tag:
         """
         Retrieves a specific tag by its ID.
 
@@ -421,14 +400,7 @@ class MultiSelect(Property):
 
 class Date(Property):
     """
-    Represents a date property.
-
-    Attributes:
-        format (str): Always set to "date".
-        date (str|datetime.datetime): The date value, either as a string or datetime object.
-
-    Methods:
-        __repr__(): String representation of the instance.
+    Represents a date property (str DD/MM/YYYY or `datetime.datetime`).
     """
 
     def __init__(self, name: str = ""):
@@ -443,13 +415,6 @@ class Date(Property):
 class Files(Property):
     """
     Represents a files property (not implemented yet).
-
-    Attributes:
-        format (str): Always set to "files".
-        files: Placeholder for file data (not yet implemented).
-
-    Methods:
-        __repr__(): String representation of the instance.
     """
 
     def __init__(self, name: str = ""):
@@ -464,13 +429,6 @@ class Files(Property):
 class Checkbox(Property):
     """
     Represents a checkbox (boolean) property.
-
-    Attributes:
-        format (str): Always set to "checkbox".
-        checkbox (bool): Boolean value representing the checkbox state.
-
-    Methods:
-        __repr__(): String representation of the instance.
     """
 
     def __init__(self, name: str = ""):
@@ -485,13 +443,6 @@ class Checkbox(Property):
 class Url(Property):
     """
     Represents a URL property.
-
-    Attributes:
-        format (str): Always set to "url".
-        url (str): The URL string.
-
-    Methods:
-        __repr__(): String representation of the instance.
     """
 
     def __init__(self, name: str = ""):
@@ -506,13 +457,6 @@ class Url(Property):
 class Email(Property):
     """
     Represents an email address property.
-
-    Attributes:
-        format (str): Always set to "email".
-        email (str): The email address.
-
-    Methods:
-        __repr__(): String representation of the instance.
     """
 
     def __init__(self, name: str = ""):

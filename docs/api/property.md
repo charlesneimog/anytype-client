@@ -1,3 +1,1 @@
-# `anytype.Property`
-
 ::: anytype.property

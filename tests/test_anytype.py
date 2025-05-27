@@ -1,4 +1,4 @@
-from anytype import Anytype, Space, Object, Type, PropertyFormat, Icon
+from anytype import Anytype, Space, Object, Type, Icon
 
 from anytype.property import (
     Text,
@@ -319,15 +319,15 @@ def test_get_properties():
 def test_create_property():
     api_space = get_apispace()
     name = f"TestProp_{random_string(5)}"
-    prop = api_space.create_property(name, PropertyFormat.TEXT)
+    prop = api_space.create_property(Text(name))
     assert prop.name == name
-    assert prop.format == PropertyFormat.TEXT.value
+    assert prop.format == "text"
 
 
 def test_get_property():
     api_space = get_apispace()
     name = f"TestProp_{random_string(5)}"
-    prop_created = api_space.create_property(name, PropertyFormat.TEXT)
+    prop_created = api_space.create_property(Text(name))
     prop_fetched = api_space.get_property(prop_created.id)
     assert prop_fetched.id == prop_created.id
     assert prop_fetched.name == prop_created.name
@@ -336,7 +336,7 @@ def test_get_property():
 def test_get_property_bykey():
     api_space = get_apispace()
     name = f"TestProp_{random_string(5)}"
-    prop = api_space.create_property(name, PropertyFormat.TEXT)
+    prop = api_space.create_property(Text(name))
 
     fetched_prop = api_space.get_property_bykey(prop.key)
     assert fetched_prop.key == prop.key
