@@ -1,3 +1,3 @@
 # `anytype.Property`
 
-::: anytype.Property
+::: anytype.property
