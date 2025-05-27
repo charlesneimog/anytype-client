@@ -40,10 +40,10 @@ if article_type is None:
     article_type.layout = "basic"
     article_type.plural_name = "Artigos"
 
-    article_type.add_property("Doi", anytype.PropertyFormat.TEXT)
-    article_type.add_property("Publication Year", anytype.PropertyFormat.NUMBER)
-    article_type.add_property("Authors", anytype.PropertyFormat.MULTI_SELECT)
-    article_type.add_property("Readed", anytype.PropertyFormat.CHECKBOX)
+    article_type.add_property(anytype.property.Text("Doi"))
+    article_type.add_property(anytype.property.Number("Publication Year"))
+    article_type.add_property(anytype.property.MultiSelect("Authors"))
+    article_type.add_property(anytype.property.Checkbox("Readed"))
     article_type = myspace.create_type(article_type)
 
 assert isinstance(article_type, anytype.Type)
@@ -77,9 +77,10 @@ def add_article(doi, recursive=False):
         obj.doi = article_doi
         authors = [html.unescape(author).title() for author in authors]  # fix encoding
 
-        obj.authors = authors
-        obj.publication_year = year
-        obj.readed = False
+        obj.properties["Doi"].value = article_doi
+        obj.properties["Authors"].value = authors
+        obj.properties["Publication Year"].value = year
+        obj.properties["Readed"].value = False
 
         # Handle references (citations)
         references = data["message"].get("reference", [])
