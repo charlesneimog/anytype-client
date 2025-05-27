@@ -192,11 +192,7 @@ class Type(APIWrapper):
         the property is added to the internal property list. Otherwise, the method is not implemented.
 
         Parameters:
-            name (str): The name of the property to add.
-            property_format (PropertyFormat): The format of the property (e.g., text, number, date).
-
-        Returns:
-            None
+            property (Property): `anytype.Property` to be added.
 
         Raises:
             Exception: If the API endpoints are initialized, indicating this functionality

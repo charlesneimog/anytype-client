@@ -101,9 +101,6 @@ class Object(APIWrapper):
         Parameters:
             type (anytype.Type): Type from the space retrieved using `space.get_types()[0]`, `space.get_type(type)`, `space.get_type_byname("Articles")`
 
-        Returns:
-            None
-
         """
         self.template_id = type.template_id
         self.type_key = type.key
@@ -115,8 +112,6 @@ class Object(APIWrapper):
         Parameters:
             text (str): The text to be added as a level 1 title.
 
-        Returns:
-            None
         """
         self.body += f"# {text}\n"
 
@@ -127,8 +122,6 @@ class Object(APIWrapper):
         Parameters:
             text (str): The text to be added as a level 2 title.
 
-        Returns:
-            None
         """
         self.body += f"## {text}\n"
 
@@ -139,8 +132,6 @@ class Object(APIWrapper):
         Parameters:
             text (str): The text to be added as a level 3 title.
 
-        Returns:
-            None
         """
         self.body += f"### {text}\n"
 
@@ -151,12 +142,10 @@ class Object(APIWrapper):
         Parameters:
             text (str): The text to be added.
 
-        Returns:
-            None
         """
         self.body += f"{text}\n"
 
-    def add_codeblock(self, code, language=""):
+    def add_codeblock(self, code, language="") -> None:
         """
         Adds a code block to the object's body.
 
@@ -164,8 +153,6 @@ class Object(APIWrapper):
             code (str): The code to be added.
             language (str, optional): The programming language of the code block. Default is an empty string.
 
-        Returns:
-            None
         """
         self.body += f"``` {language}\n{code}\n```\n"
 
@@ -176,8 +163,6 @@ class Object(APIWrapper):
         Parameters:
             text (str): The text to be added as a bullet point.
 
-        Returns:
-            None
         """
         self.body += f"- {text}\n"
 
@@ -189,8 +174,6 @@ class Object(APIWrapper):
             text (str): The text to be added next to the checkbox.
             checked (bool, optional): Whether the checkbox is checked. Default is False.
 
-        Returns:
-            None
         """
         self.body += f"- [x] {text}\n" if checked else f"- [ ] {text}\n"
 
@@ -203,8 +186,6 @@ class Object(APIWrapper):
             alt (str, optional): The alternative text for the image. Default is an empty string.
             title (str, optional): The title of the image. Default is an empty string.
 
-        Returns:
-            None
         """
         if title:
             self.body += f'![{alt}]({image_url} "{title}")\n'

@@ -28,6 +28,9 @@ class Anytype:
             force (bool): If True, forces re-authentication even if a token already exists.
             callback (callable): A callback function to retrieve the 4-digit code. If None, the user will be prompted to enter the code.
 
+        Returns:
+            None
+
         Raises:
             Raises an error if the authentication request or token validation fails.
         """
@@ -47,7 +50,6 @@ class Anytype:
             if self._validate_token():
                 return
 
-        # Inicializa o client de API com o nome do app
         self._apiEndpoints = apiEndpoints()
         display_code_response = self._apiEndpoints.displayCode()
         challenge_id = display_code_response.get("challenge_id")
@@ -59,7 +61,6 @@ class Anytype:
 
         token_response = self._apiEndpoints.getToken(challenge_id, api_four_digit_code)
 
-        # Salva o token localmente
         with open(anytoken, "w") as file:
             json.dump(token_response, file, indent=4)
 
@@ -92,7 +93,7 @@ class Anytype:
         Retrieve a specific space by its unique identifier.
 
         Parameters:
-            spaceId (str): The unique identifier of the space to retrieve.
+            space (str | Space): The unique id identifier of the space or the Space Class.
 
         Returns:
             Space: A `Space` instance representing the requested space.

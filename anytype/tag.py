@@ -33,9 +33,6 @@ class Tag(APIWrapper):
         """
         Deletes a tag by its ID.
 
-        Parameters:
-            tag_id (str): The ID of the tag to delete.
-
         Returns:
             bool: True if the tag was successfully deleted, False otherwise.
 

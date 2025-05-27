@@ -7,7 +7,7 @@ from .member import Member
 from .icon import Icon
 from .api import apiEndpoints, APIWrapper
 from .utils import requires_auth
-from .property import PropertyFormat, Property
+from .property import Property
 
 
 class Space(APIWrapper):
@@ -89,7 +89,7 @@ class Space(APIWrapper):
         Retrieves a specific object by its ID.
 
         Parameters:
-            object (Object | str): The object (or its ID) to retrieve.
+            obj (Object | str): The object (or its ID) to retrieve.
 
         Returns:
             An Object instance representing the retrieved object.
@@ -140,8 +140,7 @@ class Space(APIWrapper):
         Updates an existing object within the space.
 
         Parameters:
-            objectId (str): The ID of the object to update.
-            data (dict): The data to update the object with.
+            obj (Object): The anytype.Object to be modified.
 
         Returns:
             An Object instance representing the updated object.
@@ -160,7 +159,7 @@ class Space(APIWrapper):
         Attempt to delete an object by its unique identifier.
 
         Parameters:
-            objectId (Object | str): The Object or object ID string to delete.
+            obj (Object | str): The Object or object ID string to delete.
 
         Returns:
             None
@@ -315,7 +314,7 @@ class Space(APIWrapper):
         Retrieves a specific type by its ID.
 
         Parameters:
-            type_name (str): The name of the type to retrieve.
+            type (str): The name of the type to retrieve.
 
         Returns:
             A Type instance representing the type.
@@ -452,21 +451,22 @@ class Space(APIWrapper):
         return types
 
     @requires_auth
-    def create_property(self, name: str, prop_format: PropertyFormat | str) -> Property:
-        if isinstance(prop_format, PropertyFormat):
-            prop_format = prop_format.value
-
+    def create_property(self, prop: Property) -> Property:
         object_data = {
-            "name": name,
-            "format": prop_format,
+            "name": prop.name,
+            "format": prop.format,
         }
-
         response = self._apiEndpoints.createProperty(self.id, object_data)
         prop = Property._from_api(self._apiEndpoints, response.get("property", {}))
         return prop
 
     @requires_auth
-    def get_property(self, propertyId: str) -> Property:
+    def get_property(self, prop: str | Property) -> Property:
+        if isinstance(prop, Property):
+            propertyId = prop.id
+        else:
+            propertyId = prop
+
         response = self._apiEndpoints.getProperty(self.id, propertyId)
         data = response.get("property", {})
         prop = Property._from_api(self._apiEndpoints, data | {"space_id": self.id})

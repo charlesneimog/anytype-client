@@ -1,28 +1,27 @@
-from .api import APIWrapper, apiEndpoints, T
+from .api import APIWrapper
 from .tag import Tag
 from .utils import requires_auth, _ANYTYPE_PROPERTIES_COLORS
 import warnings
 import random
-from enum import Enum
 import datetime
-from typing import Type
-
-
-class PropertyFormat(str, Enum):
-    TEXT = "text"
-    NUMBER = "number"
-    SELECT = "select"
-    MULTI_SELECT = "multi_select"
-    DATE = "date"
-    FILES = "files"
-    CHECKBOX = "checkbox"
-    URL = "url"
-    EMAIL = "email"
-    PHONE = "phone"
-    OBJECTS = "objects"
 
 
 class Property(APIWrapper):
+    """
+    Base class for all property types in the system. Provides shared interface for accessing,
+    setting, and serializing values to a JSON-compatible format for API communication.
+
+    Attributes:
+        name (str): The name of the property.
+        id (str): The unique identifier of the property.
+        key (str): Internal key reference for the property (if applicable).
+        format (str): Format/type of the property (e.g., "text", "number").
+        space_id (str): Identifier for the space/environment this property belongs to.
+
+    Methods:
+        value (property): Getter and setter for the property's value, dispatches by property type.
+    """
+
     __slots__ = (
         "name",
         "id",
@@ -35,6 +34,7 @@ class Property(APIWrapper):
     )
 
     def __init__(self, name: str = ""):
+
         self.id: str = ""
         self.name: str = name
 
@@ -75,8 +75,6 @@ class Property(APIWrapper):
                     tag_obj = self.create_tag(self.select, random_color)
                     warnings.warn(f"Tag '{tag_obj.name}' not exist, creating it")
                     json_dict["select"] = tag_obj.id
-
-            print(json_dict)
         elif isinstance(self, MultiSelect):
             tag_ids = []
             all_tags = None  # self.get_tags()
@@ -204,16 +202,40 @@ class Property(APIWrapper):
 
 
 class Text(Property):
+    """
+    Represents a text property.
+
+    Attributes:
+        format (str): Always set to "text".
+        text (str): The actual string value of the text property.
+    """
+
     def __init__(self, name: str = ""):
+
         super().__init__(name)
         self.format = "text"
         self.text = ""
+
+    @property
+    def value2(self):
+        pass
 
     def __repr__(self):
         return f"<Text({self.name})>"
 
 
 class Number(Property):
+    """
+    Represents a numeric property (integer or float).
+
+    Attributes:
+        format (str): Always set to "number".
+        number (int|float): The numeric value of the property.
+
+    Methods:
+        __repr__(): String representation of the instance.
+    """
+
     def __init__(self, name: str = ""):
         super().__init__(name)
         self.format = "number"
@@ -224,6 +246,20 @@ class Number(Property):
 
 
 class Select(Property):
+    """
+    Represents a select (single-choice) property using predefined tags.
+
+    Attributes:
+        format (str): Always set to "select".
+        select (str|Tag): The selected tag or its name.
+
+    Methods:
+        create_tag(name, color, create_if_exists): Creates a tag in the property.
+        get_tags(): Fetches all tags associated with the property.
+        get_tag(tag_id): Fetches a specific tag by ID.
+        __repr__(): String representation of the instance.
+    """
+
     def __init__(self, name: str = ""):
         super().__init__(name)
         self.format = "select"
@@ -297,6 +333,20 @@ class Select(Property):
 
 
 class MultiSelect(Property):
+    """
+    Represents a multi-select (multiple-choice) property using predefined tags.
+
+    Attributes:
+        format (str): Always set to "multi_select".
+        multi_select (list[str|Tag]): List of selected tags or tag names.
+
+    Methods:
+        create_tag(name, color, create_if_exists): Creates a tag in the property.
+        get_tags(): Fetches all tags associated with the property.
+        get_tag(tag_id): Fetches a specific tag by ID.
+        __repr__(): String representation of the instance.
+    """
+
     def __init__(self, name: str = ""):
         super().__init__(name)
         self.format = "multi_select"
@@ -370,6 +420,17 @@ class MultiSelect(Property):
 
 
 class Date(Property):
+    """
+    Represents a date property.
+
+    Attributes:
+        format (str): Always set to "date".
+        date (str|datetime.datetime): The date value, either as a string or datetime object.
+
+    Methods:
+        __repr__(): String representation of the instance.
+    """
+
     def __init__(self, name: str = ""):
         super().__init__(name)
         self.format = "date"
@@ -380,6 +441,17 @@ class Date(Property):
 
 
 class Files(Property):
+    """
+    Represents a files property (not implemented yet).
+
+    Attributes:
+        format (str): Always set to "files".
+        files: Placeholder for file data (not yet implemented).
+
+    Methods:
+        __repr__(): String representation of the instance.
+    """
+
     def __init__(self, name: str = ""):
         super().__init__(name)
         self.format = "files"
@@ -390,6 +462,17 @@ class Files(Property):
 
 
 class Checkbox(Property):
+    """
+    Represents a checkbox (boolean) property.
+
+    Attributes:
+        format (str): Always set to "checkbox".
+        checkbox (bool): Boolean value representing the checkbox state.
+
+    Methods:
+        __repr__(): String representation of the instance.
+    """
+
     def __init__(self, name: str = ""):
         super().__init__(name)
         self.format = "checkbox"
@@ -400,6 +483,17 @@ class Checkbox(Property):
 
 
 class Url(Property):
+    """
+    Represents a URL property.
+
+    Attributes:
+        format (str): Always set to "url".
+        url (str): The URL string.
+
+    Methods:
+        __repr__(): String representation of the instance.
+    """
+
     def __init__(self, name: str = ""):
         super().__init__(name)
         self.format = "url"
@@ -410,6 +504,17 @@ class Url(Property):
 
 
 class Email(Property):
+    """
+    Represents an email address property.
+
+    Attributes:
+        format (str): Always set to "email".
+        email (str): The email address.
+
+    Methods:
+        __repr__(): String representation of the instance.
+    """
+
     def __init__(self, name: str = ""):
         super().__init__(name)
         self.format = "email"
@@ -420,6 +525,10 @@ class Email(Property):
 
 
 class Phone(Property):
+    """
+    Represents a phone number property.
+    """
+
     def __init__(self, name: str = ""):
         super().__init__(name)
         self.format = "phone"
@@ -430,6 +539,10 @@ class Phone(Property):
 
 
 class Objects(Property):
+    """
+    Not implemented yet
+    """
+
     def __init__(self, name: str = ""):
         self.format = "objects"
         super().__init__(name)

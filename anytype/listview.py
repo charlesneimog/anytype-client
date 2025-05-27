@@ -12,7 +12,7 @@ class ListView(APIWrapper):
         self.name = ""
 
     @requires_auth
-    def get_objectsinlistview(self, offset=0, limit=100):
+    def get_objectsinlistview(self, offset=0, limit=100) -> list[Object]:
         """
         Retrieve a list of objects displayed in the current list view.
 
