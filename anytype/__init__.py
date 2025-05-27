@@ -7,9 +7,8 @@ from .listview import ListView
 from .member import Member
 from .type import Type
 from .template import Template
-from .property import Property
+from .property import PropertyFormat, Property
 from .tag import Tag
 from .icon import Icon
-from .utils import PropertyFormat
 
 from .api import apiEndpoints

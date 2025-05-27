@@ -33,7 +33,8 @@ class Object(APIWrapper):
         self._apiEndpoints: apiEndpoints | None = None
         self._icon: Icon = Icon()
         self._values: dict = {}
-        self._type: None = None
+        self.type: None | Type = None
+        self.type_key: str = ""
 
         self.id: str = ""
         self.source: str = ""
@@ -43,81 +44,16 @@ class Object(APIWrapper):
         self.details = []
         self.layout: str = "basic"
 
-        self.properties: list[Property] = []
+        self.properties: dict = {}
         if type is not None:
             for prop in type.properties:
                 if prop.key not in _ANYTYPE_SYSTEM_RELATIONS:
-                    self.properties.append(prop)
+                    self.properties[prop.name] = prop
+            self.type = type
 
         self.root_id: str = ""
         self.space_id: str = ""
         self.template_id: str = ""
-
-        self.snippet: str = ""
-        self.type_key: str = ""
-
-        self._custom_setters = {}
-        self._custom_getters = {}
-        self._values = {}
-        notoverdrive = ("icon", "type")
-
-        if type is not None:
-            self.type = type
-            for prop in self.properties:
-                class_prop = prop.name.lower().replace(" ", "_")
-                if class_prop in notoverdrive:
-                    continue
-
-                def setter(prop, value):
-                    prop.__setattr__(prop.format, value)
-
-                def getter(name, prop):
-                    return prop.__getattr__(prop.format, name)
-
-                self._custom_setters[class_prop] = {"prop": class_prop, "func": setter}
-                self._custom_getters[class_prop] = {"prop": prop, "func": getter}
-
-    def __setattr__(self, name, value):
-        if "_custom_setters" in self.__dict__ and name in self._custom_setters:
-            for prop in self.properties:
-                class_prop = prop.name.lower().replace(" ", "_")
-                if class_prop == name:
-                    self._custom_setters[name]["func"](prop, value)
-                    return
-            raise AttributeError(f"Attribute {name} not found")
-        elif hasattr(type(self), name):
-            object.__setattr__(self, name, value)
-        else:
-            self.__dict__[name] = value
-
-    def __getattr__(self, name):
-        if "_custom_getters" in self.__dict__ and name in self._custom_getters:
-            prop = self._custom_getters[name]["prop"]
-            return self._custom_getters[name]["func"](name, prop)
-        elif hasattr(type(self), name):
-            return getattr(self, name)
-        else:
-            try:
-                return self.__dict__[name]
-            except KeyError:
-                raise AttributeError(f"'{type(self).__name__}' object has no attribute '{name}'")
-
-    @property
-    def type(self):
-        return self._type
-
-    @type.setter
-    def type(self, value):
-        if isinstance(value, dict):
-            self._type = Type._from_api(self._apiEndpoints, value | {"space_id": self.space_id})
-        elif isinstance(value, Type):
-            self._type = value
-        else:
-            raise Exception("Invalid type")
-
-    @type.getter
-    def type(self):
-        return self._type
 
     @property
     def icon(self):

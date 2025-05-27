@@ -5,27 +5,10 @@ def requires_auth(method):
     @wraps(method)
     def wrapper(self, *args, **kwargs):
         if self._apiEndpoints is None:
-            raise Exception("You need to auth first")
+            raise Exception("You need to auth first or retrieve this same item from API.")
         return method(self, *args, **kwargs)
 
     return wrapper
-
-
-from enum import Enum
-
-
-class PropertyFormat(str, Enum):
-    TEXT = "text"
-    NUMBER = "number"
-    SELECT = "select"
-    MULTI_SELECT = "multi_select"
-    DATE = "date"
-    FILES = "files"
-    CHECKBOX = "checkbox"
-    URL = "url"
-    EMAIL = "email"
-    PHONE = "phone"
-    OBJECTS = "objects"
 
 
 _ANYTYPE_PROPERTIES_COLORS = (

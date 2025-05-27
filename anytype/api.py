@@ -52,12 +52,6 @@ class apiEndpoints:
             json={"challenge_id": challengeId, "code": code},
         )
 
-    # --- export ---
-    def getExport(self, spaceId: str, objectId: str, format: str):
-        result = self._request("GET", f"/spaces/{spaceId}/objects/{objectId}/{format}")
-        print(result)
-        return result
-
     # --- lists ---
     def getListViews(self, spaceId: str, listId: str, offset: int, limit: int):
         options = {"offset": offset, "limit": limit}
@@ -67,11 +61,11 @@ class apiEndpoints:
         options = {"offset": offset, "limit": limit}
         return self._request(
             "GET",
-            f"/spaces/{spaceId}/lists/{listId}/{viewId}/objects",
+            f"/spaces/{spaceId}/lists/{listId}/views/{viewId}/objects",
             params=options,
         )
 
-    def addObjectsToList(self, spaceId: str, listId: str, object_ids: list[str]):
+    def addObjectsToList(self, spaceId: str, listId: str, object_ids: dict):
         return self._request("POST", f"/spaces/{spaceId}/lists/{listId}/objects", json=object_ids)
 
     def deleteObjectsFromList(self, spaceId: str, listId: str, objectId: str):

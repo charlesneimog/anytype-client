@@ -32,6 +32,24 @@ class ListView(APIWrapper):
 
         return [Object._from_api(self._apiEndpoints, data) for data in response.get("data", [])]
 
+    def add_objectinlistview(self, obj: Object) -> None:
+        """
+        Add a one object to the current list view.
+
+        This method assumes the object are already created and adds them to the
+        current list view context in the space.
+
+        Parameters:
+            obj Object: One Object instances to be added to the list view.
+
+        Returns:
+            None
+
+        Raises:
+            Exception: If the API call to add objects to the list view fails.
+        """
+        self.add_objectsinlistview([obj])
+
     @requires_auth
     def add_objectsinlistview(self, objs: list[Object]) -> None:
         """
@@ -50,12 +68,12 @@ class ListView(APIWrapper):
             Exception: If the API call to add objects to the list view fails.
         """
         id_lists = [obj.id for obj in objs]
-        response = self._apiEndpoints.addObjectsToList(self.space_id, self.list_id, id_lists)
+        payload = {"objects": id_lists}
+        response = self._apiEndpoints.addObjectsToList(self.space_id, self.list_id, payload)
         # TODO: implement
-        print(response)
 
     @requires_auth
-    def delete_objectinlistview(self, obj: Object) -> None:
+    def delete_objectinlistview(self, obj: Object | str) -> None:
         """
         Remove an object from the current list view.
 
@@ -71,7 +89,12 @@ class ListView(APIWrapper):
         Raises:
             Exception: If the API call to remove the object from the list view fails.
         """
-        self._apiEndpoints.deleteObjectsFromList(self.space_id, self.list_id, obj.id)
+        if isinstance(obj, Object):
+            objId = obj.id
+        else:
+            objId = obj
+        assert objId != ""
+        self._apiEndpoints.deleteObjectsFromList(self.space_id, self.list_id, objId)
 
     def __repr__(self):
         return f"<ListView(name={self.name})>"

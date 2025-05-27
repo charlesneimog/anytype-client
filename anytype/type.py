@@ -1,7 +1,20 @@
 from .template import Template
 from .api import apiEndpoints, APIWrapper
-from .utils import requires_auth, _ANYTYPE_SYSTEM_RELATIONS, PropertyFormat
-from .property import Property
+from .utils import requires_auth, _ANYTYPE_SYSTEM_RELATIONS
+from .property import (
+    Property,
+    Checkbox,
+    Text,
+    Number,
+    Select,
+    MultiSelect,
+    Date,
+    Files,
+    Url,
+    Email,
+    Phone,
+    Objects,
+)
 from .icon import Icon
 
 
@@ -16,6 +29,7 @@ class Type(APIWrapper):
         self.space_id = ""
         self.id = ""
         self.name = name
+        self.key = ""
 
         # creation
         self.layout: str = ""
@@ -24,7 +38,6 @@ class Type(APIWrapper):
         self._icon: Icon | dict = {}
         self._properties: list[Property | dict] = []
         self._properties_value: list = []
-        self.key = ""
         self.template_id = ""
 
         if name != "" and self._apiEndpoints:
@@ -48,7 +61,32 @@ class Type(APIWrapper):
             id = prop["id"]
             response = self._apiEndpoints.getProperty(self.space_id, id)
             data = response.get("property", {})
-            prop = Property._from_api(self._apiEndpoints, data | {"space_id": self.space_id})
+            format = data["format"]
+            if format == "checkbox":
+                prop = Checkbox._from_api(self._apiEndpoints, data | {"space_id": self.space_id})
+            elif format == "text":
+                prop = Text._from_api(self._apiEndpoints, data | {"space_id": self.space_id})
+            elif format == "number":
+                prop = Number._from_api(self._apiEndpoints, data | {"space_id": self.space_id})
+            elif format == "select":
+                prop = Select._from_api(self._apiEndpoints, data | {"space_id": self.space_id})
+            elif format == "multi_select":
+                prop = MultiSelect._from_api(self._apiEndpoints, data | {"space_id": self.space_id})
+            elif format == "date":
+                prop = Date._from_api(self._apiEndpoints, data | {"space_id": self.space_id})
+            elif format == "files":
+                prop = Files._from_api(self._apiEndpoints, data | {"space_id": self.space_id})
+            elif format == "url":
+                prop = Url._from_api(self._apiEndpoints, data | {"space_id": self.space_id})
+            elif format == "email":
+                prop = Email._from_api(self._apiEndpoints, data | {"space_id": self.space_id})
+            elif format == "phone":
+                prop = Phone._from_api(self._apiEndpoints, data | {"space_id": self.space_id})
+            elif format == "objects":
+                prop = Objects._from_api(self._apiEndpoints, data | {"space_id": self.space_id})
+            else:
+                raise Exception("Invalid format")
+
             if prop.key in _ANYTYPE_SYSTEM_RELATIONS:
                 continue
             self._properties.append(prop)
@@ -146,7 +184,7 @@ class Type(APIWrapper):
 
         return template
 
-    def add_property(self, name: str, property_format: PropertyFormat) -> None:
+    def add_property(self, property: Property) -> None:
         """
         Add a property definition to the type being constructed.
 
@@ -166,7 +204,7 @@ class Type(APIWrapper):
         """
 
         if self._apiEndpoints is None:
-            prop = {"format": property_format.value, "name": name}  # or: property_format.value
+            prop = {"format": property.format, "name": property.name}  # or: property_format.value
             self.properties.append(prop)
         else:
             raise Exception("Not implemented yet")

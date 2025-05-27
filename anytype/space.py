@@ -6,8 +6,8 @@ from .object import Object
 from .member import Member
 from .icon import Icon
 from .api import apiEndpoints, APIWrapper
-from .utils import requires_auth, PropertyFormat
-from .property import Property
+from .utils import requires_auth
+from .property import PropertyFormat, Property
 
 
 class Space(APIWrapper):
@@ -23,19 +23,20 @@ class Space(APIWrapper):
 
     @requires_auth
     def _object_to_dict(self, obj: Object) -> dict:
-        type = obj.type
-        if type is None:
+        if obj.type is None:
             raise Exception(
                 "You need to set one type for the object, use add_type method from the Object class"
             )
+        if type(obj.type) is dict:
+            obj.type = Type._from_api(self._apiEndpoints, obj.type)
 
-        if type.key == "":
+        if obj.type.key == "":
             raise Exception(
                 "Type has an invalid key, please retrieve it from the API to get a valid type"
             )
 
-        type_key = obj.type_key if obj.type_key != "" else type.key
-        template_id = obj.template_id if obj.template_id != "" else type.template_id
+        type_key = obj.type_key if obj.type_key != "" else obj.type.key
+        template_id = obj.template_id if obj.template_id != "" else obj.type.template_id
         icon_json = {}
         if isinstance(obj.icon, Icon):
             icon_json = obj.icon._get_json()
@@ -196,7 +197,61 @@ class Space(APIWrapper):
         if not type.icon or not type.layout or not type.name or not type.plural_name:
             raise Exception("Please define icon, layout, name and plural_name")
 
-        # TODO: Need to do something if properties len > 200
+        defined_props = []
+        all_props = self.get_properties(offset=0, limit=200)
+        for prop in type.properties:
+            prop_name = prop.name if isinstance(prop, Property) else prop["name"]
+            prop_format = prop.format if isinstance(prop, Property) else prop["format"]
+            exists = False
+            for any_prop in all_props:
+                if any_prop.name == prop_name:
+                    exists = True
+                    prop = any_prop
+
+            if not exists:
+                prop = self.create_property(prop_name, prop_format)
+
+            if isinstance(prop, Property):
+                defined_props.append(prop._json)
+            elif isinstance(prop, dict):
+                defined_props.append(prop)
+            else:
+                raise ValueError("Invalid prop type, this should not happen, please report!")
+
+        icon = type.icon._get_json()
+        data = {
+            "name": type.name,
+            "plural_name": type.plural_name,
+            "icon": icon,
+            "layout": type.layout,
+            "properties": defined_props,
+        }
+        response = self._apiEndpoints.createType(self.id, data)
+        type = Type._from_api(self._apiEndpoints, response.get("type", {}) | {"space_id": self.id})
+        return type
+
+    @requires_auth
+    def update_type(self, type: Type) -> Type:
+        """
+        Update an existing type within the current space.
+
+        This function updates the specified `Type` instance, including its metadata and properties.
+        It ensures the type exists, validates the provided fields, and updates any referenced
+        properties as needed.
+
+        Parameters:
+            type (Type): The Type instance to be updated. Must include a valid `id`.
+
+        Returns:
+            Type: The updated Type instance as returned by the API.
+
+        Raises:
+            Exception: If the type does not exist, the ID is missing, or an API error occurs.
+            ValueError: If any updated fields or properties are invalid or unrecognized.
+        """
+        if not type.icon or not type.layout or not type.name or not type.plural_name:
+            raise Exception("Please define icon, layout, name and plural_name")
+
         defined_props = []
         all_props = self.get_properties(offset=0, limit=200)
         for prop in type.properties:
@@ -227,12 +282,35 @@ class Space(APIWrapper):
             "layout": type.layout,
             "properties": defined_props,
         }
-        response = self._apiEndpoints.createType(self.id, data)
+        response = self._apiEndpoints.updateType(self.id, type.id, data)
         type = Type._from_api(self._apiEndpoints, response.get("type", {}) | {"space_id": self.id})
         return type
 
+    def delete_type(self, type: str | Type) -> None:
+        """
+        Delete an existing type from the current space.
+
+        This function deletes a type from the current space using its ID or a `Type` instance.
+        If a `Type` object is provided, its `id` is extracted. The deletion is performed via
+        the underlying API.
+
+        Parameters:
+            type (str | Type): The ID of the type to delete or a `Type` instance.
+
+        Returns:
+            None
+
+        Raises:
+            Exception: If the deletion fails due to an API error or invalid ID.
+        """
+        if isinstance(type, Type):
+            typeId = type.id
+        else:
+            typeId = type
+        _ = self._apiEndpoints.deleteType(self.id, typeId)
+
     @requires_auth
-    def get_type(self, typeId: str) -> Type:
+    def get_type(self, type: str | Type) -> Type:
         """
         Retrieves a specific type by its ID.
 
@@ -245,6 +323,11 @@ class Space(APIWrapper):
         Raises:
             ValueError: If the type with the specified name is not found.
         """
+        if isinstance(type, Type):
+            typeId = type.id
+        else:
+            typeId = type
+
         response = self._apiEndpoints.getType(self.id, typeId)
         data = response.get("type", {})
         # TODO: Sometimes we need to add more attributes beyond the ones in the
@@ -291,7 +374,12 @@ class Space(APIWrapper):
         raise ValueError("Type not found")
 
     @requires_auth
-    def get_member(self, memberId: str) -> Member:
+    def get_member(self, member: str | Member) -> Member:
+        if isinstance(member, Member):
+            memberId = member.id
+        else:
+            memberId = member
+
         response = self._apiEndpoints.getMember(self.id, memberId)
         data = response.get("object", {})
         return Member._from_api(self._apiEndpoints, data)
@@ -313,13 +401,6 @@ class Space(APIWrapper):
         """
         response = self._apiEndpoints.getMembers(self.id, offset, limit)
         return [Member._from_api(self._apiEndpoints, data) for data in response.get("data", [])]
-
-    def get_listviewfromobject(
-        self, obj: Object, offset: int = 0, limit: int = 100
-    ) -> list[ListView]:
-        if obj.type != "Collection":
-            raise ValueError("Object is not a collection")
-        return self.get_listviews(obj.id, offset, limit)
 
     @requires_auth
     def get_listviews(
@@ -357,10 +438,15 @@ class Space(APIWrapper):
             Raises an error if the request to the API fails.
         """
         response = self._apiEndpoints.getProperties(self.id, offset, limit)
-        types = [
-            Property._from_api(self._apiEndpoints, data | {"space_id": self.id})
-            for data in response.get("data", [])
-        ]
+        # types = [
+        #     Property._from_api(self._apiEndpoints, data | {"space_id": self.id})
+        #     for data in response.get("data", [])
+        # ]
+
+        types = []
+        for data in response.get("data", []):
+            prop = Property._from_api(self._apiEndpoints, data | {"space_id": self.id})
+            types.append(prop)
 
         self._all_types = types
         return types
@@ -383,7 +469,6 @@ class Space(APIWrapper):
     def get_property(self, propertyId: str) -> Property:
         response = self._apiEndpoints.getProperty(self.id, propertyId)
         data = response.get("property", {})
-        print("space", self.id)
         prop = Property._from_api(self._apiEndpoints, data | {"space_id": self.id})
         return prop
 
