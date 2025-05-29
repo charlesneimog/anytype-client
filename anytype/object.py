@@ -197,8 +197,8 @@ class Object(APIWrapper):
 
     def __repr__(self):
         if self.type:
-            if self.type.name != "":
-                return f"<Object(name={self.name}, type={self.type.name})>"
+            if self.type["name"] != "":
+                return f"<Object(name={self.name}, type={self.type["name"]})>"
             else:
                 return f"<Object(name={self.name})>"
         else:
