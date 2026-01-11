@@ -3,7 +3,7 @@
 ## ☑️ Prerequisites
 
 - Python 3.10+
-- Anytype desktop app (v0.46.19-alpha or `higher`) running during authentication
+- Anytype desktop app (v0.53.0 or `higher`) running during authentication
 
 ## 📦 Installation
 
