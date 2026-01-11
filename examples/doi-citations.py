@@ -9,6 +9,7 @@ sys.path.append(file)
 import anytype
 import requests
 import time
+import warnings
 
 any = anytype.Anytype()
 any.auth()
@@ -18,12 +19,12 @@ spaces = any.get_spaces()
 
 myspace = None
 for space in spaces:
-    if space.name == "My Space":
+    if space.name == "API":
         myspace = space
         break
 
 if myspace is None:
-    myspace = any.create_space("My Space")
+    myspace = any.create_space("API")
 
 
 article_type = None
@@ -91,7 +92,10 @@ def add_article(doi, recursive=False):
                 if ref_doi != "":
                     add_article(ref_doi)
 
-        myspace.create_object(obj)
+        try:
+            myspace.create_object(obj)
+        except:
+            warnings.warn(f"Not possible to create {obj.name}")
         time.sleep(1)
 
     else:

@@ -57,11 +57,11 @@ new_note.description = "Automatically generated via Python API"
 
 # Add rich content
 new_note.add_title1("Welcome to Automated Knowledge Management!")
-new_note.add_text("This section was created programmatically using:")
+new_note.add_text("This section was created programmatically using Python")
 
 # Commit to workspace
 created_object = my_space.create_object(new_note, note_type)
-print(f"Created object: {created_object.id}")
+print(f"Created object: {created_object.name}")
 ```
 ## 🌟 Examples
 
