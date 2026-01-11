@@ -20,16 +20,20 @@ class Anytype:
         self._apiEndpoints: apiEndpoints | None = None
         self._headers = {}
 
-    def auth(self, force=False, callback=None) -> None:
+        
+    def auth(self, force=False, callback=None, persist_token=True, api_key='') -> dict | None:
         """
-        Authenticates the user by retrieving or creating a session token. If the session token already exists, it validates the token. If not, the user will be prompted to enter a 4-digit code for authentication.
+        Authenticates the user by retrieving or creating a session token.
+        If persist_token is False, the token won't be saved to disk and will be returned instead.
 
         Parameters:
             force (bool): If True, forces re-authentication even if a token already exists.
             callback (callable): A callback function to retrieve the 4-digit code. If None, the user will be prompted to enter the code.
+            persist_token (bool): If False, the token will not be saved to disk and will be returned.
+            api_key (string): Used to re-auth to the app, if persist_token is set to False
 
         Returns:
-            None
+            dict | None: The token response if persist_token is False, otherwise None.
 
         Raises:
             Raises an error if the authentication request or token validation fails.
@@ -43,12 +47,19 @@ class Anytype:
         if self.app_name == "":
             self.app_name = "python-anytype-client"
 
-        if os.path.exists(anytoken):
+        if persist_token and os.path.exists(anytoken):
             with open(anytoken) as f:
                 auth_json = json.load(f)
             self.api_key = auth_json.get("api_key")
             if self._validate_token():
-                return
+                return None
+            
+        if not persist_token and api_key and not force:
+            self.api_key = api_key
+            if self._validate_token():
+                return None
+            else:
+                raise Exception("Invalid provided API key, please login again.")
 
         self._apiEndpoints = apiEndpoints()
         display_code_response = self._apiEndpoints.displayCode()
@@ -61,11 +72,15 @@ class Anytype:
 
         token_response = self._apiEndpoints.getToken(challenge_id, api_four_digit_code)
 
-        with open(anytoken, "w") as file:
-            json.dump(token_response, file, indent=4)
-
         self.api_key = token_response.get("api_key")
         self._validate_token()
+
+        if persist_token:
+            with open(anytoken, "w") as file:
+                json.dump(token_response, file, indent=4)
+            return None
+        else:
+            return token_response
 
     def _validate_token(self) -> bool:
         self._headers = {
