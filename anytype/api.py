@@ -5,7 +5,7 @@ from .utils import _ANYTYPE_SYSTEM_RELATIONS
 
 
 MIN_API_VERSION = "2025-05-20"
-MIN_REQUIRED_VERSION = datetime(2025, 4, 22).date()
+MIN_REQUIRED_VERSION = datetime(2025, 5, 20).date()
 API_CONFIG = {
     "apiUrl": "http://localhost:31009/v1",
     "apiAppName": "PythonClient",
