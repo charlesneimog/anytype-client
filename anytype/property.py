@@ -49,6 +49,9 @@ class Property(APIWrapper):
         Raises:
             Raises an error if the request to the API fails.
         """
+        if self._apiEndpoints is None:
+            raise Exception("Internal error, please report")
+
         response = self._apiEndpoints.getProperty(self.space_id, self.id)
         json_dict = response.get("property", {})
         if isinstance(self, Checkbox):
@@ -278,6 +281,9 @@ class Select(Property):
                     warnings.warn(f"Tag '{name}' already exists, returning existing tag")
                     return tag
 
+        if self._apiEndpoints is None:
+            raise Exception("Internal error, please report")
+
         response = self._apiEndpoints.createTag(self.space_id, self.id, data)
         tag = Tag._from_api(
             self._apiEndpoints, response.get("tag", []) | {"space_id": self.space_id}
@@ -295,6 +301,9 @@ class Select(Property):
         Raises:
             Raises an error if the request to the API fails.
         """
+        if self._apiEndpoints is None:
+            raise Exception("Internal error, please report")
+
         response = self._apiEndpoints.getTags(self.space_id, self.id)
         types = [
             Tag._from_api(
@@ -318,6 +327,9 @@ class Select(Property):
         Raises:
             Raises an error if the request to the API fails.
         """
+        if self._apiEndpoints is None:
+            raise Exception("Internal error, please report")
+
         response = self._apiEndpoints.getTag(self.space_id, self.id, tag_id)
         tag = Tag._from_api(
             self._apiEndpoints, response.get("tag", []) | {"space_id": self.space_id}
@@ -364,6 +376,9 @@ class MultiSelect(Property):
                     warnings.warn(f"Tag '{name}' already exists, returning existing tag")
                     return tag
 
+        if self._apiEndpoints is None:
+            raise Exception("Internal error, please report")
+
         response = self._apiEndpoints.createTag(self.space_id, self.id, data)
         tag = Tag._from_api(
             self._apiEndpoints, response.get("tag", []) | {"space_id": self.space_id}
@@ -381,6 +396,9 @@ class MultiSelect(Property):
         Raises:
             Raises an error if the request to the API fails.
         """
+        if self._apiEndpoints is None:
+            raise Exception("Internal error, please report")
+
         response = self._apiEndpoints.getTags(self.space_id, self.id)
         types = [
             Tag._from_api(
@@ -404,6 +422,9 @@ class MultiSelect(Property):
         Raises:
             Raises an error if the request to the API fails.
         """
+        if self._apiEndpoints is None:
+            raise Exception("Internal error, please report")
+
         response = self._apiEndpoints.getTag(self.space_id, self.id, tag_id)
         tag = Tag._from_api(
             self._apiEndpoints, response.get("tag", []) | {"space_id": self.space_id}

@@ -47,9 +47,15 @@ class Space(APIWrapper):
 
         if isinstance(obj.properties, dict):
             for prop in obj.properties.values():
-                print(prop)
-                prop.space_id = self.id
-                properties_json.append(prop._get_json())
+                if isinstance(prop, Property):
+                    try:
+                        prop.space_id = self.id
+                        json = prop._get_json()
+                        properties_json.append(json)
+                    except:
+                        pass
+                else:
+                    raise TypeError("Internal error: expected an instance of Property")
         else:
             raise ValueError("Invalid properties type")
 
@@ -145,6 +151,16 @@ class Space(APIWrapper):
         new_obj.space_id = self.id
         return new_obj
 
+    def _diff_properties(self, new_props, old_props):
+        new_idx = {p["key"]: p for p in new_props if "key" in p}
+        old_idx = {p["key"]: p for p in old_props if "key" in p}
+
+        return [
+            deepcopy(prop)
+            for key, prop in new_idx.items()
+            if key not in old_idx or prop != old_idx[key]
+        ]
+
     @requires_auth
     def update_object(self, obj: Object) -> Object:
         """
@@ -160,7 +176,15 @@ class Space(APIWrapper):
             Raises an error if the request to the API fails.
         """
         data = self._object_to_dict(obj)
+        old_obj = self._object_to_dict(self.get_object(obj.id))
+
+        # keep only changed properties
+        data["properties"] = self._diff_properties(
+            data.get("properties", []), old_obj.get("properties", [])
+        )
+
         response = self._apiEndpoints.updateObject(self.id, obj.id, data)
+
         data = response.get("object", {})
         return Object._from_api(self._apiEndpoints, data | {"space_id": self.id})
 
