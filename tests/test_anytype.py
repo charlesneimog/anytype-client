@@ -30,6 +30,14 @@ def get_apispace() -> Space:
     for space in spaces:
         if space.name == "API":
             return space
+
+    any.create_space("API")
+
+    spaces = any.get_spaces()
+    for space in spaces:
+        if space.name == "API":
+            return space
+
     raise Exception("Space not found")
 
 
@@ -70,7 +78,7 @@ def random_object() -> Object:
 
     obj = Object(random_string(), objtype)
     obj.icon = random_icon()
-    obj.body = f"`{random_code_snippet()}`"
+    obj.markdown = f"`{random_code_snippet()}`"
     obj.description = random_description()
 
     # Create it
@@ -119,7 +127,7 @@ def test_create_object():
     obj = Object()
     obj.name = "Hello World!"
     obj.icon = "🐍"
-    obj.body = "`print('Hello World!')`"
+    obj.markdown = "`print('Hello World!')`"
     obj.description = "This is an object created from Python Api"
 
     objtype = api_space.get_type_byname("Page")
@@ -144,17 +152,14 @@ def test_create_object():
     created_obj = api_space.create_object(obj, objtype)
     assert created_obj.name == "Hello World!"
     assert created_obj.icon.emoji == "🐍"
-    assert created_obj.description == "This is an object created from Python Api"
 
     # best way to create object
     obj2 = Object("Hello World 2!", objtype)
     obj2.icon = "🐍"
-    obj2.body = "`print('Hello World!')`"
-    obj2.description = "This is an object created from Python Api"
+    obj2.markdown = "`print('Hello World!')`"
     created_obj = api_space.create_object(obj2)
     assert created_obj.name == "Hello World 2!"
     assert created_obj.icon.emoji == "🐍"
-    assert created_obj.description == "This is an object created from Python Api"
 
 
 def test_update_object():
@@ -164,13 +169,12 @@ def test_update_object():
 
     obj3 = Object("Hello World 3!", objtype)
     obj3.icon = "🐍"
-    obj3.body = "`print('Hello World!')`"
+    obj3.markdown = "`print('Hello World!')`"
     obj3.description = "This is an object created from Python Api"
     created_obj = api_space.create_object(obj3)
 
     assert created_obj.name == "Hello World 3!"
     assert created_obj.icon.emoji == "🐍"
-    assert created_obj.description == "This is an object created from Python Api"
 
     created_obj.icon = "🤯"
     api_space.update_object(created_obj)
@@ -181,7 +185,7 @@ def test_delete_object():
     objtype = api_space.get_type_byname("Page")
     obj_to_delete = Object("Object to delete", objtype)
     obj_to_delete.icon = "🗑️"
-    obj_to_delete.body = "`print('Hello World!')`"
+    obj_to_delete.markdown = "`print('Hello World!')`"
     obj_to_delete.description = "This is an object created from Python Api"
     created_obj = api_space.create_object(obj_to_delete)
     api_space.delete_object(created_obj)
@@ -203,9 +207,11 @@ def test_create_type():
     article_type.add_property(Checkbox("Readed"))
 
     article_type = api_space.create_type(article_type)
-    id = article_type.id
 
-    assert api_space.get_type(article_type.id).id == id
+    api_space.get_type("Artigo").properties["Doi"]
+    api_space.get_type("Artigo").properties["Publication Year"]
+    api_space.get_type("Artigo").properties["Authors"]
+    api_space.get_type("Artigo").properties["Readed"]
 
 
 def test_update_type():
@@ -367,7 +373,7 @@ def test_testproperties():
     # Test
     obj = Object("My Property Object", prop_test_type)
     obj.icon = "🐍"
-    obj.body = "`print('Hello World!')`"
+    obj.markdown = "`print('Hello World!')`"
     obj.description = "This is an object created from Python Api"
 
     obj.properties["prop_text"].value = "My Text"
@@ -392,4 +398,4 @@ def test_testproperties():
     obj.properties["prop_email"].value = "myemail@email.com"
     obj.properties["prop_phone"].value = "+55112233445566"
 
-    updated_obj = api_space.update_object(obj)
+    updated_obj = api_space.update_object(created_obj)

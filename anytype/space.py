@@ -147,6 +147,7 @@ class Space(APIWrapper):
         new_obj = Object._from_api(
             self._apiEndpoints, response.get("object", {}) | {"space_id": self.id}
         )
+
         new_obj._apiEndpoints = self._apiEndpoints
         new_obj.space_id = self.id
         return new_obj
@@ -296,8 +297,18 @@ class Space(APIWrapper):
         defined_props = []
         all_props = self.get_properties(offset=0, limit=200)
         for prop in type.properties:
-            prop_name = prop.name if isinstance(prop, Property) else prop["name"]
-            prop_format = prop.format if isinstance(prop, Property) else prop["format"]
+            if isinstance(prop, str):
+                prop_name = prop
+            elif isinstance(prop, Property):
+                prop_name = prop.name
+            else:
+                raise TypeError("Invalid type for update_type, please report")
+
+            # BUG: Tag is not a valid prop?
+            if prop_name == "Tag":
+                continue
+
+            prop_format = prop.format
             exists = False
             for any_prop in all_props:
                 if any_prop.name == prop_name:
@@ -305,7 +316,8 @@ class Space(APIWrapper):
                     prop = any_prop
 
             if not exists:
-                prop = self.create_property(prop_name, prop_format)
+                prop = Property.from_format(prop_name, prop_format)
+                prop = self.create_property(prop)
                 pass
 
             if isinstance(prop, Property):
