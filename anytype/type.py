@@ -20,10 +20,10 @@ class Type(APIWrapper):
         self.properties = {}
 
         # creation
-        self.layout: str = ""
+        self.layout: str = "basic"
         self.plural_name: str = ""
 
-        self._icon: Icon | dict = {}
+        self._icon: Icon | dict = Icon()
         self.template_id = ""
 
         if name != "" and self._apiEndpoints:

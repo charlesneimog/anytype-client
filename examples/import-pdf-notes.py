@@ -57,12 +57,15 @@ if pdf_space is None:
 
 # <- Not sure if this exists for you too
 article_type = Type("Article")
+article_type.plural_name = "Articles"
+
+
 article_type = pdf_space.create_type(article_type)
 new_object = Object(pdf_name, article_type)
 new_object.icon = "📄"
 new_object.description = "This is an object created from Python Api"
 
 for note in all_notes:
-    new_object.body += f"> {note['text']} \n\n"
+    new_object.markdown += f"> {note['text']} \n\n"
 
 created_object = pdf_space.create_object(new_object)
