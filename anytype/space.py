@@ -43,20 +43,29 @@ class Space(APIWrapper):
         else:
             raise ValueError("Invalid icon type")
 
-        properties_json: list[dict] = [{}]
+        properties_json: list[dict] = []
+
         if isinstance(obj.properties, dict):
-            properties_json = []
-            for _, prop in obj.properties.items():
+            for prop in obj.properties.values():
+                print(prop)
                 prop.space_id = self.id
                 properties_json.append(prop._get_json())
         else:
             raise ValueError("Invalid properties type")
 
+        # append description property
+        # To avoid incompatibility
+        properties_json.append(
+            {
+                "key": "description",
+                "text": obj.description,
+            }
+        )
+
         object_data = {
             "icon": icon_json,
             "name": obj.name,
-            "description": obj.description,
-            "body": obj.body,
+            "body": obj.markdown,
             "source": "",
             "template_id": template_id,
             "type_key": type_key,
@@ -211,10 +220,16 @@ class Space(APIWrapper):
                     prop = any_prop
 
             if not exists:
-                prop = self.create_property(prop_name, prop_format)
+                prop = Property.from_format(prop_name, prop_format)
+                prop.space_id = self.id
 
             if isinstance(prop, Property):
-                defined_props.append(prop._json)
+                # For locally created properties without an id, use a simple dict representation
+                if prop.id == "":
+                    defined_props.append({"name": prop.name, "format": prop.format})
+                else:
+                    # For properties retrieved from API, use the _json attribute
+                    defined_props.append(prop._json)
             elif isinstance(prop, dict):
                 defined_props.append(prop)
             else:
@@ -328,7 +343,8 @@ class Space(APIWrapper):
         if isinstance(type, Type):
             typeId = type.id
         else:
-            typeId = type
+            type = self.get_type_byname(type)
+            typeId = type.id
 
         response = self._apiEndpoints.getType(self.id, typeId)
         data = response.get("type", {})

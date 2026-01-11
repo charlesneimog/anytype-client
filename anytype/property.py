@@ -101,9 +101,13 @@ class Property(APIWrapper):
             if self.value is None:
                 json_dict["date"] = None
             elif isinstance(self.value, str):
+                if datetime.datetime is None or type(self.date) is not str:
+                    raise Exception("Invalid datetime initialization")
                 dt = datetime.datetime.strptime(self.date, "%d/%m/%Y")
                 json_dict["date"] = dt.strftime("%Y-%m-%dT%H:%M:%SZ")
             elif isinstance(self.value, datetime.datetime):
+                if datetime.datetime is None or self.date is not datetime.datetime:
+                    raise Exception("Invalid datetime initialization")
                 json_dict["date"] = self.date.strftime("%Y-%m-%dT%H:%M:%SZ")
         elif isinstance(self, Files):
             json_dict["files"] = self.value
@@ -200,9 +204,14 @@ class Property(APIWrapper):
         else:
             raise ValueError("Format not supported")
 
-    # @value.getter
-    # def value(self):
-    #     raise Exception("Anytype API yet does not return property value")
+    _FACTORY: dict[str, type["Property"]] = {}
+
+    @classmethod
+    def from_format(cls, name: str, fmt: str) -> "Property":
+        try:
+            return cls._FACTORY[fmt](name)
+        except KeyError:
+            raise ValueError(f"Unsupported property format: {fmt}")
 
 
 class Text(Property):
@@ -227,7 +236,7 @@ class Number(Property):
     def __init__(self, name: str = ""):
         super().__init__(name)
         self.format = "number"
-        self.number = 0
+        self.number: int | float = 0
 
     def __repr__(self):
         return f"<Number({self.name})>"
@@ -246,7 +255,7 @@ class Select(Property):
     def __init__(self, name: str = ""):
         super().__init__(name)
         self.format = "select"
-        self.select = None
+        self.select = ""
 
     @requires_auth
     def create_tag(self, name: str, color: str = "red", create_if_exists: bool = False) -> Tag:
@@ -413,7 +422,7 @@ class Date(Property):
     def __init__(self, name: str = ""):
         super().__init__(name)
         self.format = "date"
-        self.date = None
+        self.date: str | datetime.datetime = ""
 
     def __repr__(self):
         return f"<Date({self.name})>"
@@ -501,3 +510,18 @@ class Objects(Property):
 
     def __repr__(self):
         return f"<Objects({self.name})>"
+
+
+Property._FACTORY = {
+    "text": Text,
+    "number": Number,
+    "select": Select,
+    "multi_select": MultiSelect,
+    "date": Date,
+    "files": Files,
+    "checkbox": Checkbox,
+    "url": Url,
+    "email": Email,
+    "phone": Phone,
+    "objects": Objects,
+}

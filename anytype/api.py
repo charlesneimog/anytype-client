@@ -23,6 +23,7 @@ class ResponseHasError(Exception):
 
 class apiEndpoints:
     def __init__(self, headers: dict = {}):
+        self.space_id = ""
         self.api_url = API_CONFIG["apiUrl"].rstrip("/")
         self.app_name = API_CONFIG["apiAppName"]
         if "Anytype-Version" not in headers:
@@ -195,6 +196,7 @@ class APIWrapper:
     __slots__ = ()
     _apiEndpoints: apiEndpoints | None = None
     _json: dict | None = None
+    space_id = ""
 
     @classmethod
     def _from_api(cls: Type[T], api: apiEndpoints, data: dict) -> T:

@@ -35,13 +35,12 @@ class Object(APIWrapper):
         self._values: dict = {}
         self.type: None | Type = None
         self.type_key: str = ""
-
         self.id: str = ""
         self.source: str = ""
         self.name: str = name
-        self.body: str = ""
+        self.markdown: str = ""
+        self.archived: bool = False
         self.description: str = ""
-        self.details = []
         self.layout: str = "basic"
 
         self.properties: dict = {}
@@ -116,7 +115,7 @@ class Object(APIWrapper):
             text (str): The text to be added as a level 1 title.
 
         """
-        self.body += f"# {text}\n"
+        self.markdown += f"# {text}\n"
 
     def add_title2(self, text) -> None:
         """
@@ -126,7 +125,7 @@ class Object(APIWrapper):
             text (str): The text to be added as a level 2 title.
 
         """
-        self.body += f"## {text}\n"
+        self.markdown += f"## {text}\n"
 
     def add_title3(self, text) -> None:
         """
@@ -136,7 +135,7 @@ class Object(APIWrapper):
             text (str): The text to be added as a level 3 title.
 
         """
-        self.body += f"### {text}\n"
+        self.markdown += f"### {text}\n"
 
     def add_text(self, text) -> None:
         """
@@ -146,7 +145,7 @@ class Object(APIWrapper):
             text (str): The text to be added.
 
         """
-        self.body += f"{text}\n"
+        self.markdown += f"{text}\n"
 
     def add_codeblock(self, code, language="") -> None:
         """
@@ -157,7 +156,7 @@ class Object(APIWrapper):
             language (str, optional): The programming language of the code block. Default is an empty string.
 
         """
-        self.body += f"``` {language}\n{code}\n```\n"
+        self.markdown += f"``` {language}\n{code}\n```\n"
 
     def add_bullet(self, text) -> None:
         """
@@ -167,7 +166,7 @@ class Object(APIWrapper):
             text (str): The text to be added as a bullet point.
 
         """
-        self.body += f"- {text}\n"
+        self.markdown += f"- {text}\n"
 
     def add_checkbox(self, text, checked=False) -> None:
         """
@@ -178,7 +177,7 @@ class Object(APIWrapper):
             checked (bool, optional): Whether the checkbox is checked. Default is False.
 
         """
-        self.body += f"- [x] {text}\n" if checked else f"- [ ] {text}\n"
+        self.markdown += f"- [x] {text}\n" if checked else f"- [ ] {text}\n"
 
     def add_image(self, image_url: str, alt: str = "", title: str = "") -> None:
         """
@@ -191,15 +190,9 @@ class Object(APIWrapper):
 
         """
         if title:
-            self.body += f'![{alt}]({image_url} "{title}")\n'
+            self.markdown += f'![{alt}]({image_url} "{title}")\n'
         else:
-            self.body += f"![{alt}]({image_url})\n"
+            self.markdown += f"![{alt}]({image_url})\n"
 
     def __repr__(self):
-        if self.type:
-            if self.type["name"] != "":
-                return f"<Object(name={self.name}, type={self.type["name"]})>"
-            else:
-                return f"<Object(name={self.name})>"
-        else:
-            return f"<Object(name={self.name})>"
+        return f"<Object(name={self.name})>"
