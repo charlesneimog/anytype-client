@@ -51,6 +51,41 @@ class Type(APIWrapper):
         return self._icon
 
     @requires_auth
+    def get_template_byname(self, name: str, offset: int = 0, limit: int = 100) -> Template:
+        """
+        Retrieves a template by its name.
+
+        This method paginates through all available templates in the space
+        until a template with the given name is found.
+
+        Parameters:
+            name (str): The name of the template to retrieve.
+            offset (int, optional): The starting offset for pagination (default: 0).
+            limit (int, optional): The maximum number of templates per request (default: 100).
+
+        Returns:
+            Template: The matching Template instance.
+
+        Raises:
+            ValueError: If no template with the given name is found.
+            Raises an error if the request to the API fails.
+        """
+        while True:
+            templates = self.get_templates(offset=offset, limit=limit)
+            template_len = len(templates)
+
+            for template in templates:
+                if template.name == name:
+                    return template
+
+            if template_len < limit:
+                break
+
+            offset += limit
+
+        raise ValueError("Template not found")
+
+    @requires_auth
     def get_templates(self, offset: int = 0, limit: int = 100) -> list[Template]:
         """
         Retrieves all templates associated with the type from the API.

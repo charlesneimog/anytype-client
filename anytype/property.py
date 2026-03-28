@@ -121,7 +121,13 @@ class Property(APIWrapper):
         elif isinstance(self, Phone):
             json_dict["phone"] = self.value
         elif isinstance(self, Objects):
-            json_dict["objects"] = self.value
+            if isinstance(self.value, list):
+                ids = []
+                for v in self.value:
+                    ids.append(v.id)
+                json_dict["objects"] = ids
+            else:
+                json_dict["objects"] = [self.value.id]
         else:
             raise ValueError("Format not supported")
         return json_dict
@@ -203,7 +209,7 @@ class Property(APIWrapper):
             else:
                 raise ValueError("Value for Phone property must be string")
         elif isinstance(self, Objects):
-            raise ValueError("Files are not implemented yet")
+            self.objects = value
         else:
             raise ValueError("Format not supported")
 

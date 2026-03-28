@@ -412,6 +412,22 @@ class Space(APIWrapper):
         return types
 
     def get_type_byname(self, name: str) -> Type:
+        """
+        Retrieves a type by its name.
+
+        This method paginates through all available types in the space
+        until a type with the given name is found.
+
+        Parameters:
+            name (str): The name of the type to retrieve.
+
+        Returns:
+            Type: The matching Type instance.
+
+        Raises:
+            ValueError: If no type with the given name is found.
+            Raises an error if the request to the API fails.
+        """
         offset = 0
         limit = 5
         while True:

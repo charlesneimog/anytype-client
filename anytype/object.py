@@ -1,6 +1,7 @@
 import re
 
 from .type import Type
+from .template import Template
 from .icon import Icon
 from .property import Property
 from .api import apiEndpoints, APIWrapper
@@ -25,11 +26,13 @@ class Object(APIWrapper):
 
     are accessible through the class properties. For example, if an object is created with a `Type` (e.g., `anytype.Type`) that includes a `DOI` property, the DOI URL can be set during the object creation using `Object.doi`.
 
+    You can also provide a Template for this object.
+
     Note that these property names are derived from the corresponding name in the Anytype GUI. They are all lowercase with spaces replaced by underscores. For instance, a property called `Release Year` in the Anytype GUI will be accessed as `release_year` in the object, and a property called `Publication Date` will be accessed as `publication_date`.
 
     """
 
-    def __init__(self, name: str = "", type: Type | None = None):
+    def __init__(self, name: str = "", type: Type | None = None, template: Template | None = None):
         self._apiEndpoints: apiEndpoints | None = None
         self._icon: Icon = Icon()
         self._values: dict = {}
@@ -56,6 +59,9 @@ class Object(APIWrapper):
         self.root_id: str = ""
         self.space_id: str = ""
         self.template_id: str = ""
+
+        if template is not None:
+            self.template_id = template.id
 
     @property
     def icon(self):
@@ -178,6 +184,9 @@ class Object(APIWrapper):
 
         """
         self.markdown += f"- [x] {text}\n" if checked else f"- [ ] {text}\n"
+
+    def add_quote(self, text: str) -> None:
+        self.markdown += f'" {text}'
 
     def add_image(self, image_url: str, alt: str = "", title: str = "") -> None:
         """

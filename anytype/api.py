@@ -208,6 +208,9 @@ class APIWrapper:
 
     def _add_attrs_from_dict(self, data: dict) -> None:
         for key, value in data.items():
+            if value is None:
+                continue
+
             if key == "type":
                 from anytype import type
 
