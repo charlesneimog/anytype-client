@@ -41,7 +41,7 @@ class Object(APIWrapper):
         self.id: str = ""
         self.source: str = ""
         self.name: str = name
-        self.markdown: str = ""
+        self._markdown: str = ""
         self.archived: bool = False
         self.description: str = ""
         self.layout: str = "basic"
@@ -101,6 +101,23 @@ class Object(APIWrapper):
     @icon.getter
     def icon(self):
         return self._icon
+
+    @property
+    def markdown(self):
+        pass
+
+    @markdown.setter
+    def markdown(self, text: str):
+        self._markdown = text
+
+    @markdown.getter
+    def markdown(self):
+        if self._markdown == "" and self.id and self._apiEndpoints is not None:
+            data = self._apiEndpoints.getObject(self.space_id, self.id)
+            self._markdown = data["object"]["markdown"]
+            if isinstance(self._markdown, (list, tuple)):
+                self._markdown = "".join(self._markdown)
+        return self._markdown
 
     def add_type(self, type: Type):
         """
