@@ -569,7 +569,7 @@ class Space(APIWrapper):
 
     @requires_auth
     def search(
-        self, query, type: Type | None = None, offset: int = 0, limit: int = 10
+        self, query, type: Type | list[Type] | None = None, offset: int = 0, limit: int = 10
     ) -> list[Object]:
         """
         Performs a search for objects in the space using a query string.
@@ -590,8 +590,21 @@ class Space(APIWrapper):
             raise ValueError("Space ID is required")
 
         types = []
-        if type is not None:
-            types = [type.key]
+
+        if isinstance(type, Type):
+            key = type.key
+            if key == "":
+                key = type.name.lower()
+            types = [key]
+        elif isinstance(type, list):
+            for t in type:
+                key = t.key
+                if key == "":
+                    key = t.name.lower()
+                types.append(key)
+
+        print(types)
+
         data = {
             "query": query,
             "sort": {"direction": "desc", "property_key": "last_modified_date"},
