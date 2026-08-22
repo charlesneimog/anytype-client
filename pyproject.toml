@@ -1,6 +1,6 @@
 [project]
 name = "anytype-client" 
-version = "0.4.0"
+version = "0.5.0"
 description = " A Python Client for Anytype."
 readme = "README.md"
 authors = [
@@ -9,6 +9,11 @@ authors = [
 license = {text = "GPL-3.0-or-later"}
 dependencies = [
     "requests"
+]
+
+[project.optional-dependencies]
+test = [
+    "pytest>=8,<9",
 ]
 
 [project.urls]
@@ -20,5 +25,4 @@ packages = ["anytype"]
 [tool.black]
 line-length = 100
 fast = true
-
 
