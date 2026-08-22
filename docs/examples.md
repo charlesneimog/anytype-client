@@ -1,41 +1,65 @@
 # Examples
 
-## Hello World 
+## Hello World
 
 ??? example "Hello World Example" 
     ``` python
-    from anytype import Anytype
-    from anytype import Object
+    from anytype import Anytype, Object
 
-    # Need Anytype-0.44.13-beta or higher
-    # Auth, on first type you need to type the 4 digit code that will popup on Anytype App
-    any = Anytype()
-    any.auth()
+    client = Anytype()
+    client.auth()
 
-    # Get Spaces
-    spaces = any.get_spaces()
+    spaces = client.get_spaces()
     my_space = spaces[0]
 
-    # Create Object on the first space
-    note_type = my_space.get_type("Page")
-    new_object = Object()
-    new_object.name = "Hello World!"
+    note_type = my_space.get_type_byname("Page")
+    new_object = Object("Hello World!", type=note_type)
     new_object.icon = "🐍"
-    new_object.description = "This is an object created from Python Api"
+    new_object.description = "Created from the Anytype Python API"
     new_object.add_title1("Hello")
-    new_object.add_title2("From")
-    new_object.add_title3("Python")
     new_object.add_codeblock("print('Hello World!')", language="python")
-    new_object.add_bullet("1")
-    new_object.add_bullet("2")
-    new_object.add_bullet("3")
-    new_object.add_bullet("3")
-    new_object.add_text("$x(n) = x + n$")
 
-    # Add to my_space
-    created_object = my_space.create_object(new_object, note_type)
+    created_object = my_space.create_object(new_object)
     ```
-    
+
+## Templates and custom properties
+
+Properties linked to the selected type can be assigned by their API key or their
+normalized display name:
+
+```python
+from anytype import Anytype, Object
+
+client = Anytype()
+client.auth()
+my_space = client.get_spaces()[0]
+
+quote_type = my_space.get_type_byname("Quote")
+template = quote_type.get_template_byname("Quote Template")
+person = my_space.search("Ada Lovelace", limit=30)[0]
+
+obj = Object("A quote", type=quote_type, template=template)
+obj.date = "02/06/2026"
+obj.people = [person]
+
+created = my_space.create_object(obj)
+```
+
+The `people` property in this example uses the `objects` format. Select and
+multi-select properties accept tag names or `Tag` objects instead.
+
+See the runnable [custom property example](https://github.com/charlesneimog/anytype-client/blob/main/examples/custom-properties.py).
+
+## API 2025-11-08
+
+The runnable [API reference example](https://github.com/charlesneimog/anytype-client/blob/main/examples/api-2025-11-08.py)
+shows listing spaces, objects, chats, members, properties, tags, types, and templates;
+global search; optional file upload; and adding an existing object to a list.
+
+```bash
+python examples/api-2025-11-08.py --space "My Space" --type "Page" --query "roadmap"
+```
+
 ## Collection with articles and all articles cited 
 
 <p>
@@ -46,9 +70,11 @@
 
 ??? example "Collection with all cited articles" 
     ``` python
+    import html
+    import time
+
     import anytype
     import requests
-    import time
 
     any = anytype.Anytype()
     any.auth()
@@ -71,8 +97,6 @@
         if type.name == "Artigo":
             article_type = type
 
-    objects = myspace.search("", article_type)
-
     # if type does not exist we create it
     if article_type is None:
         article_type = anytype.Type("Artigo")
@@ -80,10 +104,10 @@
         article_type.layout = "basic"
         article_type.plural_name = "Artigos"
 
-        article_type.add_property("Doi", anytype.PropertyFormat.TEXT)
-        article_type.add_property("Publication Year", anytype.PropertyFormat.NUMBER)
-        article_type.add_property("Authors", anytype.PropertyFormat.MULTI_SELECT)
-        article_type.add_property("Readed", anytype.PropertyFormat.CHECKBOX)
+        article_type.add_property(anytype.property.Text("Doi"))
+        article_type.add_property(anytype.property.Number("Publication Year"))
+        article_type.add_property(anytype.property.MultiSelect("Authors"))
+        article_type.add_property(anytype.property.Checkbox("Readed"))
         article_type = myspace.create_type(article_type)
 
     assert isinstance(article_type, anytype.Type)

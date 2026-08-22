@@ -9,7 +9,6 @@ sys.path.append(file)
 import anytype
 import requests
 import time
-import warnings
 
 any = anytype.Anytype()
 any.auth()
@@ -31,8 +30,6 @@ article_type = None
 for type in myspace.get_types(offset=0, limit=100):
     if type.name == "Artigo":
         article_type = type
-
-objects = myspace.search("", article_type)
 
 # if type does not exist we create it
 if article_type is None:
@@ -78,10 +75,10 @@ def add_article(doi, recursive=False):
         obj.doi = article_doi
         authors = [html.unescape(author).title() for author in authors]  # fix encoding
 
-        obj.properties["Doi"].value = article_doi
-        obj.properties["Authors"].value = authors
-        obj.properties["Publication Year"].value = year
-        obj.properties["Readed"].value = False
+        obj.doi = article_doi
+        obj.authors = authors
+        obj.publication_year = year
+        obj.readed = False
 
         # Handle references (citations)
         references = data["message"].get("reference", [])
@@ -92,10 +89,7 @@ def add_article(doi, recursive=False):
                 if ref_doi != "":
                     add_article(ref_doi)
 
-        try:
-            myspace.create_object(obj)
-        except:
-            warnings.warn(f"Not possible to create {obj.name}")
+        myspace.create_object(obj)
         time.sleep(1)
 
     else:

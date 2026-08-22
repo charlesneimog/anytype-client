@@ -1,5 +1,6 @@
 import sys
 import os
+from pprint import pprint
 
 path = os.path.dirname(__file__)
 
@@ -11,15 +12,20 @@ any = anytype.Anytype()
 
 any.auth()
 
-space = any.get_spaces()[0]
-objects = space.get_objects(limit=1000)
+space = any.get_spaces()[1]
+objects = space.get_objects(limit=100)
+
 
 mytype = space.get_type_byname("Page")
 page_icon = anytype.Icon("🗒️")
+print(mytype.id)
+
+pages = space.search("Peeters", type=mytype)
+
 
 for obj in objects:
-    if obj.type is not None:
-        if obj.type.name == "Page":
-            obj.icon = page_icon
-            space.update_object(obj)
-            print("Icon updated to " + obj.name)
+    if obj.type.id != mytype.id:
+        print(obj.type)
+        print(mytype)
+        print("wrong")
+        exit(-1)

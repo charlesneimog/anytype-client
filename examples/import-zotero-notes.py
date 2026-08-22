@@ -4,7 +4,7 @@ import os
 dir = os.path.dirname(os.path.abspath(__file__)) + "/../"
 sys.path.insert(0, dir)
 
-from anytype import Anytype, Object, Property
+from anytype import Anytype, Object
 
 any = Anytype()
 any.auth()
@@ -225,9 +225,9 @@ for attachment_key, attachment_id, parent_key, parent_id in attachments:
 
             obj = Object(title, anypage, anytemplate)
             if doi is not None:
-                obj.properties["DOI"].value = doi
+                obj.doi = doi
 
-            obj.properties["Author"].value = authors_id
+            obj.author = authors_id
             for d in data:
                 obj.add_quote(d["text"])
 

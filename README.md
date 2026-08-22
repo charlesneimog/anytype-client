@@ -90,6 +90,8 @@ objects = spaces[0].get_objects(
 | Example | Description | Results | 
 |---------|-------------| ------  |
 | [📄 Hello World](examples/hello_world.py) | Create a basic note with formatted text | [Check Result](resources/hello.png) |
+| [🏷️ Custom properties](examples/custom-properties.py) | Create from a type and template with date and object properties | — |
+| [🔌 API 2025-11-08](examples/api-2025-11-08.py) | Explore listing, search, tags, templates, upload, and list objects | — |
 | [📚 PDF Notes Importer](examples/import-pdf-notes.py) | Batch import annotated PDFs | [Check Result](resources/pdf.png) |
 | *More examples coming as Anytype API evolves* | [Request a feature](https://github.com/charlesneimog/anytype-client/issues) | ⚔️ |
 
