@@ -1,9 +1,50 @@
+import datetime
+import random
+import warnings
+
 from .api import APIWrapper
 from .tag import Tag
 from .utils import requires_auth, _ANYTYPE_PROPERTIES_COLORS
-import warnings
-import random
-import datetime
+
+_VALUE_FIELDS = {
+    "checkbox",
+    "text",
+    "number",
+    "select",
+    "multi_select",
+    "date",
+    "files",
+    "url",
+    "email",
+    "phone",
+    "objects",
+}
+
+
+def _format_date(value) -> str | None:
+    if value is None:
+        return None
+
+    if isinstance(value, str):
+        try:
+            parsed = datetime.datetime.fromisoformat(value.replace("Z", "+00:00"))
+        except ValueError:
+            try:
+                parsed = datetime.datetime.strptime(value, "%d/%m/%Y")
+            except ValueError as error:
+                raise ValueError(
+                    "Date values must use DD/MM/YYYY, YYYY-MM-DD, or RFC3339 format"
+                ) from error
+    elif isinstance(value, datetime.datetime):
+        parsed = value
+    elif isinstance(value, datetime.date):
+        parsed = datetime.datetime.combine(value, datetime.time())
+    else:
+        raise ValueError("Date property must be a string, date, datetime, or None")
+
+    if parsed.tzinfo is not None:
+        parsed = parsed.astimezone(datetime.timezone.utc).replace(tzinfo=None)
+    return parsed.strftime("%Y-%m-%dT%H:%M:%SZ")
 
 
 class Property(APIWrapper):
@@ -31,29 +72,74 @@ class Property(APIWrapper):
         "object",
         "format",
         "space_id",
+        "_is_set",
     )
 
     def __init__(self, name: str = ""):
-
         self.id: str = ""
         self.name: str = name
+        self.key: str = ""
+        self.space_id: str = ""
+        self._is_set = False
 
-    @requires_auth
-    def _get_json(self) -> dict:
-        """
-        Retrieves all properties associated with the property.
+    @classmethod
+    def _from_api(cls, api, data: dict):
+        property_class = cls
+        if cls is Property:
+            property_class = cls._FACTORY.get(data.get("format"))
+            if property_class is None:
+                raise ValueError(f"Unsupported property format: {data.get('format')}")
 
-        Returns:
-            A list of Property instances representing the properties associated with the property.
+        instance = property_class()
+        instance._apiEndpoints = api
+        instance._json = data
+        instance._add_attrs_from_dict(data)
 
-        Raises:
-            Raises an error if the request to the API fails.
-        """
-        if self._apiEndpoints is None:
-            raise Exception("Internal error, please report")
+        def tag_from_api(tag_data: dict) -> Tag:
+            tag = Tag._from_api(
+                api,
+                tag_data
+                | {
+                    "space_id": instance.space_id,
+                    "property_id": instance.id,
+                },
+            )
+            tag._property_id = instance.id
+            return tag
+
+        # Object responses embed complete tags, while create/update requests expect
+        # their IDs (or keys). Keep the rich response representation as Tag objects
+        # so it can be serialized again without another lookup.
+        if isinstance(instance, Select) and isinstance(instance.select, dict):
+            instance.select = tag_from_api(instance.select)
+        elif isinstance(instance, MultiSelect):
+            instance.multi_select = [
+                tag_from_api(tag) if isinstance(tag, dict) else tag for tag in instance.multi_select
+            ]
+
+        instance._is_set = any(field in data for field in _VALUE_FIELDS)
+        return instance
+
+    @property
+    def is_set(self) -> bool:
+        return self._is_set
+
+    def _property_key(self) -> str:
+        if self.key:
+            return self.key
+        if not self.id or self._apiEndpoints is None:
+            raise ValueError(f"Property '{self.name}' has no API key")
 
         response = self._apiEndpoints.getProperty(self.space_id, self.id)
-        json_dict = response.get("property", {})
+        definition = response.get("property", {})
+        self.key = definition.get("key", "")
+        if not self.key:
+            raise ValueError(f"Property '{self.name}' has no API key")
+        return self.key
+
+    def _get_json(self) -> dict:
+        """Serialize this property to an Anytype PropertyLinkWithValue."""
+        json_dict = {"key": self._property_key()}
         if isinstance(self, Checkbox):
             json_dict["checkbox"] = self.value
         elif isinstance(self, Text):
@@ -101,17 +187,7 @@ class Property(APIWrapper):
 
             json_dict["multi_select"] = tag_ids
         elif isinstance(self, Date):
-            if self.value is None:
-                json_dict["date"] = None
-            elif isinstance(self.value, str):
-                if datetime.datetime is None or type(self.date) is not str:
-                    raise Exception("Invalid datetime initialization")
-                dt = datetime.datetime.strptime(self.date, "%d/%m/%Y")
-                json_dict["date"] = dt.strftime("%Y-%m-%dT%H:%M:%SZ")
-            elif isinstance(self.value, datetime.datetime):
-                if datetime.datetime is None or self.date is not datetime.datetime:
-                    raise Exception("Invalid datetime initialization")
-                json_dict["date"] = self.date.strftime("%Y-%m-%dT%H:%M:%SZ")
+            json_dict["date"] = _format_date(self.value)
         elif isinstance(self, Files):
             json_dict["files"] = self.value
         elif isinstance(self, Url):
@@ -121,13 +197,17 @@ class Property(APIWrapper):
         elif isinstance(self, Phone):
             json_dict["phone"] = self.value
         elif isinstance(self, Objects):
-            if isinstance(self.value, list):
-                ids = []
-                for v in self.value:
-                    ids.append(v.id)
-                json_dict["objects"] = ids
-            else:
-                json_dict["objects"] = [self.value.id]
+            values = self.value if isinstance(self.value, list) else [self.value]
+            object_ids = []
+            for value in values:
+                if isinstance(value, str):
+                    object_id = value
+                else:
+                    object_id = getattr(value, "id", "")
+                if not object_id:
+                    raise ValueError("Objects properties require object IDs or Object instances")
+                object_ids.append(object_id)
+            json_dict["objects"] = object_ids
         else:
             raise ValueError("Format not supported")
         return json_dict
@@ -177,22 +257,27 @@ class Property(APIWrapper):
             else:
                 raise ValueError("Value for Number property must be number")
         elif isinstance(self, Select):
-            if type(value) is str:
+            if isinstance(value, (str, Tag)):
                 self.select = value
             else:
-                raise ValueError("Value for Select property must be string")
+                raise ValueError("Value for Select property must be a string or Tag")
         elif isinstance(self, MultiSelect):
-            if type(value) is list:
+            if isinstance(value, list) and all(isinstance(item, (str, Tag)) for item in value):
                 self.multi_select = value
             else:
-                raise ValueError("Value for MultiSelect property must be list of strings")
+                raise ValueError("Value for MultiSelect property must be a list of strings or Tags")
         elif isinstance(self, Date):
-            if type(value) is str or type(value) is datetime.datetime:
+            if value is None or isinstance(value, (str, datetime.date, datetime.datetime)):
                 self.date = value
             else:
-                raise ValueError("Value for Date property must be string or datetime.datetime")
+                raise ValueError(
+                    "Value for Date property must be a string, date, datetime, or None"
+                )
         elif isinstance(self, Files):
-            raise ValueError("Files are not implemented yet")
+            if isinstance(value, list):
+                self.files = value
+            else:
+                raise ValueError("Value for Files property must be a list of file IDs")
         elif isinstance(self, Url):
             if type(value) is str:
                 self.url = value
@@ -209,9 +294,13 @@ class Property(APIWrapper):
             else:
                 raise ValueError("Value for Phone property must be string")
         elif isinstance(self, Objects):
-            self.objects = value
+            if isinstance(value, (str, list)) or getattr(value, "id", ""):
+                self.objects = value
+            else:
+                raise ValueError("Value for Objects property must contain object IDs or Objects")
         else:
             raise ValueError("Format not supported")
+        self._is_set = True
 
     _FACTORY: dict[str, type["Property"]] = {}
 
@@ -297,7 +386,7 @@ class Select(Property):
         return tag
 
     @requires_auth
-    def get_tags(self) -> list[Tag]:
+    def get_tags(self, offset: int = 0, limit: int = 100, filters: dict | None = None) -> list[Tag]:
         """
         Retrieves all tags associated with the property.
 
@@ -310,7 +399,7 @@ class Select(Property):
         if self._apiEndpoints is None:
             raise Exception("Internal error, please report")
 
-        response = self._apiEndpoints.getTags(self.space_id, self.id)
+        response = self._apiEndpoints.getTags(self.space_id, self.id, offset, limit, filters)
         types = [
             Tag._from_api(
                 self._apiEndpoints, data | {"space_id": self.space_id, "property_id": self.id}
@@ -392,7 +481,7 @@ class MultiSelect(Property):
         return tag
 
     @requires_auth
-    def get_tags(self) -> list[Tag]:
+    def get_tags(self, offset: int = 0, limit: int = 100, filters: dict | None = None) -> list[Tag]:
         """
         Retrieves all tags associated with the property.
 
@@ -405,7 +494,7 @@ class MultiSelect(Property):
         if self._apiEndpoints is None:
             raise Exception("Internal error, please report")
 
-        response = self._apiEndpoints.getTags(self.space_id, self.id)
+        response = self._apiEndpoints.getTags(self.space_id, self.id, offset, limit, filters)
         types = [
             Tag._from_api(
                 self._apiEndpoints, data | {"space_id": self.space_id, "property_id": self.id}
@@ -443,13 +532,13 @@ class MultiSelect(Property):
 
 class Date(Property):
     """
-    Represents a date property (str DD/MM/YYYY or `datetime.datetime`).
+    Represents a date property (date, datetime, DD/MM/YYYY, or RFC3339 string).
     """
 
     def __init__(self, name: str = ""):
         super().__init__(name)
         self.format = "date"
-        self.date: str | datetime.datetime = ""
+        self.date: str | datetime.date | datetime.datetime | None = ""
 
     def __repr__(self):
         return f"<Date({self.name})>"
@@ -457,7 +546,7 @@ class Date(Property):
 
 class Files(Property):
     """
-    Represents a files property (not implemented yet).
+    Represents a files property as a list of file IDs.
     """
 
     def __init__(self, name: str = ""):
@@ -527,7 +616,7 @@ class Phone(Property):
 
 class Objects(Property):
     """
-    Not implemented yet
+    Represents links to other objects, supplied as object IDs or Object instances.
     """
 
     def __init__(self, name: str = ""):

@@ -1,3 +1,4 @@
+import copy
 import re
 
 from .type import Type
@@ -45,23 +46,44 @@ class Object(APIWrapper):
         self.archived: bool = False
         self.description: str = ""
         self.layout: str = "basic"
+        self.root_id: str = ""
+        self.space_id: str = ""
+        self.template_id: str = template.id if template is not None else ""
 
         self.properties: dict = {}
         if type is not None:
-            if type.id == "":
-                raise Exception("Type has no id, create the type first and pass the created type")
-            for _, prop in type.properties.items():
-                if prop.key not in _ANYTYPE_SYSTEM_RELATIONS:
-                    self.properties[prop.name] = prop
+            self.add_type(type)
 
-            self.type = type
+    @staticmethod
+    def _normalize_property_name(name: str) -> str:
+        return re.sub(r"[^a-z0-9]+", "_", name.lower()).strip("_")
 
-        self.root_id: str = ""
-        self.space_id: str = ""
-        self.template_id: str = ""
+    def _property_for_attribute(self, name: str) -> Property | None:
+        properties = self.__dict__.get("properties")
+        if not isinstance(properties, dict):
+            return None
 
-        if template is not None:
-            self.template_id = template.id
+        for prop in properties.values():
+            if isinstance(prop, Property) and prop.key == name:
+                return prop
+        for prop in properties.values():
+            if isinstance(prop, Property) and self._normalize_property_name(prop.name) == name:
+                return prop
+        return None
+
+    def __getattr__(self, name):
+        prop = self._property_for_attribute(name)
+        if prop is not None:
+            return prop.value
+        raise AttributeError(f"{type(self).__name__!s} has no attribute {name!r}")
+
+    def __setattr__(self, name, value):
+        if not name.startswith("_"):
+            prop = self._property_for_attribute(name)
+            if prop is not None:
+                prop.value = value
+                return
+        object.__setattr__(self, name, value)
 
     @property
     def icon(self):
@@ -127,8 +149,39 @@ class Object(APIWrapper):
             type (anytype.Type): Type from the space retrieved using `space.get_types()[0]`, `space.get_type(type)`, `space.get_type_byname("Articles")`
 
         """
-        self.template_id = type.template_id
+        if not isinstance(type, Type) or not type.id:
+            raise ValueError("Type must be retrieved from or created in the Anytype API")
+
+        existing_properties = self.__dict__.get("properties", {})
+        properties = {}
+        for prop in type.properties.values():
+            if isinstance(prop, Property) and prop.key not in _ANYTYPE_SYSTEM_RELATIONS:
+                cloned = copy.copy(prop)
+                for value_attribute in ("multi_select", "files", "objects"):
+                    value = getattr(cloned, value_attribute, None)
+                    if isinstance(value, list):
+                        setattr(cloned, value_attribute, list(value))
+                cloned._is_set = False
+                properties[prop.name] = cloned
+
+        for existing_name, existing in existing_properties.items():
+            if not isinstance(existing, Property) or not existing.is_set:
+                continue
+            matching_name = next(
+                (
+                    name
+                    for name, prop in properties.items()
+                    if prop.key and prop.key == existing.key
+                ),
+                existing_name,
+            )
+            properties[matching_name] = existing
+
+        self.type = type
         self.type_key = type.key
+        self.properties = properties
+        if not self.template_id and type.template_id:
+            self.template_id = type.template_id
 
     def add_title1(self, text) -> None:
         """

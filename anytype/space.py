@@ -1,5 +1,4 @@
 from copy import deepcopy
-
 from .listview import ListView
 from .type import Type
 from .object import Object
@@ -48,12 +47,10 @@ class Space(APIWrapper):
         if isinstance(obj.properties, dict):
             for prop in obj.properties.values():
                 if isinstance(prop, Property):
-                    try:
-                        prop.space_id = self.id
-                        json = prop._get_json()
-                        properties_json.append(json)
-                    except:
-                        pass
+                    if not prop.is_set:
+                        continue
+                    prop.space_id = self.id
+                    properties_json.append(prop._get_json())
                 else:
                     raise TypeError("Internal error: expected an instance of Property")
         else:
@@ -80,13 +77,15 @@ class Space(APIWrapper):
         return object_data
 
     @requires_auth
-    def get_objects(self, offset=0, limit=100) -> list[Object]:
+    def get_objects(self, offset=0, limit=100, filters: dict | None = None) -> list[Object]:
         """
         Retrieves a list of objects associated with the space.
 
         Parameters:
             offset (int, optional): The offset for pagination (default: 0).
             limit (int, optional): The limit for the number of results (default: 100).
+            filters (dict, optional): Dynamic query filters keyed by property and
+                condition.
 
         Returns:
             A list of Object instances.
@@ -94,13 +93,27 @@ class Space(APIWrapper):
         Raises:
             Raises an error if the request to the API fails.
         """
-        response_data = self._apiEndpoints.getObjects(self.id, offset, limit)
+        response_data = self._apiEndpoints.getObjects(self.id, offset, limit, filters)
         objects = [
             Object._from_api(self._apiEndpoints, data | {"space_id": self.id})
             for data in response_data.get("data", [])
         ]
 
         return objects
+
+    @requires_auth
+    def get_chats(self, offset=0, limit=100, filters: dict | None = None) -> list[Object]:
+        """Retrieve chat container objects in this space."""
+        response_data = self._apiEndpoints.getChats(self.id, offset, limit, filters)
+        return [
+            Object._from_api(self._apiEndpoints, data | {"space_id": self.id})
+            for data in response_data.get("data", [])
+        ]
+
+    @requires_auth
+    def upload_file(self, file) -> dict:
+        """Upload a path or binary file object to this space."""
+        return self._apiEndpoints.uploadFile(self.id, file)
 
     @requires_auth
     def get_object(self, obj: str | Object) -> Object:
@@ -140,7 +153,7 @@ class Space(APIWrapper):
             Raises an error if the request to the API fails.
         """
         if obj.type is None and type is not None:
-            obj.type = type
+            obj.add_type(type)
 
         object_data = self._object_to_dict(obj)
         response = self._apiEndpoints.createObject(self.id, object_data)
@@ -390,13 +403,15 @@ class Space(APIWrapper):
         return Type._from_api(self._apiEndpoints, data | {"space_id": self.id})
 
     @requires_auth
-    def get_types(self, offset=0, limit=100) -> list[Type]:
+    def get_types(self, offset=0, limit=100, filters: dict | None = None) -> list[Type]:
         """
         Retrieves a list of types associated with the space.
 
         Parameters:
             offset (int, optional): The offset for pagination (default: 0).
             limit (int, optional): The limit for the number of results (default: 100).
+            filters (dict, optional): Dynamic query filters keyed by property and
+                condition.
 
         Returns:
             A list of Type instances.
@@ -404,7 +419,7 @@ class Space(APIWrapper):
         Raises:
             Raises an error if the request to the API fails.
         """
-        response = self._apiEndpoints.getTypes(self.id, offset, limit)
+        response = self._apiEndpoints.getTypes(self.id, offset, limit, filters)
         types = [
             Type._from_api(self._apiEndpoints, data | {"space_id": self.id})
             for data in response.get("data", [])
@@ -455,13 +470,17 @@ class Space(APIWrapper):
         return Member._from_api(self._apiEndpoints, data | {"space_id": self.id})
 
     @requires_auth
-    def get_members(self, offset: int = 0, limit: int = 100) -> list[Member]:
+    def get_members(
+        self, offset: int = 0, limit: int = 100, filters: dict | None = None
+    ) -> list[Member]:
         """
         Retrieves a list of members associated with the space.
 
         Parameters:
             offset (int, optional): The offset for pagination (default: 0).
             limit (int, optional): The limit for the number of results (default: 100).
+            filters (dict, optional): Dynamic query filters keyed by property and
+                condition.
 
         Returns:
             A list of Member instances.
@@ -469,7 +488,7 @@ class Space(APIWrapper):
         Raises:
             Raises an error if the request to the API fails.
         """
-        response = self._apiEndpoints.getMembers(self.id, offset, limit)
+        response = self._apiEndpoints.getMembers(self.id, offset, limit, filters)
         return [
             Member._from_api(self._apiEndpoints, data | {"space_id": self.id})
             for data in response.get("data", [])
@@ -496,13 +515,15 @@ class Space(APIWrapper):
         ]
 
     @requires_auth
-    def get_properties(self, offset=0, limit=100) -> list[Property]:
+    def get_properties(self, offset=0, limit=100, filters: dict | None = None) -> list[Property]:
         """
         Retrieves a list of property associated with the space.
 
         Parameters:
             offset (int, optional): The offset for pagination (default: 0).
             limit (int, optional): The limit for the number of results (default: 100).
+            filters (dict, optional): Dynamic query filters keyed by property and
+                condition.
 
         Returns:
             A list of Property instances.
@@ -510,7 +531,7 @@ class Space(APIWrapper):
         Raises:
             Raises an error if the request to the API fails.
         """
-        response = self._apiEndpoints.getProperties(self.id, offset, limit)
+        response = self._apiEndpoints.getProperties(self.id, offset, limit, filters)
         # types = [
         #     Property._from_api(self._apiEndpoints, data | {"space_id": self.id})
         #     for data in response.get("data", [])

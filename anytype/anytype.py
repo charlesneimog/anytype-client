@@ -20,8 +20,7 @@ class Anytype:
         self._apiEndpoints: apiEndpoints | None = None
         self._headers = {}
 
-        
-    def auth(self, force=False, callback=None, persist_token=True, api_key='') -> dict | None:
+    def auth(self, force=False, callback=None, persist_token=True, api_key="") -> dict | None:
         """
         Authenticates the user by retrieving or creating a session token.
         If persist_token is False, the token won't be saved to disk and will be returned instead.
@@ -53,7 +52,7 @@ class Anytype:
             self.api_key = auth_json.get("api_key")
             if self._validate_token():
                 return None
-            
+
         if not persist_token and api_key and not force:
             self.api_key = api_key
             if self._validate_token():
@@ -130,13 +129,15 @@ class Anytype:
         return Space._from_api(self._apiEndpoints, data)
 
     @requires_auth
-    def get_spaces(self, offset=0, limit=10) -> list[Space]:
+    def get_spaces(self, offset=0, limit=100, filters: dict | None = None) -> list[Space]:
         """
         Retrieves a list of spaces associated with the authenticated user.
 
         Parameters:
             offset (int, optional): The offset for pagination (default: 0).
-            limit (int, optional): The limit for the number of results (default: 10).
+            limit (int, optional): The limit for the number of results (default: 100).
+            filters (dict, optional): Dynamic query filters such as
+                {"name[contains]": "project"}.
 
         Returns:
             A list of Space instances.
@@ -144,7 +145,7 @@ class Anytype:
         Raises:
             Raises an error if the request to the API fails.
         """
-        response = self._apiEndpoints.getSpaces(offset, limit)
+        response = self._apiEndpoints.getSpaces(offset, limit, filters)
         # TODO: what I do here to save the space id?
         return [Space._from_api(self._apiEndpoints, data) for data in response.get("data", [])]
 
@@ -168,14 +169,25 @@ class Anytype:
         return Space._from_api(self._apiEndpoints, data)
 
     @requires_auth
-    def global_search(self, query, offset=0, limit=10) -> list[Object]:
+    def global_search(
+        self,
+        query: str = "",
+        offset: int = 0,
+        limit: int = 100,
+        types: list[str] | None = None,
+        sort: dict | None = None,
+        filters: dict | None = None,
+    ) -> list[Object]:
         """
         Performs a global search for objects across all spaces using a query string.
 
         Parameters:
             query (str): The search query string.
             offset (int, optional): The offset for pagination (default: 0).
-            limit (int, optional): The limit for the number of results (default: 10).
+            limit (int, optional): The limit for the number of results (default: 100).
+            types (list[str], optional): Type API keys to include.
+            sort (dict, optional): Sort direction and property key.
+            filters (dict, optional): A nested filter expression.
 
         Returns:
             A list of Object instances that match the search query.
@@ -183,6 +195,13 @@ class Anytype:
         Raises:
             Raises an error if the search request fails.
         """
-        response = self._apiEndpoints.globalSearch(query, offset, limit)
+        response = self._apiEndpoints.globalSearch(
+            query,
+            offset,
+            limit,
+            types=types,
+            sort=sort,
+            filters=filters,
+        )
         # TODO: what I do here to save the space id?
         return [Object._from_api(self._apiEndpoints, data) for data in response.get("data", [])]

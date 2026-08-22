@@ -63,6 +63,27 @@ new_note.add_text("This section was created programmatically using Python")
 created_object = my_space.create_object(new_note, note_type)
 print(f"Created object: {created_object.name}")
 ```
+
+### API 2025-11-08
+
+List endpoints accept the API's dynamic filter syntax as a dictionary, global search
+accepts the complete search body, and spaces expose chat listing and file upload:
+
+```python
+spaces = any.get_spaces(filters={"name[contains]": "project"})
+pages = any.global_search(
+    "roadmap",
+    types=["page", "task"],
+    sort={"direction": "desc", "property_key": "last_modified_date"},
+)
+
+chats = spaces[0].get_chats(limit=50)
+uploaded = spaces[0].upload_file("./report.pdf")
+objects = spaces[0].get_objects(
+    filters={"type": "page", "created_date[gte]": "2024-01-01"}
+)
+```
+
 ## 🌟 Examples
 
 
@@ -87,4 +108,3 @@ Contributions are welcomed! Here's how to help:
 ## 📄 License
 
 GPL-3.0 License - see LICENSE for details.
-

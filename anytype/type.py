@@ -86,7 +86,9 @@ class Type(APIWrapper):
         raise ValueError("Template not found")
 
     @requires_auth
-    def get_templates(self, offset: int = 0, limit: int = 100) -> list[Template]:
+    def get_templates(
+        self, offset: int = 0, limit: int = 100, filters: dict | None = None
+    ) -> list[Template]:
         """
         Retrieves all templates associated with the type from the API.
 
@@ -100,7 +102,7 @@ class Type(APIWrapper):
         Raises:
             Raises an error if the request to the API fails.
         """
-        response = self._apiEndpoints.getTemplates(self.space_id, self.id, offset, limit)
+        response = self._apiEndpoints.getTemplates(self.space_id, self.id, offset, limit, filters)
         self._all_templates = [
             Template._from_api(self._apiEndpoints, data | {"space_id": self.space_id})
             for data in response.get("data", [])
