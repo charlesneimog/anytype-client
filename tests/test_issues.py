@@ -43,3 +43,8 @@ def test_issue16():
     tester = space.get_objects()[0]
     print(tester)
     space.update_object(tester)
+
+
+def test_issue20():
+    space = get_apispace()
+    types = space.get_types()
