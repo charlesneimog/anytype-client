@@ -1,7 +1,7 @@
 [project]
 name = "anytype-client" 
-version = "1.0.0"
-description = " A Python Client for Anytype."
+version = "1.0.0a1"
+description = "A Python Client for Anytype."
 readme = "README.md"
 authors = [
   {name = "Charles K. Neimog", email = "charlesneimog@outlook.com"},
