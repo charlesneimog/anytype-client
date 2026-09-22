@@ -52,7 +52,10 @@ class Issue20Backend:
     def createObject(self, space_id, data):
         assert space_id == "space-api"
         self.created.append(data)
-        return {"object": {"id": "created-object", "name": data["name"]}}
+        return {"id": "created-object", "etag": "one"}
+
+    def getObject(self, space_id, object_id):
+        return {**self.created[-1], "id": object_id, "etag": "one"}
 
 
 @pytest.fixture
@@ -88,7 +91,7 @@ def issue20_context():
 
 
 def property_values(payload):
-    return {item["key"]: item for item in payload["properties"]}
+    return payload["properties"]
 
 
 def test_get_properties_returns_format_specific_classes(issue20_context):
@@ -107,7 +110,7 @@ def test_get_properties_returns_format_specific_classes(issue20_context):
 
 def test_dynamic_property_assignment_and_template_constructor(issue20_context):
     backend, space, quote_type, template, person = issue20_context
-    obj = Object(template=template)
+    obj = Object()
     obj.add_type(quote_type)
     obj.name = "Test"
 
@@ -118,16 +121,9 @@ def test_dynamic_property_assignment_and_template_constructor(issue20_context):
     payload = backend.created[-1]
     values = property_values(payload)
     assert created.id == "created-object"
-    assert payload["type_key"] == "quote"
-    assert payload["template_id"] == "template-quote"
-    assert values["date"] == {
-        "key": "date",
-        "date": "2026-06-02T00:00:00Z",
-    }
-    assert values["people"] == {
-        "key": "people",
-        "objects": ["object-person"],
-    }
+    assert payload["type"] == "quote"
+    assert values["date"] == "2026-06-02T00:00:00Z"
+    assert values["people"] == ["object-person"]
 
 
 def test_explicit_template_id_survives_type_argument(issue20_context):
@@ -135,9 +131,9 @@ def test_explicit_template_id_survives_type_argument(issue20_context):
     obj = Object("Test")
     obj.template_id = template.id
 
-    space.create_object(obj, quote_type)
-
-    assert backend.created[-1]["template_id"] == "template-quote"
+    with pytest.raises(NotImplementedError, match="template_id"):
+        space.create_object(obj, quote_type)
+    assert not backend.created
 
 
 def test_manually_selected_properties_serialize(issue20_context):
@@ -146,7 +142,7 @@ def test_manually_selected_properties_serialize(issue20_context):
     properties["date"].value = "2026-06-02"
     properties["people"].value = person
 
-    obj = Object("Manual", quote_type, template)
+    obj = Object("Manual", quote_type)
     obj.properties = {
         "date": properties["date"],
         "people": properties["people"],
@@ -154,8 +150,8 @@ def test_manually_selected_properties_serialize(issue20_context):
     space.create_object(obj)
 
     values = property_values(backend.created[-1])
-    assert values["date"]["date"] == "2026-06-02T00:00:00Z"
-    assert values["people"]["objects"] == ["object-person"]
+    assert values["date"] == "2026-06-02T00:00:00Z"
+    assert values["people"] == ["object-person"]
 
 
 def test_manual_properties_survive_type_argument(issue20_context):
@@ -172,8 +168,8 @@ def test_manual_properties_survive_type_argument(issue20_context):
     space.create_object(obj, quote_type)
 
     values = property_values(backend.created[-1])
-    assert values["date"]["date"] == "2026-06-02T00:00:00Z"
-    assert values["people"]["objects"] == ["object-person"]
+    assert values["date"] == "2026-06-02T00:00:00Z"
+    assert values["people"] == ["object-person"]
 
 
 @pytest.mark.parametrize(
@@ -193,7 +189,7 @@ def test_supported_date_inputs_serialize(issue20_context, value, expected):
     prop = quote_type.properties["Quote Date"]
     prop.value = value
 
-    assert prop._get_json() == {"key": "date", "date": expected}
+    assert prop._get_json() == {"date": expected}
 
 
 def test_objects_created_from_one_type_do_not_share_property_values(issue20_context):
@@ -258,10 +254,9 @@ def test_object_response_tags_can_be_serialized_again(issue20_context):
     assert isinstance(status.value, Tag)
     assert isinstance(topics, MultiSelect)
     assert all(isinstance(tag, Tag) for tag in topics.value)
-    assert status._get_json() == {"key": "status", "select": "tag-draft"}
+    assert status._get_json() == {"status": ["Draft"]}
     assert topics._get_json() == {
-        "key": "topics",
-        "multi_select": ["tag-python", "tag-api"],
+        "topics": ["Python", "API"],
     }
 
 

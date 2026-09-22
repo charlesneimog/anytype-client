@@ -1,4 +1,3 @@
-from datetime import datetime
 from os import PathLike
 from pathlib import Path
 from typing import TypeVar, Type
@@ -7,10 +6,9 @@ import requests
 
 from .utils import _ANYTYPE_SYSTEM_RELATIONS
 
-MIN_API_VERSION = "2025-11-08"
-MIN_REQUIRED_VERSION = datetime(2025, 11, 8).date()
+API_VERSION = "v2"
 API_CONFIG = {
-    "apiUrl": "http://localhost:31009/v1",
+    "apiUrl": "http://localhost:31009/v2",
     "apiAppName": "PythonClient",
 }
 
@@ -28,7 +26,8 @@ class ResponseHasError(Exception):
 
         if isinstance(payload, dict):
             self.code = payload.get("code")
-            message = payload.get("message") or f"Anytype API returned HTTP {self.status_code}"
+            self.issues = payload.get("issues", [])
+            message = payload.get("message") or payload.get("error") or f"Anytype API returned HTTP {self.status_code}"
         else:
             self.code = None
             message = str(payload) if payload else f"Anytype API returned HTTP {self.status_code}"
@@ -42,8 +41,6 @@ class apiEndpoints:
         self.api_url = API_CONFIG["apiUrl"].rstrip("/")
         self.app_name = API_CONFIG["apiAppName"]
         headers = dict(headers or {})
-        if "Anytype-Version" not in headers:
-            headers["Anytype-Version"] = MIN_API_VERSION
         self.headers = headers
 
     @staticmethod
@@ -52,9 +49,9 @@ class apiEndpoints:
         params.update({"offset": offset, "limit": limit})
         return params
 
-    def _request(self, method, path, params=None, json=None, files=None):
+    def _request(self, method, path, params=None, json=None, files=None, headers=None):
         url = f"{self.api_url}{path}"
-        headers = dict(self.headers)
+        headers = dict(self.headers) | dict(headers or {})
         if files is not None:
             # requests must generate the multipart boundary itself.
             for key in list(headers):
@@ -68,22 +65,10 @@ class apiEndpoints:
             json=json,
             params=params,
             files=files,
+            timeout=30,
         )
         if not 200 <= response.status_code < 300:
             raise ResponseHasError(response)
-
-        version_str = response.headers.get("Anytype-Version")
-        if version_str:
-            try:
-                version_date = datetime.strptime(version_str, "%Y-%m-%d").date()
-            except ValueError as error:
-                raise ValueError(
-                    f"Invalid Anytype-Version response header: {version_str}"
-                ) from error
-            if version_date < MIN_REQUIRED_VERSION:
-                raise ValueError(f"Anytype API version is too old: {version_str}")
-        else:
-            raise ValueError("Anytype-Version header not found, probably anytype is too old")
 
         if response.status_code == 204 or not response.content:
             return None
@@ -100,62 +85,80 @@ class apiEndpoints:
             json={"challenge_id": challengeId, "code": code},
         )
 
-    # --- lists ---
-    def getListViews(self, spaceId: str, listId: str, offset: int, limit: int):
-        options = self._pagination_params(offset, limit)
-        return self._request("GET", f"/spaces/{spaceId}/lists/{listId}/views", params=options)
+    # v2 collections and queries replace /lists.
+    def getListViews(self, spaceId, listId, offset=0, limit=100, kind="collection"):
+        return self._request("GET", f"/spaces/{spaceId}/{self._list_kind(kind)}/{listId}/views",
+                             params=self._pagination_params(offset, limit))
 
-    def getObjectsInList(self, spaceId: str, listId: str, viewId: str, offset: int, limit: int):
-        options = self._pagination_params(offset, limit)
-        return self._request(
-            "GET",
-            f"/spaces/{spaceId}/lists/{listId}/views/{viewId}/objects",
-            params=options,
-        )
+    @staticmethod
+    def _list_kind(kind):
+        if kind not in ("collection", "query"):
+            raise ValueError("List kind must be collection or query")
+        return "collections" if kind == "collection" else "queries"
 
-    def addObjectsToList(self, spaceId: str, listId: str, object_ids: list[str] | dict):
-        payload = object_ids if isinstance(object_ids, dict) else {"objects": object_ids}
-        return self._request("POST", f"/spaces/{spaceId}/lists/{listId}/objects", json=payload)
+    def getObjectsInList(self, spaceId, listId, viewId=None, offset=0, limit=100,
+                         kind="collection", fields=None):
+        params = self._pagination_params(offset, limit)
+        if viewId:
+            params["view"] = viewId
+        if fields:
+            params["fields"] = ",".join(fields)
+        return self._request("GET", f"/spaces/{spaceId}/{self._list_kind(kind)}/{listId}/objects",
+                             params=params)
 
-    def deleteObjectsFromList(self, spaceId: str, listId: str, objectId: str):
-        return self._request("DELETE", f"/spaces/{spaceId}/lists/{listId}/objects/{objectId}")
+    def addObjectsToList(self, spaceId, listId, object_ids):
+        items = object_ids["objects"] if isinstance(object_ids, dict) else object_ids
+        return self.updateObject(spaceId, listId, {"ops": [{"op": "add_items", "items": items}]})
+
+    def deleteObjectsFromList(self, spaceId, listId, objectId):
+        return self.updateObject(spaceId, listId,
+                                 {"ops": [{"op": "remove_items", "items": [objectId]}]})
+
+    def createCollection(self, spaceId, data):
+        return self._request("POST", f"/spaces/{spaceId}/collections", json=data)
+
+    def createQuery(self, spaceId, data):
+        return self._request("POST", f"/spaces/{spaceId}/queries", json=data)
 
     # --- objects ---
-    def createObject(self, spaceId: str, data: dict):
-        return self._request("POST", f"/spaces/{spaceId}/objects", json=data)
+    def createObject(self, spaceId, data, **options):
+        return self._request("POST", f"/spaces/{spaceId}/objects", json=data, params=options or None)
 
-    def updateObject(self, spaceId: str, objectId: str, data: dict):
-        return self._request("PATCH", f"/spaces/{spaceId}/objects/{objectId}", json=data)
+    def updateObject(self, spaceId, objectId, data, etag=None, **options):
+        return self._request("PATCH", f"/spaces/{spaceId}/objects/{objectId}", json=data,
+                             params=options or None, headers={"If-Match": etag} if etag else None)
 
-    def deleteObject(self, spaceId: str, objectId: str):
+    def deleteObject(self, spaceId, objectId):
         return self._request("DELETE", f"/spaces/{spaceId}/objects/{objectId}")
 
-    def getObject(self, spaceId: str, objectId: str):
-        return self._request("GET", f"/spaces/{spaceId}/objects/{objectId}")
+    def getObject(self, spaceId, objectId, **options):
+        return self._request("GET", f"/spaces/{spaceId}/objects/{objectId}",
+                             params={"ids": "full", **options})
 
-    def getObjects(self, spaceId: str, offset=0, limit=100, filters: dict | None = None):
-        options = self._pagination_params(offset, limit, filters)
-        return self._request("GET", f"/spaces/{spaceId}/objects", params=options)
+    def getObjects(self, spaceId, offset=0, limit=100, filters=None):
+        return self._request("GET", f"/spaces/{spaceId}/objects",
+                             params=self._pagination_params(offset, limit, filters))
+
+    def getSchema(self, kind):
+        return self._request("GET", f"/schemas/{kind}")
+
+    def validate(self, document):
+        return self._request("POST", "/validate", json=document)
 
     # --- search ---
-    def globalSearch(
-        self,
-        query: str = "",
-        offset=0,
-        limit=100,
-        types: list[str] | None = None,
-        sort: dict | None = None,
-        filters: dict | None = None,
-    ):
-        options = self._pagination_params(offset, limit)
-        payload = {"query": query}
-        if types is not None:
-            payload["types"] = types
-        if sort is not None:
-            payload["sort"] = sort
+    def globalSearch(self, query="", offset=0, limit=100, types=None, sort=None,
+                     filters=None, **options):
+        payload = {"query": query, **options}
+        if types:
+            if len(types) != 1:
+                raise ValueError("v2 takes one type; use a filter expression for multiple types")
+            payload["type"] = types[0]
+        if sort:
+            payload["sorts"] = [{("property" if k == "property_key" else k): v
+                                  for k, v in sort.items()}]
         if filters is not None:
-            payload["filters"] = filters
-        return self._request("POST", "/search", params=options, json=payload)
+            payload["filter" if isinstance(filters, str) else "filters"] = filters
+        return self._request("POST", "/search", params=self._pagination_params(offset, limit), json=payload)
 
     def search(self, spaceId: str, data: dict, offset: int = 0, limit: int = 10):
         options = {"offset": offset, "limit": limit}
@@ -195,8 +198,18 @@ class apiEndpoints:
         return self._request("POST", f"/spaces/{spaceId}/files", files={"file": file})
 
     # --- members ---
-    def getMember(self, spaceId: str, objectId: str):
-        return self._request("GET", f"/spaces/{spaceId}/members/{objectId}")
+    def getMember(self, spaceId, objectId):
+        if objectId == "me":
+            return self._request("GET", f"/spaces/{spaceId}/members/me")
+        offset = 0
+        while True:
+            page = self.getMembers(spaceId, offset, 100)
+            for member in page["data"]:
+                if member.get("id") == objectId:
+                    return member
+            if not page.get("has_more"):
+                raise ValueError(f"Member not found: {objectId}")
+            offset += 100
 
     def getMembers(
         self, spaceId: str, offset: int = 0, limit: int = 100, filters: dict | None = None
@@ -224,19 +237,14 @@ class apiEndpoints:
         return self._request("DELETE", f"/spaces/{spaceId}/types/{typeId}")
 
     # --- templates ---
-    def getTemplate(self, spaceId: str, typeId: str, templateId: str):
-        return self._request("GET", f"/spaces/{spaceId}/types/{typeId}/templates/{templateId}")
+    def getTemplate(self, spaceId, typeId, templateId):
+        return self.getObject(spaceId, templateId)
 
-    def getTemplates(
-        self,
-        spaceId: str,
-        typeId: str,
-        offset: int = 0,
-        limit: int = 100,
-        filters: dict | None = None,
-    ):
-        options = self._pagination_params(offset, limit, filters)
-        return self._request("GET", f"/spaces/{spaceId}/types/{typeId}/templates", params=options)
+    def getTemplates(self, spaceId, typeId, offset=0, limit=100, filters=None):
+        raise NotImplementedError("v2 has no template-list endpoint; retrieve a template by ID")
+
+    def createTemplate(self, spaceId, data):
+        return self._request("POST", f"/spaces/{spaceId}/templates", json=data)
 
     # --- Property ---
     def getProperties(
@@ -245,8 +253,16 @@ class apiEndpoints:
         options = self._pagination_params(offset, limit, filters)
         return self._request("GET", f"/spaces/{spaceId}/properties", params=options)
 
-    def getProperty(self, spaceId: str, propertyId: str):
-        return self._request("GET", f"/spaces/{spaceId}/properties/{propertyId}")
+    def getProperty(self, spaceId, propertyId):
+        offset = 0
+        while True:
+            page = self.getProperties(spaceId, offset, 100)
+            for prop in page["data"]:
+                if prop["key"] == propertyId:
+                    return prop
+            if not page.get("has_more"):
+                raise ValueError(f"Property not found: {propertyId}")
+            offset += 100
 
     def createProperty(self, spaceId: str, data: dict):
         return self._request("POST", f"/spaces/{spaceId}/properties", json=data)
@@ -268,22 +284,28 @@ class apiEndpoints:
     ):
         options = self._pagination_params(offset, limit, filters)
         return self._request(
-            "GET", f"/spaces/{spaceId}/properties/{propertyId}/tags", params=options
+            "GET", f"/spaces/{spaceId}/properties/{propertyId}/options", params=options
         )
 
-    def getTag(self, spaceId: str, propertyId: str, tagId: str):
-        return self._request("GET", f"/spaces/{spaceId}/properties/{propertyId}/tags/{tagId}")
+    def getTag(self, spaceId, propertyId, tagId):
+        offset = 0
+        while True:
+            page = self.getTags(spaceId, propertyId, offset, 100)
+            for tag in page["data"]:
+                if tag["name"] == tagId:
+                    return {"tag": tag}
+            if not page.get("has_more"):
+                raise ValueError(f"Option not found: {tagId}")
+            offset += 100
 
-    def createTag(self, spaceId: str, propertyId: str, data: dict):
-        return self._request("POST", f"/spaces/{spaceId}/properties/{propertyId}/tags", json=data)
+    def createTag(self, spaceId, propertyId, data):
+        raise NotImplementedError("v2 creates missing options through object writes with create_missing_options=True")
 
-    def updateTag(self, spaceId: str, propertyId: str, tagId: str, data: dict):
-        return self._request(
-            "PATCH", f"/spaces/{spaceId}/properties/{propertyId}/tags/{tagId}", json=data
-        )
+    def updateTag(self, spaceId, propertyId, tagId, data):
+        raise NotImplementedError("v2 does not expose an option-update endpoint")
 
-    def deleteTag(self, spaceId: str, propertyId: str, tagId: str):
-        return self._request("DELETE", f"/spaces/{spaceId}/properties/{propertyId}/tags/{tagId}")
+    def deleteTag(self, spaceId, propertyId, tagId):
+        raise NotImplementedError("v2 does not expose an option-delete endpoint")
 
 
 T = TypeVar("T", bound="APIWrapper")
@@ -310,7 +332,7 @@ class APIWrapper:
             if value is None:
                 continue
 
-            if key == "type":
+            if key == "type" and isinstance(value, dict):
                 from anytype import type
 
                 setattr(
@@ -318,7 +340,7 @@ class APIWrapper:
                     key,
                     type.Type()._from_api(self._apiEndpoints, value | {"space_id": self.space_id}),
                 )
-            elif key == "properties":
+            elif key == "properties" and isinstance(value, list):
                 from anytype import property
 
                 properties = {}

@@ -20,61 +20,15 @@ class Space(APIWrapper):
         self.id = ""
         self._all_types = []
 
-    @requires_auth
-    def _object_to_dict(self, obj: Object) -> dict:
-        if obj.type is None:
-            raise Exception(
-                "You need to set one type for the object, use add_type method from the Object class"
-            )
-        if type(obj.type) is dict:
-            obj.type = Type._from_api(self._apiEndpoints, obj.type | {"space_id": self.id})
-
-        if obj.type.key == "":
-            raise Exception(
-                "Type has an invalid key, please retrieve it from the API to get a valid type"
-            )
-
-        type_key = obj.type_key if obj.type_key != "" else obj.type.key
-        template_id = obj.template_id if obj.template_id != "" else obj.type.template_id
-        icon_json = {}
-        if isinstance(obj.icon, Icon):
-            icon_json = obj.icon._get_json()
-        else:
-            raise ValueError("Invalid icon type")
-
-        properties_json: list[dict] = []
-
-        if isinstance(obj.properties, dict):
-            for prop in obj.properties.values():
-                if isinstance(prop, Property):
-                    if not prop.is_set:
-                        continue
-                    prop.space_id = self.id
-                    properties_json.append(prop._get_json())
-                else:
-                    raise TypeError("Internal error: expected an instance of Property")
-        else:
-            raise ValueError("Invalid properties type")
-
-        # append description property
-        # To avoid incompatibility
-        properties_json.append(
-            {
-                "key": "description",
-                "text": obj.description,
-            }
-        )
-
-        object_data = {
-            "icon": icon_json,
-            "name": obj.name,
-            "body": obj.markdown,
-            "source": "",
-            "template_id": template_id,
-            "type_key": type_key,
-            "properties": properties_json,
-        }
-        return object_data
+    def _object_to_dict(self, obj):
+        if obj.template_id:
+            raise NotImplementedError("v2 object creation does not accept template_id; use the type's default_template")
+        if obj._markdown and obj.blocks:
+            raise ValueError("Supply blocks or markdown, not both")
+        if obj._markdown:
+            return {"type": obj.type.key if isinstance(obj.type, Type) else obj.type or "page",
+                    "name": obj.name, "properties": obj._property_values(), "markdown": obj._markdown}
+        return obj.to_document(for_create=True)
 
     @requires_auth
     def get_objects(self, offset=0, limit=100, filters: dict | None = None) -> list[Object]:
@@ -134,73 +88,92 @@ class Space(APIWrapper):
         else:
             objectId = obj
         response = self._apiEndpoints.getObject(self.id, objectId)
-        data = response.get("object", {})
+        data = response.get("object", response)
         return Object._from_api(self._apiEndpoints, data | {"space_id": self.id})
 
     @requires_auth
-    def create_object(self, obj: Object, type: Type | None = None) -> Object:
-        """
-        Creates a new object within the space, associated with a specified type.
+    def create_object(self, obj, type=None, **options):
+        """Create an AnyBlock document and fetch its complete server representation.
 
-        Parameters:
-            obj (Object): The Object instance to create.
-            type (Type): The Type instance to associate the object with.
-
-        Returns:
-            A new Object instance representing the created object.
-
-        Raises:
-            Raises an error if the request to the API fails.
+        ``dry_run=True`` returns the validation result without creating anything.
+        ``create_missing_options=True`` allows new select option names.
         """
         if obj.type is None and type is not None:
             obj.add_type(type)
-
-        object_data = self._object_to_dict(obj)
-        response = self._apiEndpoints.createObject(self.id, object_data)
-        new_obj = Object._from_api(
-            self._apiEndpoints, response.get("object", {}) | {"space_id": self.id}
-        )
-
-        new_obj._apiEndpoints = self._apiEndpoints
-        new_obj.space_id = self.id
-        return new_obj
-
-    def _diff_properties(self, new_props, old_props):
-        new_idx = {p["key"]: p for p in new_props if "key" in p}
-        old_idx = {p["key"]: p for p in old_props if "key" in p}
-
-        return [
-            deepcopy(prop)
-            for key, prop in new_idx.items()
-            if key not in old_idx or prop != old_idx[key]
-        ]
+        result = self._apiEndpoints.createObject(self.id, self._object_to_dict(obj), **options)
+        if options.get("dry_run"):
+            return result
+        return self.get_object(result["id"])
 
     @requires_auth
-    def update_object(self, obj: Object) -> Object:
+    def update_object(self, obj):
+        """Persist changes to a fetched object using an atomic, conditional patch.
+
+        Block field edits and appended blocks retain existing IDs. Structural
+        changes use explicit ``obj.patch`` operations (move_block/delete_block).
         """
-        Updates an existing object within the space.
+        if obj._snapshot is None:
+            raise ValueError("Retrieve the object before updating it")
+        if obj._markdown_dirty:
+            raise ValueError("Use insert_blocks with markdown or edit typed blocks; exported markdown is read-only")
+        old, new = obj._snapshot, obj.to_document()
+        ops = []
+        if old['type'] != new['type'] or old.get('icon') != new.get('icon') or any(
+            old.get(k) != new.get(k) for k in ('cover', 'collection_items', 'query_source')):
+            raise ValueError("Use v2 patch operations to change type, icon, cover or list membership")
+        changed = {key: value for key, value in new['properties'].items()
+                   if key not in old['properties'] or old['properties'][key] != value}
+        unset = [key for key in old['properties'] if key not in new['properties']]
+        if changed or unset:
+            op = {"op": "set_properties"}
+            if changed:
+                op["set"] = changed
+            if unset:
+                op["unset"] = unset
+            ops.append(op)
+        previous = old['blocks']
+        current = new['blocks']
+        if len(current) < len(previous) or any(
+            a.get('id') != b.get('id') or a.get('indent', 0) != b.get('indent', 0)
+            for a, b in zip(previous, current)):
+            raise ValueError("Use delete_block/move_block operations for structural block edits")
+        for before, after in zip(previous, current):
+            fields = {key: after.get(key) for key in before.keys() | after.keys()
+                      if key != 'id' and before.get(key) != after.get(key)}
+            if fields:
+                ops.append({"op": "update_block", "id": before['id'], "set": fields})
+        if len(current) > len(previous):
+            from .block import Block
+            ops.append({"op": "insert_blocks", "blocks": [Block.from_dict(b).to_dict(for_create=True)
+                        for b in current[len(previous):]]})
+        if ops:
+            obj.patch(ops)
+        return obj
 
-        Parameters:
-            obj (Object): The anytype.Object to be modified.
+    @requires_auth
+    def create_collection(self, name, objects=None):
+        items = [o.id if isinstance(o, Object) else o for o in objects or []]
+        result = self._apiEndpoints.createCollection(self.id, {"name": name, "items": items})
+        return self.get_object(result['id'])
 
-        Returns:
-            An Object instance representing the updated object.
+    @requires_auth
+    def create_query(self, name, type, **options):
+        result = self._apiEndpoints.createQuery(self.id, {"name": name,
+            "type": type.key if isinstance(type, Type) else type, **options})
+        return self.get_object(result['id'])
 
-        Raises:
-            Raises an error if the request to the API fails.
-        """
-        data = self._object_to_dict(obj)
-        old_obj = self._object_to_dict(self.get_object(obj.id))
+    @requires_auth
+    def get_list_objects(self, list, view=None, offset=0, limit=100, kind="collection", fields=None):
+        result = self._apiEndpoints.getObjectsInList(self.id,
+            list.id if isinstance(list, Object) else list, view, offset, limit, kind=kind, fields=fields)
+        return [Object._from_api(self._apiEndpoints, row | {"space_id": self.id}) for row in result['data']]
 
-        # keep only changed properties
-        data["properties"] = self._diff_properties(
-            data.get("properties", []), old_obj.get("properties", [])
-        )
-
-        response = self._apiEndpoints.updateObject(self.id, obj.id, data)
-
-        data = response.get("object", {})
-        return Object._from_api(self._apiEndpoints, data | {"space_id": self.id})
+    @requires_auth
+    def upload_file_url(self, url, name=None):
+        data = {"url": url}
+        if name:
+            data["name"] = name
+        return self._apiEndpoints._request("POST", f"/spaces/{self.id}/files", json=data)
 
     @requires_auth
     def delete_object(self, obj: str | Object) -> None:
@@ -221,136 +194,27 @@ class Space(APIWrapper):
             obj = obj.id
         self._apiEndpoints.deleteObject(self.id, obj)
 
-    @requires_auth
-    def create_type(self, type: Type) -> Type:
-        """
-        Create a new type within the current space.
-
-        This function validates the `Type` instance, ensures all required fields are
-        present (icon, layout, name, plural_name), and resolves all referenced
-        properties—creating them if they don't already exist.
-
-        Parameters:
-            type (Type): The Type instance to be created, including its properties.
-
-        Returns:
-            Type: The created Type instance as returned by the API.
-
-        Raises:
-            Exception: If any of the required fields (icon, layout, name, plural_name)
-                       are missing.
-            ValueError: If a property has an invalid or unrecognized format.
-        """
-
-        if not type.icon or not type.layout or not type.name or not type.plural_name:
-            raise Exception("Please define icon, layout, name and plural_name")
-
-        defined_props = []
-        all_props = self.get_properties(offset=0, limit=200)
-        for _, prop in type.properties.items():
-            prop.space_id = self.id
-            prop_name = prop.name if isinstance(prop, Property) else prop["name"]
-            prop_format = prop.format if isinstance(prop, Property) else prop["format"]
-            exists = False
-            for any_prop in all_props:
-                if any_prop.name == prop_name:
-                    exists = True
-                    prop = any_prop
-
-            if not exists:
-                prop = Property.from_format(prop_name, prop_format)
-                prop.space_id = self.id
-
-            if isinstance(prop, Property):
-                # For locally created properties without an id, use a simple dict representation
-                if prop.id == "":
-                    defined_props.append({"name": prop.name, "format": prop.format})
-                else:
-                    # For properties retrieved from API, use the _json attribute
-                    defined_props.append(prop._json)
-            elif isinstance(prop, dict):
-                defined_props.append(prop)
-            else:
-                raise ValueError("Invalid prop type, this should not happen, please report!")
-
-        icon = type.icon._get_json()
-        data = {
-            "name": type.name,
-            "plural_name": type.plural_name,
-            "icon": icon,
-            "layout": type.layout,
-            "properties": defined_props,
-        }
-        response = self._apiEndpoints.createType(self.id, data)
-        type = Type._from_api(self._apiEndpoints, response.get("type", {}) | {"space_id": self.id})
-        return type
+    def _type_to_dict(self, type):
+        data = {"name": type.name, "plural_name": type.plural_name, "layout": type.layout,
+                "icon": type.icon._get_json(), "property_definitions": [
+                    {"property": p.key} if p.key else {"name": p.name, "format": p.format}
+                    for p in type.properties.values()]}
+        if type.template_id:
+            data["default_template"] = type.template_id
+        return data
 
     @requires_auth
-    def update_type(self, type: Type) -> Type:
-        """
-        Update an existing type within the current space.
+    def create_type(self, type):
+        data = self._type_to_dict(type)
+        if type.key:
+            data["api_key"] = type.key
+        result = self._apiEndpoints.createType(self.id, data)
+        return self.get_type(result['key'])
 
-        This function updates the specified `Type` instance, including its metadata and properties.
-        It ensures the type exists, validates the provided fields, and updates any referenced
-        properties as needed.
-
-        Parameters:
-            type (Type): The Type instance to be updated. Must include a valid `id`.
-
-        Returns:
-            Type: The updated Type instance as returned by the API.
-
-        Raises:
-            Exception: If the type does not exist, the ID is missing, or an API error occurs.
-            ValueError: If any updated fields or properties are invalid or unrecognized.
-        """
-        if not type.icon or not type.layout or not type.name or not type.plural_name:
-            raise Exception("Please define icon, layout, name and plural_name")
-
-        defined_props = []
-        all_props = self.get_properties(offset=0, limit=200)
-        for prop in type.properties:
-            if isinstance(prop, str):
-                prop_name = prop
-            elif isinstance(prop, Property):
-                prop_name = prop.name
-            else:
-                raise TypeError("Invalid type for update_type, please report")
-
-            # BUG: Tag is not a valid prop?
-            if prop_name == "Tag":
-                continue
-
-            prop_format = prop.format
-            exists = False
-            for any_prop in all_props:
-                if any_prop.name == prop_name:
-                    exists = True
-                    prop = any_prop
-
-            if not exists:
-                prop = Property.from_format(prop_name, prop_format)
-                prop = self.create_property(prop)
-                pass
-
-            if isinstance(prop, Property):
-                defined_props.append(prop._json)
-            elif isinstance(prop, dict):
-                defined_props.append(prop)
-            else:
-                raise ValueError("Invalid prop type, this should not happen, please report!")
-
-        icon = type.icon._get_json()
-        data = {
-            "name": type.name,
-            "plural_name": type.plural_name,
-            "icon": icon,
-            "layout": type.layout,
-            "properties": defined_props,
-        }
-        response = self._apiEndpoints.updateType(self.id, type.id, data)
-        type = Type._from_api(self._apiEndpoints, response.get("type", {}) | {"space_id": self.id})
-        return type
+    @requires_auth
+    def update_type(self, type):
+        self._apiEndpoints.updateType(self.id, type.key, self._type_to_dict(type))
+        return self.get_type(type.key)
 
     def delete_type(self, type: str | Type) -> None:
         """
@@ -370,37 +234,16 @@ class Space(APIWrapper):
             Exception: If the deletion fails due to an API error or invalid ID.
         """
         if isinstance(type, Type):
-            typeId = type.id
+            typeId = type.key or type.id
         else:
             typeId = type
         _ = self._apiEndpoints.deleteType(self.id, typeId)
 
     @requires_auth
-    def get_type(self, type: str | Type) -> Type:
-        """
-        Retrieves a specific type by its ID.
-
-        Parameters:
-            type (str): The name of the type to retrieve.
-
-        Returns:
-            A Type instance representing the type.
-
-        Raises:
-            ValueError: If the type with the specified name is not found.
-        """
-        if isinstance(type, Type):
-            typeId = type.id
-        else:
-            type = self.get_type_byname(type)
-            typeId = type.id
-
-        response = self._apiEndpoints.getType(self.id, typeId)
-        data = response.get("type", {})
-        # TODO: Sometimes we need to add more attributes beyond the ones in the
-        # API response. There might be a cleaner way to do this, but doing
-        # a dict merge with | works for now.
-        return Type._from_api(self._apiEndpoints, data | {"space_id": self.id})
+    def get_type(self, type):
+        key = type.key or type.id if isinstance(type, Type) else type
+        response = self._apiEndpoints.getType(self.id, key)
+        return Type._from_api(self._apiEndpoints, response | {"space_id": self.id})
 
     @requires_auth
     def get_types(self, offset=0, limit=100, filters: dict | None = None) -> list[Type]:
@@ -450,7 +293,7 @@ class Space(APIWrapper):
             type_len = len(types)
             for type in types:
                 if type.name == name:
-                    return type
+                    return self.get_type(type.key)
             if type_len < limit:
                 break
 
@@ -466,7 +309,7 @@ class Space(APIWrapper):
             memberId = member
 
         response = self._apiEndpoints.getMember(self.id, memberId)
-        data = response.get("object", {})
+        data = response.get("object", response)
         return Member._from_api(self._apiEndpoints, data | {"space_id": self.id})
 
     @requires_auth
@@ -496,12 +339,12 @@ class Space(APIWrapper):
 
     @requires_auth
     def get_listviews(
-        self, listId: str | Object | Type, offset: int = 0, limit: int = 100
+        self, listId: str | Object | Type, offset: int = 0, limit: int = 100, kind="collection"
     ) -> list[ListView]:
         if isinstance(listId, Object) or isinstance(listId, Type):
             listId = listId.id
 
-        response = self._apiEndpoints.getListViews(self.id, listId, offset, limit)
+        response = self._apiEndpoints.getListViews(self.id, listId, offset, limit, kind=kind)
         return [
             ListView._from_api(
                 self._apiEndpoints,
@@ -509,6 +352,7 @@ class Space(APIWrapper):
                 | {
                     "space_id": self.id,
                     "list_id": listId,
+                    "kind": kind,
                 },
             )
             for data in response.get("data", [])
@@ -551,91 +395,44 @@ class Space(APIWrapper):
             "name": prop.name,
             "format": prop.format,
         }
+        if prop.key:
+            object_data["key"] = prop.key
+        if hasattr(prop, "options"):
+            object_data["options"] = prop.options
         response = self._apiEndpoints.createProperty(self.id, object_data)
-        prop = Property._from_api(
-            self._apiEndpoints, response.get("property", {}) | {"space_id": self.id}
-        )
-        return prop
+        return self.get_property(response["key"])
 
     @requires_auth
     def get_property(self, prop: str | Property) -> Property:
         if isinstance(prop, Property):
-            propertyId = prop.id
+            propertyId = prop.key or prop.id
         else:
             propertyId = prop
 
         response = self._apiEndpoints.getProperty(self.id, propertyId)
-        data = response.get("property", {})
+        data = response.get("property", response)
         prop = Property._from_api(self._apiEndpoints, data | {"space_id": self.id})
         return prop
 
-    def get_property_bykey(self, key: str) -> Property:
-        all_properties = self.get_properties(offset=0, limit=100)
-        offset = 0
-        limit = 50
-        while True:
-            for prop in all_properties:
-                if prop.key == key:
-                    return prop
-
-            if len(all_properties) < 100:
-                break
-            else:
-                all_properties = self.get_properties(offset=offset, limit=limit)
-            offset += limit
-            limit += 100
-
-        # If we reach here, the property was not found
-        raise ValueError("Property not found, create it using create_property method")
+    def get_property_bykey(self, key):
+        return self.get_property(key)
 
     @requires_auth
-    def search(
-        self, query, type: Type | list[Type] | None = None, offset: int = 0, limit: int = 10
-    ) -> list[Object]:
-        """
-        Performs a search for objects in the space using a query string.
-
-        Parameters:
-            query (str): The search query string.
-            type (Type, optional): The type to filter by.
-            offset (int, optional): The offset for pagination (default: 0).
-            limit (int, optional): The limit for the number of results (default: 10).
-
-        Returns:
-            A list of Object instances that match the search query.
-
-        Raises:
-            ValueError: If the space ID is not set.
-        """
-        if self.id == "":
-            raise ValueError("Space ID is required")
-
-        types = []
-
-        if isinstance(type, Type):
-            key = type.key
-            if key == "":
-                key = type.name.lower()
-            types = [key]
-        elif isinstance(type, list):
-            for t in type:
-                key = t.key
-                if key == "":
-                    key = t.name.lower()
-                types.append(key)
-
-        print(types)
-
-        data = {
-            "query": query,
-            "sort": {"direction": "desc", "property_key": "last_modified_date"},
-            "types": types,
-        }
+    def search(self, query="", type=None, offset=0, limit=100, *, filters=None, filter=None,
+               sorts=None, fields=None):
+        data = {"query": query}
+        if type is not None:
+            if isinstance(type, list):
+                if len(type) != 1:
+                    raise ValueError("Use the type filter for searches across multiple types")
+                type = type[0]
+            data["type"] = type.key if isinstance(type, Type) else type
+        for key, value in (("filters", filters), ("filter", filter), ("sorts", sorts), ("fields", fields)):
+            if value is not None:
+                data[key] = value
         response = self._apiEndpoints.search(self.id, data, offset, limit)
-        return [
-            Object._from_api(self._apiEndpoints, data | {"space_id": self.id})
-            for data in response.get("data", [])
-        ]
+        return [Object._from_api(self._apiEndpoints, row | {"space_id": self.id})
+                for row in response.get("data", [])]
 
     def __repr__(self):
         return f"<Space(name={self.name})>"

@@ -8,6 +8,7 @@ class ListView(APIWrapper):
         self._apiEndpoints: apiEndpoints | None = None
         self.space_id = ""
         self.list_id = ""
+        self.kind = "collection"
         self.id = ""
         self.name = ""
 
@@ -27,7 +28,7 @@ class ListView(APIWrapper):
             list[Object]: A list of Object instances parsed from the API response.
         """
         response = self._apiEndpoints.getObjectsInList(
-            self.space_id, self.list_id, self.id, offset, limit
+            self.space_id, self.list_id, self.id, offset, limit, kind=self.kind
         )
 
         return [
@@ -70,6 +71,8 @@ class ListView(APIWrapper):
         Raises:
             Exception: If the API call to add objects to the list view fails.
         """
+        if self.kind != "collection":
+            raise ValueError("Query membership is determined by filters")
         id_lists = [obj.id for obj in objs]
         payload = {"objects": id_lists}
         response = self._apiEndpoints.addObjectsToList(self.space_id, self.list_id, payload)
@@ -92,6 +95,8 @@ class ListView(APIWrapper):
         Raises:
             Exception: If the API call to remove the object from the list view fails.
         """
+        if self.kind != "collection":
+            raise ValueError("Query membership is determined by filters")
         if isinstance(obj, Object):
             objId = obj.id
         else:

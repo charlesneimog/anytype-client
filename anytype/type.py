@@ -29,6 +29,32 @@ class Type(APIWrapper):
         if name != "" and self._apiEndpoints:
             self.set_template(name)
 
+    @classmethod
+    def _from_api(cls, api, data):
+        if "formatVersion" not in data:
+            return super()._from_api(api, data)
+        obj = cls()
+        obj._apiEndpoints = api
+        obj.space_id = data.get("space_id", "")
+        obj.id = data.get("id", "")
+        obj.name = data.get("properties", {}).get("name", "")
+        settings = data.get("type_settings", {})
+        obj.key = settings.get("api_key", data.get("internal_key", ""))
+        obj.layout = settings.get("layout", "basic")
+        obj.plural_name = settings.get("plural_name", "")
+        obj.template_id = settings.get("default_template", "")
+        if data.get("icon"):
+            obj.icon = data["icon"]
+        obj.properties = {}
+        for definition in settings.get("property_definitions", []):
+            if definition.get("format") not in Property._FACTORY:
+                continue
+            prop = Property._from_api(api, {"key": definition['property'],
+                "name": definition.get('name', definition['property']),
+                "format": definition['format'], "space_id": obj.space_id})
+            obj.properties[prop.name] = prop
+        return obj
+
     @property
     def icon(self):
         return self._icon
@@ -149,16 +175,8 @@ class Type(APIWrapper):
         Raises:
             Exception: If the request to the API fails or the template cannot be retrieved.
         """
-        response_data = self._apiEndpoints.getTemplate(self.space_id, self.id, id)
-
-        # TODO: Fix this
-        template = Template()
-        template._apiEndpoints = self._apiEndpoints
-        for data in response_data.get("data", []):
-            for key, value in data.items():
-                template.__dict__[key] = value
-
-        return template
+        data = self._apiEndpoints.getTemplate(self.space_id, self.key, id)
+        return Template._from_api(self._apiEndpoints, data | {"space_id": self.space_id})
 
     def add_property(self, property: Property) -> None:
         """

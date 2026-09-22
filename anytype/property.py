@@ -131,86 +131,30 @@ class Property(APIWrapper):
             raise ValueError(f"Property '{self.name}' has no API key")
 
         response = self._apiEndpoints.getProperty(self.space_id, self.id)
-        definition = response.get("property", {})
+        definition = response.get("property", response)
         self.key = definition.get("key", "")
         if not self.key:
             raise ValueError(f"Property '{self.name}' has no API key")
         return self.key
 
-    def _get_json(self) -> dict:
-        """Serialize this property to an Anytype PropertyLinkWithValue."""
-        json_dict = {"key": self._property_key()}
-        if isinstance(self, Checkbox):
-            json_dict["checkbox"] = self.value
-        elif isinstance(self, Text):
-            json_dict["text"] = self.value
-        elif isinstance(self, Number):
-            json_dict["number"] = self.value
-        elif isinstance(self, Select):
-            all_tags = None  # self.get_tags()
-            if isinstance(self.select, Tag):
-                json_dict["select"] = self.select.id
-            else:
-                if all_tags is None:
-                    all_tags = self.get_tags()
-                notfound = True
-                for found_tag in all_tags:
-                    if found_tag.name == self.select:
-                        json_dict["select"] = found_tag.id
-                        notfound = False
-                        break
-                if notfound:
-                    random_color = random.choice(_ANYTYPE_PROPERTIES_COLORS)
-                    tag_obj = self.create_tag(self.select, random_color)
-                    warnings.warn(f"Tag '{tag_obj.name}' not exist, creating it")
-                    json_dict["select"] = tag_obj.id
-        elif isinstance(self, MultiSelect):
-            tag_ids = []
-            all_tags = None  # self.get_tags()
-            for tag in self.multi_select:
-                if isinstance(tag, Tag):
-                    tag_ids.append(tag.id)
-                else:
-                    if all_tags is None:
-                        all_tags = self.get_tags()
-                    notfound = True
-                    for found_tag in all_tags:
-                        if found_tag.name == tag:
-                            tag_ids.append(found_tag.id)
-                            notfound = False
-                            break
-                    if notfound:
-                        random_color = random.choice(_ANYTYPE_PROPERTIES_COLORS)
-                        tag_obj = self.create_tag(tag, random_color)
-                        tag_ids.append(tag_obj.id)
-                        warnings.warn(f"Tag '{tag_obj.name}' not exist, creating it")
+    def to_value(self):
+        """Return the unwrapped value used by v2 property maps."""
+        value = self.value
+        if self.format == "date":
+            return _format_date(value)
+        if self.format in ("select", "multi_select"):
+            values = value if isinstance(value, list) else ([value] if value else [])
+            return [item.name if isinstance(item, Tag) else item for item in values]
+        if self.format in ("objects", "files"):
+            values = value if isinstance(value, list) else ([value] if value else [])
+            ids = [item if isinstance(item, str) else getattr(item, "id", "") for item in values]
+            if not all(ids):
+                raise ValueError("Object references require object IDs or Object instances")
+            return ids
+        return value
 
-            json_dict["multi_select"] = tag_ids
-        elif isinstance(self, Date):
-            json_dict["date"] = _format_date(self.value)
-        elif isinstance(self, Files):
-            json_dict["files"] = self.value
-        elif isinstance(self, Url):
-            json_dict["url"] = self.value
-        elif isinstance(self, Email):
-            json_dict["email"] = self.value
-        elif isinstance(self, Phone):
-            json_dict["phone"] = self.value
-        elif isinstance(self, Objects):
-            values = self.value if isinstance(self.value, list) else [self.value]
-            object_ids = []
-            for value in values:
-                if isinstance(value, str):
-                    object_id = value
-                else:
-                    object_id = getattr(value, "id", "")
-                if not object_id:
-                    raise ValueError("Objects properties require object IDs or Object instances")
-                object_ids.append(object_id)
-            json_dict["objects"] = object_ids
-        else:
-            raise ValueError("Format not supported")
-        return json_dict
+    def _get_json(self):
+        return {self._property_key(): self.to_value()}
 
     @property
     def value(self):
@@ -379,7 +323,7 @@ class Select(Property):
         if self._apiEndpoints is None:
             raise Exception("Internal error, please report")
 
-        response = self._apiEndpoints.createTag(self.space_id, self.id, data)
+        response = self._apiEndpoints.createTag(self.space_id, self.key or self.id, data)
         tag = Tag._from_api(
             self._apiEndpoints, response.get("tag", []) | {"space_id": self.space_id}
         )
@@ -399,7 +343,7 @@ class Select(Property):
         if self._apiEndpoints is None:
             raise Exception("Internal error, please report")
 
-        response = self._apiEndpoints.getTags(self.space_id, self.id, offset, limit, filters)
+        response = self._apiEndpoints.getTags(self.space_id, self.key or self.id, offset, limit, filters)
         types = [
             Tag._from_api(
                 self._apiEndpoints, data | {"space_id": self.space_id, "property_id": self.id}
@@ -425,7 +369,7 @@ class Select(Property):
         if self._apiEndpoints is None:
             raise Exception("Internal error, please report")
 
-        response = self._apiEndpoints.getTag(self.space_id, self.id, tag_id)
+        response = self._apiEndpoints.getTag(self.space_id, self.key or self.id, tag_id)
         tag = Tag._from_api(
             self._apiEndpoints, response.get("tag", []) | {"space_id": self.space_id}
         )
@@ -474,7 +418,7 @@ class MultiSelect(Property):
         if self._apiEndpoints is None:
             raise Exception("Internal error, please report")
 
-        response = self._apiEndpoints.createTag(self.space_id, self.id, data)
+        response = self._apiEndpoints.createTag(self.space_id, self.key or self.id, data)
         tag = Tag._from_api(
             self._apiEndpoints, response.get("tag", []) | {"space_id": self.space_id}
         )
@@ -494,7 +438,7 @@ class MultiSelect(Property):
         if self._apiEndpoints is None:
             raise Exception("Internal error, please report")
 
-        response = self._apiEndpoints.getTags(self.space_id, self.id, offset, limit, filters)
+        response = self._apiEndpoints.getTags(self.space_id, self.key or self.id, offset, limit, filters)
         types = [
             Tag._from_api(
                 self._apiEndpoints, data | {"space_id": self.space_id, "property_id": self.id}
@@ -520,7 +464,7 @@ class MultiSelect(Property):
         if self._apiEndpoints is None:
             raise Exception("Internal error, please report")
 
-        response = self._apiEndpoints.getTag(self.space_id, self.id, tag_id)
+        response = self._apiEndpoints.getTag(self.space_id, self.key or self.id, tag_id)
         tag = Tag._from_api(
             self._apiEndpoints, response.get("tag", []) | {"space_id": self.space_id}
         )

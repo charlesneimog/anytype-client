@@ -1,6 +1,7 @@
 import copy
 import re
 
+from . import block as blocks
 from .type import Type
 from .template import Template
 from .icon import Icon
@@ -33,7 +34,8 @@ class Object(APIWrapper):
 
     """
 
-    def __init__(self, name: str = "", type: Type | None = None, template: Template | None = None):
+    def __init__(self, name: str = "", type: Type | str | None = None, template: Template | None = None,
+                 blocks=None):
         self._apiEndpoints: apiEndpoints | None = None
         self._icon: Icon = Icon()
         self._values: dict = {}
@@ -43,6 +45,10 @@ class Object(APIWrapper):
         self.source: str = ""
         self.name: str = name
         self._markdown: str = ""
+        self._markdown_dirty = False
+        self.blocks = list(blocks or [])
+        self.etag = ""
+        self._snapshot = None
         self.archived: bool = False
         self.description: str = ""
         self.layout: str = "basic"
@@ -75,6 +81,10 @@ class Object(APIWrapper):
         prop = self._property_for_attribute(name)
         if prop is not None:
             return prop.value
+        properties = self.__dict__.get("properties", {})
+        for key, value in properties.items():
+            if key == name or self._normalize_property_name(key) == name:
+                return value
         raise AttributeError(f"{type(self).__name__!s} has no attribute {name!r}")
 
     def __setattr__(self, name, value):
@@ -83,6 +93,11 @@ class Object(APIWrapper):
             if prop is not None:
                 prop.value = value
                 return
+            if name not in self.__dict__ and not hasattr(type(self), name):
+                for key in self.__dict__.get("properties", {}):
+                    if key == name or self._normalize_property_name(key) == name:
+                        self.properties[key] = value
+                        return
         object.__setattr__(self, name, value)
 
     @property
@@ -126,20 +141,97 @@ class Object(APIWrapper):
 
     @property
     def markdown(self):
-        pass
+        """Read-only server export, or locally supplied creation markdown."""
+        if not self._markdown and self.id and self._apiEndpoints is not None:
+            data = self._apiEndpoints.getObject(self.space_id, self.id, format="md")
+            self._markdown = data.get("markdown", "") if isinstance(data, dict) else data
+        return self._markdown
 
     @markdown.setter
-    def markdown(self, text: str):
+    def markdown(self, text):
         self._markdown = text
+        self._markdown_dirty = True
 
-    @markdown.getter
-    def markdown(self):
-        if self._markdown == "" and self.id and self._apiEndpoints is not None:
-            data = self._apiEndpoints.getObject(self.space_id, self.id)
-            self._markdown = data["object"]["markdown"]
-            if isinstance(self._markdown, (list, tuple)):
-                self._markdown = "".join(self._markdown)
-        return self._markdown
+    @classmethod
+    def _from_api(cls, api, data):
+        if isinstance(data.get("properties"), list):
+            return super()._from_api(api, data)
+        obj = cls()
+        obj._apiEndpoints = api
+        obj._json = copy.deepcopy(data)
+        for key, value in data.items():
+            if key == "blocks":
+                obj.blocks = [blocks.Block.from_dict(item) for item in value]
+            elif key == "properties":
+                obj.properties = copy.deepcopy(value)
+            elif key == "type":
+                obj.type = value
+                obj.type_key = value if isinstance(value, str) else value.get("key", "")
+            elif key != "$schema":
+                setattr(obj, key, value)
+        obj.name = data.get("name", obj.properties.get("name", ""))
+        obj.description = obj.properties.get("description", "")
+        obj._snapshot = obj.to_document() if "blocks" in data else None
+        obj._markdown_dirty = False
+        return obj
+
+    def _property_values(self):
+        values = {}
+        for key, prop in self.properties.items():
+            if isinstance(prop, Property):
+                if prop.is_set:
+                    values[prop._property_key()] = prop.to_value()
+            else:
+                values[key] = copy.deepcopy(prop)
+        values["name"] = self.name
+        if self.description or "description" in values:
+            values["description"] = self.description
+        return values
+
+    def to_document(self, *, for_create=False):
+        """Serialize an AnyBlock 2.0 document, preserving typed block content."""
+        type_key = self.type.key if isinstance(self.type, Type) else self.type
+        doc = {"formatVersion": "2.0", "type": type_key or self.type_key or "page",
+               "properties": self._property_values(),
+               "blocks": [(item if isinstance(item, blocks.Block) else blocks.Block.from_dict(item))
+                          .to_dict(for_create=for_create) for item in self.blocks]}
+        if self.icon is not None:
+            doc["icon"] = self.icon._get_json()
+        for key in ("cover", "collection_items", "query_source"):
+            if key in self.__dict__:
+                doc[key] = copy.deepcopy(self.__dict__[key])
+        return doc
+
+    def add_block(self, block):
+        """Append a Block (or wire mapping) locally and return it."""
+        if not isinstance(block, blocks.Block):
+            block = blocks.Block.from_dict(block)
+        self.blocks.append(block)
+        return block
+
+    @requires_auth
+    def patch(self, ops, **options):
+        """Apply v2 operations atomically and reload this object."""
+        result = self._apiEndpoints.updateObject(self.space_id, self.id, {"ops": ops},
+                                                etag=self.etag or None, **options)
+        if not options.get("dry_run"):
+            refreshed = self._from_api(self._apiEndpoints,
+                self._apiEndpoints.getObject(self.space_id, self.id) | {"space_id": self.space_id})
+            self.__dict__.update(refreshed.__dict__)
+        return result
+
+    def insert_blocks(self, new_blocks, **position):
+        return self.patch([{"op": "insert_blocks", "blocks": [
+            (b if isinstance(b, blocks.Block) else blocks.Block.from_dict(b)).to_dict(for_create=True)
+            for b in new_blocks], **position}])
+
+    def update_block(self, block, **fields):
+        return self.patch([{"op": "update_block", "id": block.id if isinstance(block, blocks.Block) else block,
+                            "set": fields}])
+
+    def delete_block(self, block, recursive=False):
+        return self.patch([{"op": "delete_block", "id": block.id if isinstance(block, blocks.Block) else block,
+                            "recursive": recursive}])
 
     def add_type(self, type: Type):
         """
@@ -149,7 +241,11 @@ class Object(APIWrapper):
             type (anytype.Type): Type from the space retrieved using `space.get_types()[0]`, `space.get_type(type)`, `space.get_type_byname("Articles")`
 
         """
-        if not isinstance(type, Type) or not type.id:
+        if isinstance(type, str):
+            self.type = type
+            self.type_key = type
+            return
+        if not isinstance(type, Type) or not (type.key or type.id):
             raise ValueError("Type must be retrieved from or created in the Anytype API")
 
         existing_properties = self.__dict__.get("properties", {})
@@ -183,95 +279,38 @@ class Object(APIWrapper):
         if not self.template_id and type.template_id:
             self.template_id = type.template_id
 
-    def add_title1(self, text) -> None:
-        """
-        Adds a level 1 title to the object's body.
+    def add_title1(self, text):
+        return self.add_block(blocks.Heading1(text))
 
-        Parameters:
-            text (str): The text to be added as a level 1 title.
+    def add_title2(self, text):
+        return self.add_block(blocks.Heading2(text))
 
-        """
-        self.markdown += f"# {text}\n"
+    def add_title3(self, text):
+        return self.add_block(blocks.Heading3(text))
 
-    def add_title2(self, text) -> None:
-        """
-        Adds a level 2 title to the object's body.
+    def add_text(self, text):
+        return self.add_block(blocks.Text(text))
 
-        Parameters:
-            text (str): The text to be added as a level 2 title.
+    def add_codeblock(self, code, language=""):
+        return self.add_block(blocks.Code(code, language=language))
 
-        """
-        self.markdown += f"## {text}\n"
+    def add_math(self, text):
+        return self.add_block(blocks.Math(text))
 
-    def add_title3(self, text) -> None:
-        """
-        Adds a level 3 title to the object's body.
+    def add_bullet(self, text):
+        return self.add_block(blocks.BulletedListItem(text))
 
-        Parameters:
-            text (str): The text to be added as a level 3 title.
+    def add_checkbox(self, text, checked=False):
+        return self.add_block(blocks.Checkbox(text, checked=checked))
 
-        """
-        self.markdown += f"### {text}\n"
+    def add_quote(self, text):
+        return self.add_block(blocks.Quote(text))
 
-    def add_text(self, text) -> None:
-        """
-        Adds plain text to the object's body.
-
-        Parameters:
-            text (str): The text to be added.
-
-        """
-        self.markdown += f"{text}\n"
-
-    def add_codeblock(self, code, language="") -> None:
-        """
-        Adds a code block to the object's body.
-
-        Parameters:
-            code (str): The code to be added.
-            language (str, optional): The programming language of the code block. Default is an empty string.
-
-        """
-        self.markdown += f"``` {language}\n{code}\n```\n"
-
-    def add_bullet(self, text) -> None:
-        """
-        Adds a bullet point to the object's body.
-
-        Parameters:
-            text (str): The text to be added as a bullet point.
-
-        """
-        self.markdown += f"- {text}\n"
-
-    def add_checkbox(self, text, checked=False) -> None:
-        """
-        Adds a checkbox to the object's body.
-
-        Parameters:
-            text (str): The text to be added next to the checkbox.
-            checked (bool, optional): Whether the checkbox is checked. Default is False.
-
-        """
-        self.markdown += f"- [x] {text}\n" if checked else f"- [ ] {text}\n"
-
-    def add_quote(self, text: str) -> None:
-        self.markdown += f'" {text}'
-
-    def add_image(self, image_url: str, alt: str = "", title: str = "") -> None:
-        """
-        Adds an image to the object's body.
-
-        Parameters:
-            image_url (str): The URL of the image.
-            alt (str, optional): The alternative text for the image. Default is an empty string.
-            title (str, optional): The title of the image. Default is an empty string.
-
-        """
-        if title:
-            self.markdown += f'![{alt}]({image_url} "{title}")\n'
-        else:
-            self.markdown += f"![{alt}]({image_url})\n"
+    def add_image(self, image_url, alt="", title=""):
+        """Add an uploaded image ID; remote URLs are uploaded when creating the object."""
+        if image_url.startswith(("http://", "https://")):
+            raise ValueError("Upload the URL with space.upload_file_url first, then pass its id")
+        return self.add_block(blocks.Image(object_id=image_url, name=title or alt))
 
     def __repr__(self):
         return f"<Object(name={self.name})>"

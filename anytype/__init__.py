@@ -13,3 +13,6 @@ from .icon import Icon
 
 
 from .api import apiEndpoints
+
+from . import blocks
+from .block import *

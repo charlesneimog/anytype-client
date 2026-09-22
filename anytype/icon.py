@@ -11,7 +11,8 @@ class Icon:
             self.emoji = json["emoji"]
             self.format = "emoji"
         elif json["format"] == "icon":
-            self.icon = json["name"]
+            self.name = json["name"]
+            self.color = json.get("color", self.color)
             self.format = "icon"
         elif json["format"] == "file":
             self.file = json["file"]

@@ -124,7 +124,7 @@ class Anytype:
             raise Exception("Invalid space type")
 
         response = self._apiEndpoints.getSpace(spaceId)
-        data = response.get("space", {})
+        data = response.get("space", response)
         # TODO: what I do here to save the space id?
         return Space._from_api(self._apiEndpoints, data)
 
@@ -164,7 +164,7 @@ class Anytype:
             Raises an error if the space creation request fails.
         """
         response = self._apiEndpoints.createSpace(name)
-        data = response.get("space", {})
+        data = response.get("space", response)
         # TODO: what I do here to save the space id?
         return Space._from_api(self._apiEndpoints, data)
 
@@ -176,7 +176,8 @@ class Anytype:
         limit: int = 100,
         types: list[str] | None = None,
         sort: dict | None = None,
-        filters: dict | None = None,
+        filters: dict | str | None = None,
+        **options,
     ) -> list[Object]:
         """
         Performs a global search for objects across all spaces using a query string.
@@ -202,6 +203,7 @@ class Anytype:
             types=types,
             sort=sort,
             filters=filters,
+            **options,
         )
         # TODO: what I do here to save the space id?
         return [Object._from_api(self._apiEndpoints, data) for data in response.get("data", [])]

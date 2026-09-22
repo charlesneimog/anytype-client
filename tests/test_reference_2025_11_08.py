@@ -3,11 +3,11 @@ from types import SimpleNamespace
 import pytest
 
 from anytype import Anytype, Object, Space, apiEndpoints
-from anytype.api import MIN_API_VERSION, ResponseHasError
+from anytype.api import ResponseHasError
 
 
 class FakeResponse:
-    def __init__(self, payload=None, status_code=200, version=MIN_API_VERSION):
+    def __init__(self, payload=None, status_code=200, version=None):
         self._payload = payload
         self.status_code = status_code
         self.headers = {} if version is None else {"Anytype-Version": version}
@@ -46,15 +46,16 @@ def api():
     )
 
 
-def test_uses_2025_11_08_api_version(api):
-    assert api.headers["Anytype-Version"] == "2025-11-08"
+def test_uses_v2_without_date_version_header(api):
+    assert api.api_url.endswith("/v2")
+    assert "Anytype-Version" not in api.headers
 
 
 def test_create_api_key_contract(api, request_spy):
     api.getToken("challenge-123", "1234")
 
     assert request_spy[-1]["method"] == "POST"
-    assert request_spy[-1]["url"].endswith("/v1/auth/api_keys")
+    assert request_spy[-1]["url"].endswith("/v2/auth/api_keys")
     assert request_spy[-1]["json"] == {
         "challenge_id": "challenge-123",
         "code": "1234",
@@ -72,18 +73,18 @@ def test_global_search_contract_with_all_optional_fields(api, request_spy):
         "roadmap",
         offset=20,
         limit=50,
-        types=["page", "task"],
+        types=["page"],
         sort=sort,
         filters=filters,
     )
 
     assert request_spy[-1]["method"] == "POST"
-    assert request_spy[-1]["url"].endswith("/v1/search")
+    assert request_spy[-1]["url"].endswith("/v2/search")
     assert request_spy[-1]["params"] == {"offset": 20, "limit": 50}
     assert request_spy[-1]["json"] == {
         "query": "roadmap",
-        "types": ["page", "task"],
-        "sort": sort,
+        "type": "page",
+        "sorts": [{"property": "name", "direction": "asc"}],
         "filters": filters,
     }
 
@@ -94,50 +95,44 @@ def test_global_search_contract_with_all_optional_fields(api, request_spy):
         (
             "spaces",
             lambda client, values: client.getSpaces(2, 25, values),
-            "/v1/spaces",
+            "/v2/spaces",
             {"name[contains]": "project"},
         ),
         (
             "chats",
             lambda client, values: client.getChats("space-1", 2, 25, values),
-            "/v1/spaces/space-1/chats",
+            "/v2/spaces/space-1/chats",
             {"name[contains]": "team"},
         ),
         (
             "members",
             lambda client, values: client.getMembers("space-1", 2, 25, values),
-            "/v1/spaces/space-1/members",
+            "/v2/spaces/space-1/members",
             {"name[ne]": "john"},
         ),
         (
             "objects",
             lambda client, values: client.getObjects("space-1", 2, 25, values),
-            "/v1/spaces/space-1/objects",
+            "/v2/spaces/space-1/objects",
             {"type": "page", "created_date[gte]": "2024-01-01"},
         ),
         (
             "properties",
             lambda client, values: client.getProperties("space-1", 2, 25, values),
-            "/v1/spaces/space-1/properties",
+            "/v2/spaces/space-1/properties",
             {"name[contains]": "date"},
         ),
         (
             "tags",
             lambda client, values: client.getTags("space-1", "property-1", 2, 25, values),
-            "/v1/spaces/space-1/properties/property-1/tags",
+            "/v2/spaces/space-1/properties/property-1/options",
             {"name[contains]": "urgent"},
         ),
         (
             "types",
             lambda client, values: client.getTypes("space-1", 2, 25, values),
-            "/v1/spaces/space-1/types",
+            "/v2/spaces/space-1/types",
             {"name[contains]": "task"},
-        ),
-        (
-            "templates",
-            lambda client, values: client.getTemplates("space-1", "type-1", 2, 25, values),
-            "/v1/spaces/space-1/types/type-1/templates",
-            {"name[contains]": "invoice"},
         ),
     ],
     ids=lambda value: value if isinstance(value, str) else None,
@@ -160,7 +155,7 @@ def test_upload_file_contract_builds_multipart_without_json_content_type(
 
     call = request_spy[-1]
     assert call["method"] == "POST"
-    assert call["url"].endswith("/v1/spaces/space-1/files")
+    assert call["url"].endswith("/v2/spaces/space-1/files")
     assert call["uploaded_name"] == "photo.png"
     assert call["uploaded_bytes"] == b"png-data"
     assert "Content-Type" not in call["headers"]
@@ -170,9 +165,9 @@ def test_upload_file_contract_builds_multipart_without_json_content_type(
 def test_add_list_objects_contract_accepts_object_id_list(api, request_spy):
     api.addObjectsToList("space-1", "list-1", ["object-1", "object-2"])
 
-    assert request_spy[-1]["method"] == "POST"
-    assert request_spy[-1]["url"].endswith("/v1/spaces/space-1/lists/list-1/objects")
-    assert request_spy[-1]["json"] == {"objects": ["object-1", "object-2"]}
+    assert request_spy[-1]["method"] == "PATCH"
+    assert request_spy[-1]["url"].endswith("/v2/spaces/space-1/objects/list-1")
+    assert request_spy[-1]["json"] == {"ops": [{"op": "add_items", "items": ["object-1", "object-2"]}]}
 
 
 def test_space_exposes_chat_objects_and_file_upload():
@@ -228,9 +223,8 @@ def test_non_success_response_raises_typed_api_error(api, monkeypatch):
 
 
 @pytest.mark.parametrize("version", [None, "2025-05-20", "not-a-date"])
-def test_rejects_missing_old_or_invalid_response_version(api, monkeypatch, version):
+def test_v2_does_not_require_legacy_date_header(api, monkeypatch, version):
     response = FakeResponse({"data": []}, version=version)
     monkeypatch.setattr("anytype.api.requests.request", lambda *args, **kwargs: response)
 
-    with pytest.raises(ValueError):
-        api.getSpaces()
+    assert api.getSpaces() == {"data": []}
