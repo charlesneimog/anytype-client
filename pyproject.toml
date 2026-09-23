@@ -12,6 +12,9 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
+zotero = [
+    "beautifulsoup4>=4.12,<5",
+]
 test = [
     "pytest>=8,<9",
 ]
@@ -25,4 +28,3 @@ packages = ["anytype"]
 [tool.black]
 line-length = 100
 fast = true
-

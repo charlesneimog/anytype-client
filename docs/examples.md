@@ -1,5 +1,32 @@
 # Examples
 
+## Zotero highlights (API v2)
+
+The `examples/zotero2anytype.py` importer creates colored quote blocks from native
+Zotero PDF annotations and highlights embedded in HTML notes. Comments, regular
+notes, citations, page labels, authors, dates, and DOIs are kept as text blocks.
+Standard Zotero colors map to Anytype's palette (green maps to lime); custom hex
+colors use the nearest standard shade. Invalid or missing colors remain uncolored.
+
+```bash
+pip install -e '.[zotero]'
+python examples/zotero2anytype.py --dry-run
+python examples/zotero2anytype.py --space SPACE_ID
+```
+
+Use `--db /path/to/zotero.sqlite` for another Zotero profile, `--storage` for a
+custom storage directory, and `--linked-base` for relative linked attachments.
+The default database is `~/Zotero/zotero.sqlite`. The offline dry run prints v2
+documents without authentication or writes. With several Anytype spaces, choose
+the destination explicitly. `--type` accepts a type key and defaults to `page`.
+
+The database is read-only. Multiple PDFs belonging to the same item produce one
+page; deleted items are excluded. HTML highlights referencing an identical native
+annotation are merged by annotation key. Older databases without native
+annotations fall back to HTML notes. Missing PDF files do not prevent importing
+stored annotation text. PDF files and image-only annotations are not imported.
+Each run creates new pages; it does not update previous imports.
+
 ## Hello World
 
 ??? example "Hello World Example" 
