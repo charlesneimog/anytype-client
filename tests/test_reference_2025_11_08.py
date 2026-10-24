@@ -2,7 +2,7 @@ from types import SimpleNamespace
 
 import pytest
 
-from anytype import Anytype, Object, Space, apiEndpoints
+from anytype import Anytype, Object, Space, Type, apiEndpoints
 from anytype.api import ResponseHasError
 
 
@@ -143,6 +143,63 @@ def test_list_endpoint_contracts(api, request_spy, case, invoke, path, filters):
     assert request_spy[-1]["method"] == "GET", case
     assert request_spy[-1]["url"].endswith(path), case
     assert request_spy[-1]["params"] == {**filters, "offset": 2, "limit": 25}, case
+
+
+def test_list_templates_uses_v2_space_endpoint_and_type_key(api, request_spy):
+    api.getTemplates(
+        "space-1",
+        "reading_list",
+        offset=2,
+        limit=25,
+        filters={"name[contains]": "book"},
+    )
+
+    assert request_spy[-1]["method"] == "GET"
+    assert request_spy[-1]["url"].endswith("/v2/spaces/space-1/templates")
+    assert request_spy[-1]["params"] == {
+        "name[contains]": "book",
+        "offset": 2,
+        "limit": 25,
+        "type": "reading_list",
+    }
+
+
+def test_type_get_templates_uses_api_key_and_maps_template_rows():
+    recorded = {}
+
+    def get_templates(*args):
+        recorded["args"] = args
+        return {
+            "data": [
+                {
+                    "id": "template-1",
+                    "name": "Book notes",
+                    "template_for": "reading_list",
+                    "default": True,
+                }
+            ]
+        }
+
+    backend = SimpleNamespace(getTemplates=get_templates)
+    object_type = Type._from_api(
+        backend,
+        {
+            "formatVersion": "2.0",
+            "id": "type-object-id",
+            "space_id": "space-1",
+            "properties": {"name": "Reading list"},
+            "type_settings": {"api_key": "reading_list"},
+        },
+    )
+
+    templates = object_type.get_templates(offset=3, limit=10)
+
+    assert recorded["args"] == ("space-1", "reading_list", 3, 10, None)
+    assert len(templates) == 1
+    assert templates[0].id == "template-1"
+    assert templates[0].name == "Book notes"
+    assert templates[0].template_for == "reading_list"
+    assert templates[0].default is True
 
 
 def test_upload_file_contract_builds_multipart_without_json_content_type(

@@ -240,8 +240,10 @@ class apiEndpoints:
     def getTemplate(self, spaceId, typeId, templateId):
         return self.getObject(spaceId, templateId)
 
-    def getTemplates(self, spaceId, typeId, offset=0, limit=100, filters=None):
-        raise NotImplementedError("v2 has no template-list endpoint; retrieve a template by ID")
+    def getTemplates(self, spaceId, typeKey, offset=0, limit=100, filters=None):
+        params = self._pagination_params(offset, limit, filters)
+        params["type"] = typeKey
+        return self._request("GET", f"/spaces/{spaceId}/templates", params=params)
 
     def createTemplate(self, spaceId, data):
         return self._request("POST", f"/spaces/{spaceId}/templates", json=data)

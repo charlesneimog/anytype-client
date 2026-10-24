@@ -128,7 +128,9 @@ class Type(APIWrapper):
         Raises:
             Raises an error if the request to the API fails.
         """
-        response = self._apiEndpoints.getTemplates(self.space_id, self.id, offset, limit, filters)
+        response = self._apiEndpoints.getTemplates(
+            self.space_id, self.key or self.id, offset, limit, filters
+        )
         self._all_templates = [
             Template._from_api(self._apiEndpoints, data | {"space_id": self.space_id})
             for data in response.get("data", [])
