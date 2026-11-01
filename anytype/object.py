@@ -37,7 +37,7 @@ class Object(APIWrapper):
     def __init__(self, name: str = "", type: Type | str | None = None, template: Template | None = None,
                  blocks=None):
         self._apiEndpoints: apiEndpoints | None = None
-        self._icon: Icon = Icon()
+        self._icon: Icon | None = None
         self._values: dict = {}
         self.type: None | Type = None
         self.type_key: str = ""
@@ -125,13 +125,13 @@ class Object(APIWrapper):
             )
 
             if bool(emoji_pattern.fullmatch(value)):
-                self._icon.emoji = value
+                self._icon = Icon(value)
             else:
                 raise Exception(f"Invalid icon format {value}")
         elif isinstance(value, Icon):
             self._icon = value
         elif value is None:
-            self._icon = Icon("")
+            self._icon = None
         else:
             raise Exception("Invalid icon format")
 
@@ -162,6 +162,9 @@ class Object(APIWrapper):
         for key, value in data.items():
             if key == "blocks":
                 obj.blocks = [blocks.Block.from_dict(item) for item in value]
+                for block in obj.blocks:
+                    if isinstance(block, blocks.Image):
+                        block._bind(api, data.get("space_id", ""))
             elif key == "properties":
                 obj.properties = copy.deepcopy(value)
             elif key == "type":

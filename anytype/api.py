@@ -27,7 +27,11 @@ class ResponseHasError(Exception):
         if isinstance(payload, dict):
             self.code = payload.get("code")
             self.issues = payload.get("issues", [])
-            message = payload.get("message") or payload.get("error") or f"Anytype API returned HTTP {self.status_code}"
+            message = (
+                payload.get("message")
+                or payload.get("error")
+                or f"Anytype API returned HTTP {self.status_code}"
+            )
         else:
             self.code = None
             message = str(payload) if payload else f"Anytype API returned HTTP {self.status_code}"
@@ -49,7 +53,16 @@ class apiEndpoints:
         params.update({"offset": offset, "limit": limit})
         return params
 
-    def _request(self, method, path, params=None, json=None, files=None, headers=None):
+    @staticmethod
+    def _query_params(params):
+        if params is None:
+            return None
+        return {
+            key: str(value).lower() if isinstance(value, bool) else value
+            for key, value in params.items()
+        }
+
+    def _request(self, method, path, params=None, json=None, files=None, headers=None, raw=False):
         url = f"{self.api_url}{path}"
         headers = dict(self.headers) | dict(headers or {})
         if files is not None:
@@ -63,13 +76,15 @@ class apiEndpoints:
             url,
             headers=headers,
             json=json,
-            params=params,
+            params=self._query_params(params),
             files=files,
             timeout=30,
         )
         if not 200 <= response.status_code < 300:
             raise ResponseHasError(response)
 
+        if raw:
+            return response.content
         if response.status_code == 204 or not response.content:
             return None
         return response.json()
@@ -87,8 +102,11 @@ class apiEndpoints:
 
     # v2 collections and queries replace /lists.
     def getListViews(self, spaceId, listId, offset=0, limit=100, kind="collection"):
-        return self._request("GET", f"/spaces/{spaceId}/{self._list_kind(kind)}/{listId}/views",
-                             params=self._pagination_params(offset, limit))
+        return self._request(
+            "GET",
+            f"/spaces/{spaceId}/{self._list_kind(kind)}/{listId}/views",
+            params=self._pagination_params(offset, limit),
+        )
 
     @staticmethod
     def _list_kind(kind):
@@ -96,23 +114,26 @@ class apiEndpoints:
             raise ValueError("List kind must be collection or query")
         return "collections" if kind == "collection" else "queries"
 
-    def getObjectsInList(self, spaceId, listId, viewId=None, offset=0, limit=100,
-                         kind="collection", fields=None):
+    def getObjectsInList(
+        self, spaceId, listId, viewId=None, offset=0, limit=100, kind="collection", fields=None
+    ):
         params = self._pagination_params(offset, limit)
         if viewId:
             params["view"] = viewId
         if fields:
             params["fields"] = ",".join(fields)
-        return self._request("GET", f"/spaces/{spaceId}/{self._list_kind(kind)}/{listId}/objects",
-                             params=params)
+        return self._request(
+            "GET", f"/spaces/{spaceId}/{self._list_kind(kind)}/{listId}/objects", params=params
+        )
 
     def addObjectsToList(self, spaceId, listId, object_ids):
         items = object_ids["objects"] if isinstance(object_ids, dict) else object_ids
         return self.updateObject(spaceId, listId, {"ops": [{"op": "add_items", "items": items}]})
 
     def deleteObjectsFromList(self, spaceId, listId, objectId):
-        return self.updateObject(spaceId, listId,
-                                 {"ops": [{"op": "remove_items", "items": [objectId]}]})
+        return self.updateObject(
+            spaceId, listId, {"ops": [{"op": "remove_items", "items": [objectId]}]}
+        )
 
     def createCollection(self, spaceId, data):
         return self._request("POST", f"/spaces/{spaceId}/collections", json=data)
@@ -122,22 +143,33 @@ class apiEndpoints:
 
     # --- objects ---
     def createObject(self, spaceId, data, **options):
-        return self._request("POST", f"/spaces/{spaceId}/objects", json=data, params=options or None)
+        return self._request(
+            "POST", f"/spaces/{spaceId}/objects", json=data, params=options or None
+        )
 
     def updateObject(self, spaceId, objectId, data, etag=None, **options):
-        return self._request("PATCH", f"/spaces/{spaceId}/objects/{objectId}", json=data,
-                             params=options or None, headers={"If-Match": etag} if etag else None)
+        return self._request(
+            "PATCH",
+            f"/spaces/{spaceId}/objects/{objectId}",
+            json=data,
+            params=options or None,
+            headers={"If-Match": etag} if etag else None,
+        )
 
     def deleteObject(self, spaceId, objectId):
         return self._request("DELETE", f"/spaces/{spaceId}/objects/{objectId}")
 
     def getObject(self, spaceId, objectId, **options):
-        return self._request("GET", f"/spaces/{spaceId}/objects/{objectId}",
-                             params={"ids": "full", **options})
+        return self._request(
+            "GET", f"/spaces/{spaceId}/objects/{objectId}", params={"ids": "full", **options}
+        )
 
     def getObjects(self, spaceId, offset=0, limit=100, filters=None):
-        return self._request("GET", f"/spaces/{spaceId}/objects",
-                             params=self._pagination_params(offset, limit, filters))
+        return self._request(
+            "GET",
+            f"/spaces/{spaceId}/objects",
+            params=self._pagination_params(offset, limit, filters),
+        )
 
     def getSchema(self, kind):
         return self._request("GET", f"/schemas/{kind}")
@@ -146,19 +178,23 @@ class apiEndpoints:
         return self._request("POST", "/validate", json=document)
 
     # --- search ---
-    def globalSearch(self, query="", offset=0, limit=100, types=None, sort=None,
-                     filters=None, **options):
+    def globalSearch(
+        self, query="", offset=0, limit=100, types=None, sort=None, filters=None, **options
+    ):
         payload = {"query": query, **options}
         if types:
             if len(types) != 1:
                 raise ValueError("v2 takes one type; use a filter expression for multiple types")
             payload["type"] = types[0]
         if sort:
-            payload["sorts"] = [{("property" if k == "property_key" else k): v
-                                  for k, v in sort.items()}]
+            payload["sorts"] = [
+                {("property" if k == "property_key" else k): v for k, v in sort.items()}
+            ]
         if filters is not None:
             payload["filter" if isinstance(filters, str) else "filters"] = filters
-        return self._request("POST", "/search", params=self._pagination_params(offset, limit), json=payload)
+        return self._request(
+            "POST", "/search", params=self._pagination_params(offset, limit), json=payload
+        )
 
     def search(self, spaceId: str, data: dict, offset: int = 0, limit: int = 10):
         options = {"offset": offset, "limit": limit}
@@ -174,10 +210,11 @@ class apiEndpoints:
         return self._request("POST", "/spaces", json=data)
 
     def getSpace(self, spaceId: str):
-        return self._request("GET", f"/spaces/{spaceId}")
+        return self._request("GET", f"/spaces/{spaceId}", params={"ids": "full"})
 
     def getSpaces(self, offset=0, limit=100, filters: dict | None = None):
         options = self._pagination_params(offset, limit, filters)
+        options["ids"] = "full"
         return self._request("GET", "/spaces", params=options)
 
     # --- chats ---
@@ -196,6 +233,22 @@ class apiEndpoints:
                     files={"file": (path.name, handle)},
                 )
         return self._request("POST", f"/spaces/{spaceId}/files", files={"file": file})
+
+    def downloadFile(self, spaceId: str, fileId: str, width: int | None = None) -> bytes:
+        """Return a file's content bytes, optionally selecting an image width variant."""
+        if not isinstance(fileId, str) or not fileId.strip():
+            raise ValueError("fileId must be a non-empty string")
+        if width is not None and (
+            isinstance(width, bool) or not isinstance(width, int) or width < 0
+        ):
+            raise ValueError("width must be a non-negative integer")
+        params = None if width is None else {"width": width}
+        return self._request(
+            "GET",
+            f"/spaces/{spaceId}/files/{fileId}/content",
+            params=params,
+            raw=True,
+        )
 
     # --- members ---
     def getMember(self, spaceId, objectId):
@@ -301,7 +354,9 @@ class apiEndpoints:
             offset += 100
 
     def createTag(self, spaceId, propertyId, data):
-        raise NotImplementedError("v2 creates missing options through object writes with create_missing_options=True")
+        raise NotImplementedError(
+            "v2 creates missing options through object writes with create_missing_options=True"
+        )
 
     def updateTag(self, spaceId, propertyId, tagId, data):
         raise NotImplementedError("v2 does not expose an option-update endpoint")

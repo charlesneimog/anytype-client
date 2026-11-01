@@ -21,14 +21,16 @@ class Space(APIWrapper):
         self._all_types = []
 
     def _object_to_dict(self, obj):
-        if obj.template_id:
-            raise NotImplementedError("v2 object creation does not accept template_id; use the type's default_template")
         if obj._markdown and obj.blocks:
             raise ValueError("Supply blocks or markdown, not both")
         if obj._markdown:
-            return {"type": obj.type.key if isinstance(obj.type, Type) else obj.type or "page",
-                    "name": obj.name, "properties": obj._property_values(), "markdown": obj._markdown}
-        return obj.to_document(for_create=True)
+            payload = {"type": obj.type.key if isinstance(obj.type, Type) else obj.type or "page",
+                       "name": obj.name, "properties": obj._property_values(), "markdown": obj._markdown}
+        else:
+            payload = obj.to_document(for_create=True)
+        if obj.template_id:
+            payload["template"] = obj.template_id
+        return payload
 
     @requires_auth
     def get_objects(self, offset=0, limit=100, filters: dict | None = None) -> list[Object]:
@@ -70,6 +72,11 @@ class Space(APIWrapper):
         return self._apiEndpoints.uploadFile(self.id, file)
 
     @requires_auth
+    def download_file(self, file_id: str, width: int | None = None) -> bytes:
+        """Download file content, optionally selecting an image width variant."""
+        return self._apiEndpoints.downloadFile(self.id, file_id, width=width)
+
+    @requires_auth
     def get_object(self, obj: str | Object) -> Object:
         """
         Retrieves a specific object by its ID.
@@ -97,6 +104,7 @@ class Space(APIWrapper):
 
         ``dry_run=True`` returns the validation result without creating anything.
         ``create_missing_options=True`` allows new select option names.
+        ``obj.template_id`` is sent as ``template``; ``"none"`` skips templates.
         """
         if obj.type is None and type is not None:
             obj.add_type(type)

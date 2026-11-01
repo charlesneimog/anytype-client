@@ -12,6 +12,8 @@ class Block:
 
     type = None
     _registry = {}
+    _repr_field_order = ("text", "icon", "processor", "background_color", "indent", "id")
+    _repr_text_limit = 120
 
     def __init_subclass__(cls, **kwargs):
         super().__init_subclass__(**kwargs)
@@ -60,7 +62,23 @@ class Block:
         return {"type": self.type, **encode(self.__dict__)}
 
     def __repr__(self):
-        return f"{self.__class__.__name__}({self.to_dict()!r})"
+        fields = dict(self.__dict__)
+        ordered_names = [name for name in self._repr_field_order if name in fields]
+        ordered_names.extend(sorted(name for name in fields if name not in ordered_names))
+        arguments = ", ".join(
+            f"{name}={self._repr_value(name, fields[name])!r}" for name in ordered_names
+        )
+        return f"{self.__class__.__name__}({arguments})"
+
+    @classmethod
+    def _repr_value(cls, name, value):
+        if name == "icon" and isinstance(value, dict) and value.get("format") == "emoji":
+            return value.get("emoji", "")
+        if name == "text" and isinstance(value, str):
+            value = value.rstrip()
+            if len(value) > cls._repr_text_limit:
+                value = value[: cls._repr_text_limit - 1] + "…"
+        return value
 
 
 class Text(Block):
@@ -142,6 +160,12 @@ class Toggle(Text):
 class Callout(Text):
     """AnyBlock ``callout`` block."""
     type = "callout"
+    _repr_field_order = ("icon", "text", "background_color", "indent", "id")
+
+    def __str__(self):
+        icon = self._repr_value("icon", getattr(self, "icon", ""))
+        suffix = f" {icon}" if icon else ""
+        return f"<Callout{suffix}>"
 
 
 class ToggleHeading1(Text):
@@ -167,6 +191,27 @@ class File(Block):
 class Image(Block):
     """AnyBlock ``image`` block."""
     type = "image"
+    __slots__ = ("_apiEndpoints", "_space_id")
+
+    @property
+    def file_id(self):
+        """The backing file object ID from the block's ``object_id`` field."""
+        return getattr(self, "object_id", None)
+
+    def _bind(self, api, space_id):
+        self._apiEndpoints = api
+        self._space_id = space_id
+        return self
+
+    def download(self, width=None):
+        """Download this image as bytes, optionally resized to ``width`` pixels."""
+        if not self.file_id:
+            raise ValueError("Image block has no file reference")
+        api = getattr(self, "_apiEndpoints", None)
+        space_id = getattr(self, "_space_id", None)
+        if api is None or not space_id:
+            raise RuntimeError("Image block is not attached to a retrieved Anytype object")
+        return api.downloadFile(space_id, self.file_id, width=width)
 
 
 class Video(Block):
@@ -222,6 +267,13 @@ class Table(Block):
 class Embed(Text):
     """AnyBlock ``embed`` block."""
     type = "embed"
+    _repr_field_order = ("processor", "text", "indent", "id")
+
+    def __str__(self):
+        processor = getattr(self, "processor", "").strip()
+        label = {"youtube": "YouTube"}.get(processor.lower(), processor.replace("_", " ").title())
+        suffix = f" {label}" if label else ""
+        return f"<Embed{suffix}>"
 
 
 class Equation(Text):

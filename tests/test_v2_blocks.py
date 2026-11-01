@@ -3,7 +3,20 @@ from types import SimpleNamespace
 
 import pytest
 
-from anytype import Block, Object, Space, Text, Heading1, Math, Code, Table, Type
+from anytype import (
+    Block,
+    Callout,
+    Embed,
+    Heading1,
+    Image,
+    Math,
+    Code,
+    Object,
+    Space,
+    Table,
+    Text,
+    Type,
+)
 from anytype import blocks
 from anytype.api import ResponseHasError, apiEndpoints
 
@@ -22,6 +35,87 @@ def test_every_documented_kind_has_a_block_subclass(kind):
     assert isinstance(block, Block)
     assert block.to_dict() == data
     assert block.to_dict(for_create=True) == {'type': kind, 'indent': 1}
+
+
+def test_embed_repr_prioritizes_processor_and_url():
+    embed = Block.from_dict({
+        'type': 'embed',
+        'id': 'embed-1',
+        'indent': 2,
+        'processor': 'youtube',
+        'text': 'https://www.youtube.com/watch?v=2TaFzpNfKlg',
+    })
+
+    assert isinstance(embed, Embed)
+    assert repr(embed) == (
+        "Embed(processor='youtube', "
+        "text='https://www.youtube.com/watch?v=2TaFzpNfKlg', indent=2, id='embed-1')"
+    )
+    assert str(embed) == "<Embed YouTube>"
+
+
+def test_callout_repr_collapses_emoji_icon_and_trailing_whitespace():
+    callout = Block.from_dict({
+        'type': 'callout',
+        'id': 'callout-1',
+        'indent': 2,
+        'icon': {'format': 'emoji', 'emoji': '📝'},
+        'text': '**Comment** \n',
+        'background_color': 'grey',
+    })
+
+    assert isinstance(callout, Callout)
+    assert repr(callout) == (
+        "Callout(icon='📝', text='**Comment**', background_color='grey', "
+        "indent=2, id='callout-1')"
+    )
+    assert str(callout) == "<Callout 📝>"
+
+
+def test_block_repr_truncates_long_text_without_changing_serialized_value():
+    text = Text('x' * 140)
+
+    assert repr(text) == f"Text(text={'x' * 119 + '…'!r})"
+    assert text.to_dict()['text'] == 'x' * 140
+
+
+def test_image_exposes_file_reference_without_confusing_it_with_block_id():
+    image = Block.from_dict({
+        'type': 'image', 'id': 'block-1', 'object_id': 'file-1', 'mime_type': 'image/jpeg'
+    })
+
+    assert isinstance(image, Image)
+    assert image.id == 'block-1'
+    assert image.file_id == 'file-1'
+    assert image.to_dict() == {
+        'type': 'image', 'id': 'block-1', 'object_id': 'file-1', 'mime_type': 'image/jpeg'
+    }
+
+
+def test_retrieved_image_downloads_through_its_space_context():
+    calls = []
+    backend = SimpleNamespace(
+        getObject=lambda *args: {
+            'id': 'object-1',
+            'type': 'page',
+            'properties': {'name': 'Wine'},
+            'blocks': [{'type': 'image', 'id': 'block-1', 'object_id': 'file-1'}],
+        },
+        downloadFile=lambda *args, **kwargs: calls.append((args, kwargs)) or b'image-bytes',
+    )
+    space = Space._from_api(backend, {'id': 'space-1'})
+
+    image = space.get_object('object-1').blocks[0]
+
+    assert image.download(width=320) == b'image-bytes'
+    assert calls == [(('space-1', 'file-1'), {'width': 320})]
+
+
+def test_image_download_requires_a_file_reference_and_retrieved_context():
+    with pytest.raises(ValueError, match='no file reference'):
+        Image(id='block-1').download()
+    with pytest.raises(RuntimeError, match='not attached'):
+        Image(id='block-1', object_id='file-1').download()
 
 
 def test_nested_table_and_unknown_blocks_roundtrip_without_aliasing():

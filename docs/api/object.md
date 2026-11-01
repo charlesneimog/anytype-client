@@ -13,6 +13,12 @@ obj.people = [person]
 created = space.create_object(obj)
 ```
 
+Object creation sends the selected template ID as the v2 request's `template`
+field. With no selected template, the field is omitted and the server applies
+the type's default template. Set `obj.template_id = "none"` to start blank.
+Additional blocks or Markdown follow the template's content in the same create
+request; supply one body format at a time.
+
 `date` must be the key of a date property. `people` must be the key of an objects
 property; it accepts object instances or object IDs. A multi-select property instead
 accepts tag names or `Tag` instances.

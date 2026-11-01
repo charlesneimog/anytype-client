@@ -2,7 +2,7 @@ from datetime import date, datetime, timezone
 
 import pytest
 
-from anytype import Object, Space, Template, Type
+from anytype import Object, Space, Template, Text, Type
 from anytype.property import Date, MultiSelect, Objects, Property, Select
 from anytype.tag import Tag
 
@@ -110,9 +110,7 @@ def test_get_properties_returns_format_specific_classes(issue20_context):
 
 def test_dynamic_property_assignment_and_template_constructor(issue20_context):
     backend, space, quote_type, template, person = issue20_context
-    obj = Object()
-    obj.add_type(quote_type)
-    obj.name = "Test"
+    obj = Object("Test", type=quote_type, template=template)
 
     obj.date = "02/06/2026"
     obj.people = [person]
@@ -122,17 +120,108 @@ def test_dynamic_property_assignment_and_template_constructor(issue20_context):
     values = property_values(payload)
     assert created.id == "created-object"
     assert payload["type"] == "quote"
+    assert payload["template"] == template.id
     assert values["date"] == "2026-06-02T00:00:00Z"
     assert values["people"] == ["object-person"]
 
 
-def test_explicit_template_id_survives_type_argument(issue20_context):
+def test_implicit_icon_is_omitted_for_type_or_template_inheritance(issue20_context):
+    backend, space, quote_type, template, _ = issue20_context
+    obj = Object("Test", type=quote_type, template=template)
+
+    space.create_object(obj)
+
+    assert "icon" not in backend.created[-1]
+
+
+def test_explicit_icon_is_serialized(issue20_context):
+    backend, space, quote_type, template, _ = issue20_context
+    obj = Object("Test", type=quote_type, template=template)
+    obj.icon = "🍷"
+
+    created = space.create_object(obj)
+
+    assert backend.created[-1]["icon"] == {"format": "emoji", "emoji": "🍷"}
+    assert created.icon.emoji == "🍷"
+
+
+@pytest.mark.parametrize("body", ["empty", "blocks", "markdown"])
+def test_explicit_template_id_survives_type_argument(issue20_context, body):
     backend, space, quote_type, template, _ = issue20_context
     obj = Object("Test")
     obj.template_id = template.id
+    if body == "blocks":
+        obj.add_block(Text("Additional content", id="old-block-id"))
+    elif body == "markdown":
+        obj.markdown = "Additional content"
 
-    with pytest.raises(NotImplementedError, match="template_id"):
-        space.create_object(obj, quote_type)
+    created = space.create_object(obj, quote_type)
+
+    payload, = backend.created
+    assert created.id == "created-object"
+    assert payload["template"] == template.id
+    assert "template_id" not in payload
+    assert payload["type"] == "quote"
+    if body == "blocks":
+        assert payload["blocks"] == [{"type": "paragraph", "text": "Additional content"}]
+        assert obj.blocks[0].id == "old-block-id"
+    elif body == "markdown":
+        assert payload["markdown"] == "Additional content"
+        assert "blocks" not in payload
+
+
+@pytest.mark.parametrize("body", ["blocks", "markdown"])
+@pytest.mark.parametrize("template_id", ["", "none"])
+def test_create_omits_template_or_explicitly_starts_blank(issue20_context, body, template_id):
+    backend, space, quote_type, _, _ = issue20_context
+    obj = Object("Test", type=quote_type)
+    obj.template_id = template_id
+    if body == "markdown":
+        obj.markdown = "Content"
+    else:
+        obj.add_text("Content")
+
+    space.create_object(obj)
+
+    payload, = backend.created
+    if template_id:
+        assert payload["template"] == "none"
+    else:
+        assert "template" not in payload
+    assert "template_id" not in payload
+
+
+def test_template_does_not_allow_blocks_and_markdown_together(issue20_context):
+    backend, space, quote_type, template, _ = issue20_context
+    obj = Object("Test", type=quote_type, template=template)
+    obj.add_text("Block")
+    obj.markdown = "Markdown"
+
+    with pytest.raises(ValueError, match="Supply blocks or markdown, not both"):
+        space.create_object(obj)
+    assert not backend.created
+
+
+@pytest.mark.parametrize("body", ["blocks", "markdown"])
+def test_template_dry_run_returns_validation_without_fetching(issue20_context, body):
+    backend, space, quote_type, template, _ = issue20_context
+    obj = Object("Test", type=quote_type, template=template)
+    if body == "markdown":
+        obj.markdown = "Content"
+    else:
+        obj.add_text("Content")
+    calls = []
+
+    def create(space_id, payload, **options):
+        calls.append((space_id, payload, options))
+        return {"dry_run": True, "template": {"id": template.id}}
+
+    backend.createObject = create
+    result = space.create_object(obj, dry_run=True)
+
+    assert result == {"dry_run": True, "template": {"id": template.id}}
+    assert calls[0][1]["template"] == template.id
+    assert calls[0][2] == {"dry_run": True}
     assert not backend.created
 
 
