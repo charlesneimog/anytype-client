@@ -10,6 +10,7 @@ from .template import Template
 from .property import Property
 from .tag import Tag
 from .icon import Icon
+from .discussion import Discussion
 
 
 from .api import apiEndpoints

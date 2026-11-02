@@ -222,6 +222,88 @@ class apiEndpoints:
         options = self._pagination_params(offset, limit, filters)
         return self._request("GET", f"/spaces/{spaceId}/chats", params=options)
 
+    def createChat(
+        self,
+        spaceId: str,
+        data: dict,
+        dry_run: bool = False,
+        idempotency_key: str | None = None,
+    ):
+        return self._request(
+            "POST",
+            f"/spaces/{spaceId}/chats",
+            params={"dry_run": True} if dry_run else None,
+            json=data,
+            headers={"Idempotency-Key": idempotency_key} if idempotency_key else None,
+        )
+
+    def getChatMessages(
+        self,
+        spaceId: str,
+        chatId: str,
+        after: str | None = None,
+        before: str | None = None,
+        limit: int = 25,
+        reactions: str | None = None,
+    ):
+        params = {"limit": limit}
+        if after is not None:
+            params["after"] = after
+        if before is not None:
+            params["before"] = before
+        if reactions is not None:
+            params["reactions"] = reactions
+        return self._request(
+            "GET", f"/spaces/{spaceId}/chats/{chatId}/messages", params=params
+        )
+
+    def addChatMessage(
+        self,
+        spaceId: str,
+        chatId: str,
+        data: dict,
+        dry_run: bool = False,
+        idempotency_key: str | None = None,
+    ):
+        return self._request(
+            "POST",
+            f"/spaces/{spaceId}/chats/{chatId}/messages",
+            params={"dry_run": True} if dry_run else None,
+            json=data,
+            headers={"Idempotency-Key": idempotency_key} if idempotency_key else None,
+        )
+
+    def toggleChatReaction(
+        self,
+        spaceId: str,
+        chatId: str,
+        messageId: str,
+        data: dict,
+        dry_run: bool = False,
+        idempotency_key: str | None = None,
+    ):
+        return self._request(
+            "POST",
+            f"/spaces/{spaceId}/chats/{chatId}/messages/{messageId}/reactions",
+            params={"dry_run": True} if dry_run else None,
+            json=data,
+            headers={"Idempotency-Key": idempotency_key} if idempotency_key else None,
+        )
+
+    def createDiscussion(
+        self,
+        spaceId: str,
+        objectId: str,
+        dry_run: bool = False,
+        idempotency_key: str | None = None,
+    ):
+        return self._request(
+            "POST",
+            f"/spaces/{spaceId}/objects/{objectId}/discussion",
+            params={"dry_run": True} if dry_run else None,
+            headers={"Idempotency-Key": idempotency_key} if idempotency_key else None,
+        )
+
     # --- files ---
     def uploadFile(self, spaceId: str, file):
         if isinstance(file, (str, PathLike)):

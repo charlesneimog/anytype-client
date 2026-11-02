@@ -4,6 +4,7 @@ from .type import Type
 from .object import Object
 from .member import Member
 from .icon import Icon
+from .discussion import Discussion
 from .api import apiEndpoints, APIWrapper
 from .utils import requires_auth
 from .property import Property
@@ -65,6 +66,134 @@ class Space(APIWrapper):
             Object._from_api(self._apiEndpoints, data | {"space_id": self.id})
             for data in response_data.get("data", [])
         ]
+
+    @staticmethod
+    def _resource_id(resource, name):
+        resource_id = resource.id if isinstance(resource, (Object, Discussion)) else resource
+        if not isinstance(resource_id, str) or not resource_id.strip():
+            raise ValueError(f"{name} must be an Object or a non-empty string")
+        return resource_id
+
+    @requires_auth
+    def create_chat(
+        self, name: str, *, dry_run: bool = False, idempotency_key: str | None = None
+    ) -> dict:
+        """Create a standalone chat in this space."""
+        return self._apiEndpoints.createChat(
+            self.id,
+            {"name": name},
+            dry_run=dry_run,
+            idempotency_key=idempotency_key,
+        )
+
+    @requires_auth
+    def get_chat_messages(
+        self,
+        chat: str | Object,
+        *,
+        after: str | None = None,
+        before: str | None = None,
+        limit: int = 25,
+        reactions: str | None = None,
+    ) -> dict:
+        """Retrieve a page of messages, ascending by order id."""
+        chat_id = self._resource_id(chat, "chat")
+        return self._apiEndpoints.getChatMessages(
+            self.id,
+            chat_id,
+            after=after,
+            before=before,
+            limit=limit,
+            reactions=reactions,
+        )
+
+    @requires_auth
+    def add_chat_message(
+        self,
+        chat: str | Object,
+        text: str,
+        *,
+        attachments: list[str] | None = None,
+        reply_to: str | None = None,
+        dry_run: bool = False,
+        idempotency_key: str | None = None,
+    ) -> dict:
+        """Post a message to a standalone chat or object discussion."""
+        data = {"text": text}
+        if attachments is not None:
+            data["attachments"] = attachments
+        if reply_to is not None:
+            data["reply_to"] = reply_to
+        return self._apiEndpoints.addChatMessage(
+            self.id,
+            self._resource_id(chat, "chat"),
+            data,
+            dry_run=dry_run,
+            idempotency_key=idempotency_key,
+        )
+
+    @requires_auth
+    def toggle_chat_reaction(
+        self,
+        chat: str | Object,
+        message_id: str,
+        emoji: str,
+        *,
+        dry_run: bool = False,
+        idempotency_key: str | None = None,
+    ) -> dict:
+        """Toggle the current account's emoji reaction on a message."""
+        return self._apiEndpoints.toggleChatReaction(
+            self.id,
+            self._resource_id(chat, "chat"),
+            message_id,
+            {"emoji": emoji},
+            dry_run=dry_run,
+            idempotency_key=idempotency_key,
+        )
+
+    @requires_auth
+    def create_discussion(
+        self,
+        obj: str | Object,
+        *,
+        dry_run: bool = False,
+        idempotency_key: str | None = None,
+    ) -> Discussion:
+        """Create or retrieve an object's discussion."""
+        object_id = self._resource_id(obj, "object")
+        response = self._apiEndpoints.createDiscussion(
+            self.id,
+            object_id,
+            dry_run=dry_run,
+            idempotency_key=idempotency_key,
+        )
+        return Discussion._from_api(
+            self._apiEndpoints,
+            response | {"space_id": self.id, "object_id": object_id},
+        )
+
+    @requires_auth
+    def get_discussion(
+        self,
+        obj: str | Object,
+    ) -> Discussion | None:
+        """Retrieve an object's existing discussion without creating one."""
+        object_id = self._resource_id(obj, "object")
+        discussion_id = getattr(obj, "discussion", None) if isinstance(obj, Object) else None
+        if not discussion_id:
+            refreshed = self.get_object(object_id)
+            discussion_id = getattr(refreshed, "discussion", None)
+        if not discussion_id:
+            return None
+        return Discussion._from_api(
+            self._apiEndpoints,
+            {
+                "id": discussion_id,
+                "space_id": self.id,
+                "object_id": object_id,
+            },
+        )
 
     @requires_auth
     def upload_file(self, file) -> dict:

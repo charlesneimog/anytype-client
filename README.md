@@ -84,6 +84,34 @@ objects = spaces[0].get_objects(
 )
 ```
 
+Chats and object discussions use the same message API. Reading a discussion does
+not create one; call `create_discussion` explicitly when needed:
+
+```python
+space = spaces[0]
+page = objects[0]
+
+discussion = space.get_discussion(page)
+if discussion is None:
+    discussion = space.create_discussion(page)
+
+message_id = discussion.add_message(
+    "A comment with a threaded reply",
+)["id"]
+discussion.add_message("Reply", reply_to=message_id)
+discussion.toggle_reaction(message_id, "👍")
+
+message_page = discussion.get_messages(limit=25)
+if message_page.get("next_before"):
+    older_page = discussion.get_messages(
+        before=message_page["next_before"],
+        limit=25,
+    )
+
+# Standalone chats use the same message and reaction methods.
+chat_id = space.create_chat("Team chat")["id"]
+```
+
 ## 🌟 Examples
 
 
