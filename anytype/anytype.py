@@ -12,7 +12,9 @@ class Anytype:
     Used to interact with the Anytype API for authentication, retrieving spaces, creating spaces, and performing global searches. It provides methods to authenticate via a token, fetch spaces, create new spaces, and search for objects across spaces.
     """
 
-    def __init__(self) -> None:
+    def __init__(self, api_url: str | None = None) -> None:
+        """Create a client, optionally overriding the Anytype API base URL."""
+        self.api_url = api_url
         self.app_name = ""
         self.space_id = ""
         self.api_key = ""
@@ -60,7 +62,7 @@ class Anytype:
             else:
                 raise Exception("Invalid provided API key, please login again.")
 
-        self._apiEndpoints = apiEndpoints()
+        self._apiEndpoints = apiEndpoints(api_url=self.api_url)
         display_code_response = self._apiEndpoints.displayCode()
         challenge_id = display_code_response.get("challenge_id")
 
@@ -86,7 +88,7 @@ class Anytype:
             "Content-Type": "application/json",
             "Authorization": f"Bearer {self.api_key}",
         }
-        self._apiEndpoints = apiEndpoints(self._headers)
+        self._apiEndpoints = apiEndpoints(self._headers, api_url=self.api_url)
         try:
             self._apiEndpoints.getSpaces(0, 1)
             return True

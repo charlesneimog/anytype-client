@@ -1,3 +1,4 @@
+import os
 from os import PathLike
 from pathlib import Path
 from typing import TypeVar, Type
@@ -40,9 +41,11 @@ class ResponseHasError(Exception):
 
 
 class apiEndpoints:
-    def __init__(self, headers: dict | None = None):
+    def __init__(self, headers: dict | None = None, api_url: str | None = None):
         self.space_id = ""
-        self.api_url = API_CONFIG["apiUrl"].rstrip("/")
+        self.api_url = (
+            api_url or os.environ.get("ANYTYPE_API_URL") or API_CONFIG["apiUrl"]
+        ).rstrip("/")
         self.app_name = API_CONFIG["apiAppName"]
         headers = dict(headers or {})
         self.headers = headers

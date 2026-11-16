@@ -39,6 +39,20 @@ from anytype import Anytype
 any = Anytype()
 any.auth()  # 🔑 Enter 4-digit code from Anytype app when prompted
 ``` 
+
+The client uses `http://localhost:31009/v2` by default. To use another API URL,
+pass it when creating the client:
+
+```python
+any = Anytype(api_url="https://anytype.example/v2")
+```
+
+Or set it once for all scripts in your environment:
+
+```bash
+export ANYTYPE_API_URL="https://anytype.example/v2"
+```
+
 2. Create Your First Object
 
 ``` python
